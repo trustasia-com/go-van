@@ -49,9 +49,11 @@ func (s *Service) Run() error {
 	g.Go(func() (err error) {
 		select {
 		case <-ch:
-			err = s.stop(ctx, g)
 		case <-ctx.Done():
 			err = ctx.Err()
+		}
+		if e := s.stop(ctx, g); e != nil {
+			err = e
 		}
 		return err
 	})
