@@ -40,7 +40,7 @@ func TestService(t *testing.T) {
 		time.Sleep(time.Second * 5)
 		cancel()
 	}()
-	srv := NewSrv(Server(svr), Context(ctx))
+	srv := NewService(Server(svr), Context(ctx))
 
 	if err := srv.Run(); err != nil {
 		t.Fatal(err)

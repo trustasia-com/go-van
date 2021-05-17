@@ -8,8 +8,12 @@ import (
 	"github.com/deepzz0/go-van/server"
 )
 
-// Options for micro service
-type Options struct {
+// Option one option
+type Option func(*options)
+
+// options for micro service
+type options struct {
+	id      string
 	name    string
 	version string
 	ctx     context.Context
@@ -21,8 +25,8 @@ type Options struct {
 	endpoints []string
 }
 
-func defaultOptions() Options {
-	return Options{
+func defaultOptions() options {
+	return options{
 		ctx:    context.Background(),
 		signal: true,
 	}
@@ -30,44 +34,44 @@ func defaultOptions() Options {
 
 // Name service name
 func Name(name string) Option {
-	return func(opts *Options) { opts.name = name }
+	return func(opts *options) { opts.name = name }
 }
 
 // Version service version
 func Version(ver string) Option {
-	return func(opts *Options) { opts.version = ver }
+	return func(opts *options) { opts.version = ver }
 }
 
 // Context specifc service context
 func Context(ctx context.Context) Option {
-	return func(opts *Options) { opts.ctx = ctx }
+	return func(opts *options) { opts.ctx = ctx }
 }
 
 // Signal specific service os signal
 func Signal(b bool) Option {
-	return func(opts *Options) { opts.signal = b }
+	return func(opts *options) { opts.signal = b }
 }
 
 // Metadata service metadata
 func Metadata(md map[string]string) Option {
-	return func(opts *Options) { opts.metadata = md }
+	return func(opts *options) { opts.metadata = md }
 }
 
 // Registry sets the registry for the services
 func Registry(r registry.Registry) Option {
-	return func(opts *Options) { opts.registry = r }
+	return func(opts *options) { opts.registry = r }
 }
 
 // Server used for service
 func Server(ss ...server.Server) Option {
-	return func(opts *Options) {
+	return func(opts *options) {
 		opts.servers = append(opts.servers, ss...)
 	}
 }
 
 // Endpoint sets service endpoints
 func Endpoint(eps ...string) Option {
-	return func(opts *Options) {
+	return func(opts *options) {
 		opts.endpoints = append(opts.endpoints, eps...)
 	}
 }

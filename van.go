@@ -10,18 +10,21 @@ import (
 
 	"github.com/deepzz0/go-van/registry"
 
+	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
 )
 
-// Option one option
-type Option func(*Options)
-
-// NewSrv create and returns a new service
-func NewSrv(opts ...Option) Service {
+// NewService create and returns a new service
+func NewService(opts ...Option) Service {
 	opt := defaultOptions()
 	// process options
 	for _, o := range opts {
 		o(&opt)
+	}
+	// service id
+	id, err := uuid.NewUUID()
+	if err == nil {
+		opt.id = id.String()
 	}
 
 	return Service{opts: opt}
@@ -29,7 +32,7 @@ func NewSrv(opts ...Option) Service {
 
 // Service for micro services
 type Service struct {
-	opts Options
+	opts options
 }
 
 // Run run the micro service
@@ -75,7 +78,7 @@ func (s *Service) start(ctx context.Context,
 	}
 	// register service
 	if s.opts.registry != nil {
-		srv := s.buildService()
+		srv := s.regService()
 		err = s.opts.registry.Register(ctx, srv)
 	}
 	return
@@ -90,14 +93,14 @@ func (s *Service) stop(ctx context.Context,
 	}
 	// deregister service
 	if s.opts.registry != nil {
-		srv := s.buildService()
+		srv := s.regService()
 		err = s.opts.registry.Deregister(ctx, srv)
 	}
 	return
 }
 
-// buildService for discovery registry
-func (s *Service) buildService() *registry.Service {
+// regService discovery registry service
+func (s *Service) regService() *registry.Service {
 	if len(s.opts.endpoints) == 0 {
 		for _, srv := range s.opts.servers {
 			if e, err := srv.Endpoint(); err == nil {
@@ -106,6 +109,7 @@ func (s *Service) buildService() *registry.Service {
 		}
 	}
 	return &registry.Service{
+		ID:        s.opts.id,
 		Name:      s.opts.name,
 		Version:   s.opts.version,
 		Metadata:  s.opts.metadata,
