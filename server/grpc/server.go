@@ -28,19 +28,22 @@ func NewServer(opts ...server.Option) server.Server {
 		o(&svr.options)
 	}
 	// prepare grpc option
-	var grpcOpts []grpc.ServerOption
-	if svr.options.Ctx != nil {
-		opts, ok := svr.options.Ctx.Value(grpcOptsKey{}).([]grpc.ServerOption)
-		if ok {
-			grpcOpts = opts
-		}
+	grpcOpts := []grpc.ServerOption{
+		grpc.ChainUnaryInterceptor(UnaryServerInterceptor()),
+		grpc.ChainStreamInterceptor(StreamServerInterceptor()),
 	}
 	// opentelemetry tracer
 	if svr.options.Trace {
 		grpcOpts = append(grpcOpts,
-			grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
-			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+			grpc.ChainUnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+			grpc.ChainStreamInterceptor(otelgrpc.StreamServerInterceptor()),
 		)
+	}
+	if svr.options.Ctx != nil {
+		opts, ok := svr.options.Ctx.Value(grpcOptsKey{}).([]grpc.ServerOption)
+		if ok {
+			grpcOpts = append(grpcOpts, opts...)
+		}
 	}
 	// new grpc server
 	svr.Server = grpc.NewServer(grpcOpts...)
