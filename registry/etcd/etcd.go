@@ -13,7 +13,7 @@ import (
 )
 
 // prefix store k/v prefix
-const prefix = "/go-van/registry/"
+const prefix = "/go-van/registry"
 
 type etcdRegistry struct {
 	options registry.Options
@@ -27,10 +27,12 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	reg := &etcdRegistry{
 		options: registry.Options{},
 	}
-	reg.options.TTL = time.Second * 15
 	// apply option
 	for _, o := range opts {
 		o(&reg.options)
+	}
+	if reg.options.TTL == 0 {
+		reg.options.TTL = time.Second * 15
 	}
 
 	// new etcd client
@@ -89,7 +91,8 @@ func (r *etcdRegistry) Deregister(ctx context.Context, srv *registry.Service) er
 // GetService get service from regsitry
 func (r *etcdRegistry) GetService(ctx context.Context, srvName string) ([]*registry.Service, error) {
 	key := fmt.Sprintf("%s/%s", prefix, srvName)
-	resp, err := r.client.Get(ctx, key, clientv3.WithSerializable())
+	resp, err := r.client.Get(ctx, key, clientv3.WithPrefix(),
+		clientv3.WithSerializable())
 	if err != nil {
 		return nil, err
 	}

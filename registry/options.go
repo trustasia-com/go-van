@@ -16,12 +16,6 @@ type Options struct {
 	Addrs     []string    // backend endpoint
 	TLSConfig *tls.Config // whether use tls
 	TTL       time.Duration
-
-	// service info
-	name      string
-	version   string
-	metadata  map[string]string
-	endpoints []string
 }
 
 // Context register with context
@@ -44,26 +38,4 @@ func TLSConfig(tls *tls.Config) Option {
 // TTL register ttl
 func TTL(ttl time.Duration) Option {
 	return func(opts *Options) { opts.TTL = ttl }
-}
-
-// Name register with name
-func Name(name string) Option {
-	return func(opts *Options) { opts.name = name }
-}
-
-// Version register with version
-func Version(ver string) Option {
-	return func(opts *Options) { opts.version = ver }
-}
-
-// Metadata register with metadata
-func Metadata(md map[string]string) Option {
-	return func(opts *Options) { opts.metadata = md }
-}
-
-// Endpoint register with endpoint
-func Endpoint(eps ...string) Option {
-	return func(opts *Options) {
-		opts.endpoints = append(opts.endpoints, eps...)
-	}
 }

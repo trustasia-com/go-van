@@ -27,17 +27,13 @@ type builder struct {
 	ch       chan struct{}
 }
 
-// Build implements resolver.Resolver
-func (d *builder) Build(target resolver.Target, cc resolver.ClientConn,
-	opts resolver.BuildOptions) (resolver.Resolver, error) {
+// ResolveNow could be called multiple times concurrently
+func (d *builder) ResolveNow(opts resolver.ResolveNowOptions) {}
 
-	w, err := d.registry.Watch(context.Background(), target.Endpoint)
-	if err != nil {
-		return nil, err
-	}
-	d.w = w
-	go d.watch()
-	return d, nil
+// Close close watcher
+func (d *builder) Close() {
+	close(d.ch)
+	d.w.Stop()
 }
 
 // Scheme return scheme
@@ -45,13 +41,29 @@ func (d *builder) Scheme() string {
 	return "discovery"
 }
 
-// ResolveNow once call
-func (d *builder) ResolveNow(opts resolver.ResolveNowOptions) {}
+// Build implements resolver.Resolver
+func (d *builder) Build(target resolver.Target, cc resolver.ClientConn,
+	opts resolver.BuildOptions) (resolver.Resolver, error) {
 
-// Close close watcher
-func (d *builder) Close() {
-	close(d.ch)
-	d.w.Stop()
+	d.cc = cc
+	ctx := context.Background()
+	// init addrs
+	srvs, err := d.registry.GetService(ctx, target.Endpoint)
+	if err != nil {
+		return nil, err
+	}
+	err = d.update(srvs)
+	if err != nil {
+		return nil, err
+	}
+	// watch addrs change
+	w, err := d.registry.Watch(ctx, target.Endpoint)
+	if err != nil {
+		return nil, err
+	}
+	d.w = w
+	go d.watch()
+	return d, nil
 }
 
 // watch watch the registry change
@@ -90,7 +102,7 @@ func (d *builder) update(srvs []*registry.Service) error {
 			}
 			addr := resolver.Address{
 				ServerName: srv.Name,
-				Attributes: attributes.New(pairs),
+				Attributes: attributes.New(pairs...),
 				Addr:       u.Host,
 			}
 			addrs = append(addrs, addr)
