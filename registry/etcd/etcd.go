@@ -28,11 +28,11 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	config := clientv3.Config{
 		TLS:         reg.options.TLSConfig,
 		DialTimeout: time.Second * 5,
-		Endpoints:   reg.options.Addresses,
+		Endpoints:   reg.options.Enpoints,
 	}
 	// auth cred
-	if reg.options.Ctx != nil {
-		auth, ok := reg.options.Ctx.Value(authKey{}).(*authCreds)
+	if reg.options.Context != nil {
+		auth, ok := reg.options.Context.Value(authKey{}).(*authCreds)
 		if ok {
 			config.Username = auth.username
 			config.Password = auth.password

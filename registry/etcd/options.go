@@ -14,16 +14,16 @@ type authCreds struct {
 	password string
 }
 
-// Auth etcd auth creds
-func Auth(username, password string) registry.Option {
+// WithAuth etcd auth creds
+func WithAuth(username, password string) registry.Option {
 	return func(opts *registry.Options) {
-		if opts.Ctx == nil {
-			opts.Ctx = context.Background()
+		if opts.Context == nil {
+			opts.Context = context.Background()
 		}
 		creds := &authCreds{
 			username: username,
 			password: password,
 		}
-		opts.Ctx = context.WithValue(opts.Ctx, authKey{}, creds)
+		opts.Context = context.WithValue(opts.Context, authKey{}, creds)
 	}
 }

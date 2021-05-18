@@ -17,8 +17,8 @@ import (
 // NewService create and returns a new service
 func NewService(opts ...Option) Service {
 	opt := options{
-		ctx:    context.Background(),
-		signal: true,
+		context: context.Background(),
+		signal:  true,
 	}
 	// process options
 	for _, o := range opts {
@@ -40,7 +40,7 @@ type Service struct {
 
 // Run run the micro service
 func (s *Service) Run() error {
-	g, ctx := errgroup.WithContext(s.opts.ctx)
+	g, ctx := errgroup.WithContext(s.opts.context)
 	// start server
 	if err := s.start(ctx, g); err != nil {
 		return err

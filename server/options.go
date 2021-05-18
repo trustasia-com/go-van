@@ -11,29 +11,43 @@ type Option func(o *Options)
 
 // Options registry Options
 type Options struct {
+	// server listen network tcp/udp
+	// client dial network
 	Network string
-	Address string
+	// server run endpoint
+	// client connect to endpoint
+	Endpoint string
+	// connect timeout
 	Timeout time.Duration
-	Trace   bool
-	Ctx     context.Context
+
+	// open trace middleware
+	Trace bool
+	// other options for implementations of the interface
+	// can be stored in a context
+	Context context.Context
 }
 
-// Network server network
-func Network(network string) Option {
+// WithNetwork server network
+func WithNetwork(network string) Option {
 	return func(opts *Options) { opts.Network = network }
 }
 
-// Address server address
-func Address(addr string) Option {
-	return func(opts *Options) { opts.Address = addr }
+// WithEndpoint server endpoint
+func WithEndpoint(addr string) Option {
+	return func(opts *Options) { opts.Endpoint = addr }
 }
 
-// Timeout server timeout
-func Timeout(timeout time.Duration) Option {
+// WithTimeout server timeout
+func WithTimeout(timeout time.Duration) Option {
 	return func(opts *Options) { opts.Timeout = timeout }
 }
 
-// Trace server trace
-func Trace(trace bool) Option {
+// WithTrace server trace
+func WithTrace(trace bool) Option {
 	return func(opts *Options) { opts.Trace = trace }
+}
+
+// WithContext server context
+func WithContext(ctx context.Context) Option {
+	return func(opts *Options) { opts.Context = ctx }
 }

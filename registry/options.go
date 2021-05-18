@@ -12,30 +12,35 @@ type Option func(o *Options)
 
 // Options registry Options
 type Options struct {
-	Ctx       context.Context
-	Addresses []string    // backend endpoint
-	TLSConfig *tls.Config // whether use tls
-	TTL       time.Duration
+	// connect to backend store
+	Enpoints []string
+	// whether use secure tls
+	TLSConfig *tls.Config
+	// time to live of heartbeat
+	TTL time.Duration
+	// other options for implementations of the interface
+	// can be stored in a context
+	Context context.Context
 }
 
-// Context register with context
-func Context(ctx context.Context) Option {
-	return func(opts *Options) { opts.Ctx = ctx }
-}
-
-// Address registry address to use
-func Address(addrs ...string) Option {
+// WithEndpoint registry address to use
+func WithEndpoint(endpoints ...string) Option {
 	return func(opts *Options) {
-		opts.Addresses = append(opts.Addresses, addrs...)
+		opts.Enpoints = append(opts.Enpoints, endpoints...)
 	}
 }
 
-// TLSConfig registry secure tlc config
-func TLSConfig(tls *tls.Config) Option {
+// WithTLS registry secure tlc config
+func WithTLS(tls *tls.Config) Option {
 	return func(opts *Options) { opts.TLSConfig = tls }
 }
 
-// TTL register ttl
-func TTL(ttl time.Duration) Option {
+// WithTTL register ttl
+func WithTTL(ttl time.Duration) Option {
 	return func(opts *Options) { opts.TTL = ttl }
+}
+
+// WithContext register with context
+func WithContext(ctx context.Context) Option {
+	return func(opts *Options) { opts.Context = ctx }
 }

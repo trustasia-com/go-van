@@ -13,57 +13,67 @@ type Option func(*options)
 
 // options for micro service
 type options struct {
-	id      string
-	name    string
+	// service id
+	id string
+	// service name
+	name string
+	// service version
 	version string
-	ctx     context.Context
-	signal  bool
+	// listen os signal
+	signal bool
+	// other options for implementations of the interface
+	// can be stored in a context
+	context context.Context
 
-	metadata  map[string]string
-	registry  registry.Registry
-	servers   []server.Server
+	// some metadata
+	metadata map[string]string
+	// registry for discovery
+	registry registry.Registry
+	// service server list
+	servers []server.Server
+	// specific servers endpoints
 	endpoints []string
 }
 
-// Name service name
-func Name(name string) Option {
+// WithName service name
+func WithName(name string) Option {
 	return func(opts *options) { opts.name = name }
 }
 
-// Version service version
-func Version(ver string) Option {
+// WithVersion service version
+func WithVersion(ver string) Option {
 	return func(opts *options) { opts.version = ver }
 }
 
-// Context specifc service context
-func Context(ctx context.Context) Option {
-	return func(opts *options) { opts.ctx = ctx }
-}
-
-// Signal specific service os signal
-func Signal(b bool) Option {
+// WithSignal specific service os signal
+func WithSignal(b bool) Option {
 	return func(opts *options) { opts.signal = b }
 }
 
-// Metadata service metadata
-func Metadata(md map[string]string) Option {
+// WithContext specifc service context
+func WithContext(ctx context.Context) Option {
+	return func(opts *options) { opts.context = ctx }
+}
+
+// WithMetadata service metadata
+func WithMetadata(md map[string]string) Option {
 	return func(opts *options) { opts.metadata = md }
 }
 
-// Registry sets the registry for the services
-func Registry(r registry.Registry) Option {
+// WithRegistry sets the registry for the services
+func WithRegistry(r registry.Registry) Option {
 	return func(opts *options) { opts.registry = r }
 }
 
-// Server used for service
-func Server(ss ...server.Server) Option {
+// WithServer used for service
+func WithServer(ss ...server.Server) Option {
 	return func(opts *options) {
 		opts.servers = append(opts.servers, ss...)
 	}
 }
 
-// Endpoint sets service endpoints
-func Endpoint(eps ...string) Option {
+// WithEndpoint sets service endpoints
+func WithEndpoint(eps ...string) Option {
 	return func(opts *options) {
 		opts.endpoints = append(opts.endpoints, eps...)
 	}

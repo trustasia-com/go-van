@@ -11,8 +11,8 @@ import (
 
 type grpcOptsKey struct{}
 
-// ServerOption grpc option
-func ServerOption(opts ...grpc.ServerOption) server.Option {
+// WithServerOpt grpc option
+func WithServerOpt(opts ...grpc.ServerOption) server.Option {
 	return func(opts *server.Options) {
 		if opts.Ctx == nil {
 			opts.Ctx = context.Background()

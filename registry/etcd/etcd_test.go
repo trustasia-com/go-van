@@ -13,7 +13,7 @@ import (
 var reg registry.Registry
 
 func init() {
-	reg = NewRegistry(registry.Address("127.0.0.1:2379"))
+	reg = NewRegistry(registry.WithEndpoint("127.0.0.1:2379"))
 	w, err := reg.Watch(context.Background(), "server1")
 	if err != nil {
 		panic(err)
