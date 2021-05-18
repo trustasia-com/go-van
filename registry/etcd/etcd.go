@@ -25,8 +25,11 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	}
 
 	// new etcd client
-	config := clientv3.Config{}
-	config.DialTimeout = time.Second * 5
+	config := clientv3.Config{
+		TLS:         reg.options.TLSConfig,
+		DialTimeout: time.Second * 5,
+		Endpoints:   reg.options.Addresses,
+	}
 	// auth cred
 	if reg.options.Ctx != nil {
 		auth, ok := reg.options.Ctx.Value(authKey{}).(*authCreds)
@@ -35,7 +38,6 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 			config.Password = auth.password
 		}
 	}
-	config.Endpoints = reg.options.Addresses
 	// ignore error, will call handle error
 	client, _ := clientv3.New(config)
 	reg.client = client
