@@ -13,6 +13,7 @@ import (
 	"github.com/deepzz0/go-van/registry/etcd"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -45,6 +46,7 @@ func TestResolver(t *testing.T) {
 	cc, err := grpc.Dial("discovery:///helloworld",
 		grpc.WithResolvers(resolv),
 		grpc.WithInsecure(),
+		grpc.WithBalancerName(roundrobin.Name),
 	)
 	t.Log(cc.GetState().String())
 	if err != nil {
