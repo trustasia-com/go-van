@@ -25,13 +25,6 @@ type options struct {
 	endpoints []string
 }
 
-func defaultOptions() options {
-	return options{
-		ctx:    context.Background(),
-		signal: true,
-	}
-}
-
 // Name service name
 func Name(name string) Option {
 	return func(opts *options) { opts.name = name }

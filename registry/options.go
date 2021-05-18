@@ -13,7 +13,7 @@ type Option func(o *Options)
 // Options registry Options
 type Options struct {
 	Ctx       context.Context
-	Addrs     []string    // backend endpoint
+	Addresses []string    // backend endpoint
 	TLSConfig *tls.Config // whether use tls
 	TTL       time.Duration
 }
@@ -23,10 +23,10 @@ func Context(ctx context.Context) Option {
 	return func(opts *Options) { opts.Ctx = ctx }
 }
 
-// Addr registry address to use
-func Addr(addrs ...string) Option {
+// Address registry address to use
+func Address(addrs ...string) Option {
 	return func(opts *Options) {
-		opts.Addrs = append(opts.Addrs, addrs...)
+		opts.Addresses = append(opts.Addresses, addrs...)
 	}
 }
 

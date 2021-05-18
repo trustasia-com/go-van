@@ -16,7 +16,10 @@ import (
 
 // NewService create and returns a new service
 func NewService(opts ...Option) Service {
-	opt := defaultOptions()
+	opt := options{
+		ctx:    context.Background(),
+		signal: true,
+	}
 	// process options
 	for _, o := range opts {
 		o(&opt)

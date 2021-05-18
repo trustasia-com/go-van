@@ -15,24 +15,13 @@ import (
 // prefix store k/v prefix
 const prefix = "/go-van/registry"
 
-type etcdRegistry struct {
-	options registry.Options
-
-	client *clientv3.Client
-	lease  clientv3.Lease
-}
-
 // NewRegistry return etcd regsitry
 func NewRegistry(opts ...registry.Option) registry.Registry {
-	reg := &etcdRegistry{
-		options: registry.Options{},
-	}
+	opt := registry.Options{TTL: time.Second * 15}
+	reg := &etcdRegistry{options: opt}
 	// apply option
 	for _, o := range opts {
 		o(&reg.options)
-	}
-	if reg.options.TTL == 0 {
-		reg.options.TTL = time.Second * 15
 	}
 
 	// new etcd client
@@ -46,11 +35,18 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 			config.Password = auth.password
 		}
 	}
-	config.Endpoints = reg.options.Addrs
+	config.Endpoints = reg.options.Addresses
 	// ignore error, will call handle error
 	client, _ := clientv3.New(config)
 	reg.client = client
 	return reg
+}
+
+type etcdRegistry struct {
+	options registry.Options
+
+	client *clientv3.Client
+	lease  clientv3.Lease
 }
 
 // Register register service to registry
@@ -112,27 +108,4 @@ func (r *etcdRegistry) GetService(ctx context.Context, srvName string) ([]*regis
 func (r *etcdRegistry) Watch(ctx context.Context, srvName string) (registry.Watcher, error) {
 	key := fmt.Sprintf("%s/%s", prefix, srvName)
 	return newWatcher(ctx, key, r.client), nil
-}
-
-// custom option
-
-type authKey struct{}
-
-type authCreds struct {
-	username string
-	password string
-}
-
-// Auth etcd auth creds
-func Auth(username, password string) registry.Option {
-	return func(opts *registry.Options) {
-		if opts.Ctx == nil {
-			opts.Ctx = context.Background()
-		}
-		creds := &authCreds{
-			username: username,
-			password: password,
-		}
-		opts.Ctx = context.WithValue(opts.Ctx, authKey{}, creds)
-	}
 }
