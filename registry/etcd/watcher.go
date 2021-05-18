@@ -8,13 +8,16 @@ import (
 
 	"github.com/deepzz0/go-van/registry"
 
-	"go.etcd.io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type watcher struct {
 	client *clientv3.Client
 	watch  clientv3.WatchChan
-	stop   chan struct{}
+
+	stop chan struct{}
+	key  string
+	ctx  context.Context
 }
 
 func newWatcher(ctx context.Context, key string, client *clientv3.Client) *watcher {
@@ -27,13 +30,15 @@ func newWatcher(ctx context.Context, key string, client *clientv3.Client) *watch
 
 	w := &watcher{
 		client: client,
-		stop:   stop,
 		watch:  client.Watch(ctx, key, clientv3.WithPrefix()),
+		stop:   stop,
+		key:    key,
+		ctx:    ctx,
 	}
 	return w
 }
 
-func (w *watcher) Next() (*registry.Result, error) {
+func (w *watcher) Next() ([]*registry.Service, error) {
 	for resp := range w.watch {
 		if err := resp.Err(); err != nil {
 			return nil, err
@@ -41,27 +46,21 @@ func (w *watcher) Next() (*registry.Result, error) {
 		if resp.Canceled {
 			break
 		}
-		for _, ev := range resp.Events {
-			result := &registry.Result{}
 
-			switch ev.Type {
-			case clientv3.EventTypePut:
-				if ev.IsCreate() {
-					result.EventType = registry.Create
-				} else {
-					result.EventType = registry.Update
-				}
-				srv := &registry.Service{}
-				json.Unmarshal(ev.Kv.Value, srv)
-				result.Service = srv
-			case clientv3.EventTypeDelete:
-				srv := &registry.Service{}
-				json.Unmarshal(ev.PrevKv.Value, srv)
-				result.EventType = registry.Delete
-				result.Service = srv
-			}
-			return result, nil
+		resp, err := w.client.Get(w.ctx, w.key, clientv3.WithPrefix())
+		if err != nil {
+			return nil, err
 		}
+		var items []*registry.Service
+		for _, kv := range resp.Kvs {
+			srv := &registry.Service{}
+			err = json.Unmarshal(kv.Value, &srv)
+			if err != nil {
+				return nil, err
+			}
+			items = append(items, srv)
+		}
+		return items, nil
 	}
 	return nil, errors.New("watcher was canceled")
 }

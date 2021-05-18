@@ -27,26 +27,7 @@ type Service struct {
 // Watcher is service watcher.
 type Watcher interface {
 	// Next is blocking call
-	Next() (*Result, error)
+	Next() ([]*Service, error)
 	// Stop close the watcher.
 	Stop() error
-}
-
-// EventType registry event type
-type EventType int
-
-// enum actions
-const (
-	// create service
-	Create EventType = iota
-	// delete service
-	Delete
-	// update service
-	Update
-)
-
-// Result watcher result
-type Result struct {
-	EventType EventType
-	Service   *Service
 }

@@ -9,7 +9,7 @@ import (
 
 	"github.com/deepzz0/go-van/registry"
 
-	"go.etcd.io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // prefix store k/v prefix
@@ -108,7 +108,7 @@ func (r *etcdRegistry) GetService(ctx context.Context, srvName string) ([]*regis
 // Watch service change
 func (r *etcdRegistry) Watch(ctx context.Context, srvName string) (registry.Watcher, error) {
 	key := fmt.Sprintf("%s/%s", prefix, srvName)
-	return &watcher{}, nil
+	return newWatcher(ctx, key, r.client), nil
 }
 
 // custom option
