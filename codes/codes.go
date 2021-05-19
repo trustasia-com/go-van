@@ -31,7 +31,7 @@ const (
 	OutOfRange         Code = 11 // 11
 	Unimplemented      Code = 12 // 12
 	Internal           Code = 13 // 13
-	Unavalilable       Code = 14 // 14
+	Unavailable        Code = 14 // 14
 	DataLoss           Code = 15 // 15
 	Unauthenticated    Code = 16 // 16
 
@@ -59,7 +59,7 @@ var (
 			OutOfRange:         "索引越界",
 			Unimplemented:      "方法未实现",
 			Internal:           "内部错误",
-			Unavalilable:       "服务繁忙",
+			Unavailable:        "服务繁忙",
 			DataLoss:           "数据丢失",
 			Unauthenticated:    "未经认证",
 		},
@@ -78,7 +78,7 @@ var (
 			OutOfRange:         "OutOfRange",
 			Unimplemented:      "Unimplemented",
 			Internal:           "Internal",
-			Unavalilable:       "Unavailable",
+			Unavailable:        "Unavailable",
 			DataLoss:           "DataLoss",
 			Unauthenticated:    "Unauthenticated",
 		},
@@ -99,6 +99,16 @@ func (c Code) StatusCode() int {
 		return http.StatusInternalServerError
 	case Unauthenticated:
 		return http.StatusUnauthorized
+	case FailedPrecondition:
+		return http.StatusPreconditionFailed
+	case AlreadyExist:
+		return http.StatusConflict
+	case DeadlineExceeded:
+		return http.StatusRequestTimeout
+	case Unimplemented:
+		return http.StatusNotImplemented
+	case Unavailable:
+		return http.StatusServiceUnavailable
 	}
 	// other codes
 	return http.StatusBadRequest
