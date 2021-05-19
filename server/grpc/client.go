@@ -15,7 +15,6 @@ import (
 // DialContext dial to grpc server
 func DialContext(opts ...server.Option) (*grpc.ClientConn, error) {
 	options := server.Options{
-		Network:  "tcp",
 		Endpoint: ":0",
 		Timeout:  time.Second,
 	}
