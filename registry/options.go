@@ -12,7 +12,7 @@ type Option func(o *Options)
 
 // Options registry Options
 type Options struct {
-	// connect to backend store
+	// connect to backend store, maybe is a cluster
 	Enpoints []string
 	// whether use secure tls
 	TLSConfig *tls.Config
