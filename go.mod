@@ -4,10 +4,10 @@ go 1.15
 
 require (
 	github.com/golang/protobuf v1.5.2
-	github.com/google/uuid v1.1.2
-	go.etcd.io/etcd/client/v3 v3.5.0-alpha.0
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.20.0
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	google.golang.org/grpc v1.37.0
+	github.com/google/uuid v1.2.0
+	go.etcd.io/etcd/client/v3 v3.5.0-beta.3
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	google.golang.org/genproto v0.0.0-20210518161634-ec7691c0a37d
+	google.golang.org/grpc v1.37.1
 	google.golang.org/protobuf v1.26.0
 )

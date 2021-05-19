@@ -3,10 +3,12 @@ package recovery
 
 import (
 	"context"
+	"fmt"
+
+	"github.com/deepzz0/go-van/codes"
+	"github.com/deepzz0/go-van/codes/status"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // HandlerFunc recover handler func
@@ -81,5 +83,5 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 }
 
 func defaultHandler(ctx context.Context, p interface{}) error {
-	return status.Errorf(codes.Internal, "%v", p)
+	return status.Err(codes.Internal, fmt.Sprintf("%v"), p)
 }
