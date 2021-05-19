@@ -6,9 +6,9 @@ import (
 	"net"
 	"time"
 
+	"github.com/deepzz0/go-van/middleware/recovery"
 	"github.com/deepzz0/go-van/server"
 
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -18,9 +18,9 @@ import (
 // NewServer new grpc server
 func NewServer(opts ...server.Option) server.Server {
 	opt := server.Options{
-		Network: "tcp",
-		Address: ":0",
-		Timeout: time.Second,
+		Network:  "tcp",
+		Endpoint: ":0",
+		Timeout:  time.Second,
 	}
 	svr := &grpcServer{options: opt}
 	// apply option
@@ -28,19 +28,17 @@ func NewServer(opts ...server.Option) server.Server {
 		o(&svr.options)
 	}
 	// prepare grpc option
-	grpcOpts := []grpc.ServerOption{
-		grpc.ChainUnaryInterceptor(UnaryServerInterceptor()),
-		grpc.ChainStreamInterceptor(StreamServerInterceptor()),
-	}
-	// opentelemetry tracer
-	if svr.options.Trace {
+	grpcOpts := []grpc.ServerOption{}
+	// recover options
+	if svr.options.Recover {
 		grpcOpts = append(grpcOpts,
-			grpc.ChainUnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
-			grpc.ChainStreamInterceptor(otelgrpc.StreamServerInterceptor()),
+			grpc.ChainUnaryInterceptor(recovery.UnaryServerInterceptor()),
+			grpc.ChainStreamInterceptor(recovery.StreamServerInterceptor()),
 		)
 	}
-	if svr.options.Ctx != nil {
-		opts, ok := svr.options.Ctx.Value(grpcOptsKey{}).([]grpc.ServerOption)
+	// other server option or middleware
+	if svr.options.Context != nil {
+		opts, ok := svr.options.Context.Value(grpcOptsKey{}).([]grpc.ServerOption)
 		if ok {
 			grpcOpts = append(grpcOpts, opts...)
 		}
@@ -64,7 +62,7 @@ type grpcServer struct {
 }
 
 func (s *grpcServer) Start() error {
-	lis, err := net.Listen(s.options.Network, s.options.Address)
+	lis, err := net.Listen(s.options.Network, s.options.Endpoint)
 	if err != nil {
 		return err
 	}
@@ -83,5 +81,5 @@ func (s *grpcServer) Stop() error {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *grpcServer) Endpoint() (string, error) {
-	return fmt.Sprintf("grpc://%s" + s.options.Address), nil
+	return fmt.Sprintf("grpc://%s" + s.options.Endpoint), nil
 }

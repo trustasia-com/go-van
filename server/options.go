@@ -4,12 +4,14 @@ package server
 import (
 	"context"
 	"time"
+
+	"github.com/deepzz0/go-van/registry"
 )
 
 // Option server option.
 type Option func(o *Options)
 
-// Options registry Options
+// Options server Options, it's effective server and client
 type Options struct {
 	// server listen network tcp/udp
 	// client dial network
@@ -19,12 +21,17 @@ type Options struct {
 	Endpoint string
 	// connect timeout
 	Timeout time.Duration
-
-	// open trace middleware
-	Trace bool
 	// other options for implementations of the interface
 	// can be stored in a context
 	Context context.Context
+
+	// secure with tls for client
+	Secure bool
+	// discovery registry for client
+	Registry registry.Registry
+
+	// recover from panic for server
+	Recover bool
 }
 
 // WithNetwork server network
@@ -42,12 +49,22 @@ func WithTimeout(timeout time.Duration) Option {
 	return func(opts *Options) { opts.Timeout = timeout }
 }
 
-// WithTrace server trace
-func WithTrace(trace bool) Option {
-	return func(opts *Options) { opts.Trace = trace }
-}
-
 // WithContext server context
 func WithContext(ctx context.Context) Option {
 	return func(opts *Options) { opts.Context = ctx }
+}
+
+// WithSecure endpoint secure
+func WithSecure(secure bool) Option {
+	return func(opts *Options) { opts.Secure = secure }
+}
+
+// WithRegistry registry for discovery
+func WithRegistry(reg registry.Registry) Option {
+	return func(opts *Options) { opts.Registry = reg }
+}
+
+// WithRecover server panic recover
+func WithRecover(rec bool) Option {
+	return func(opts *Options) { opts.Recover = rec }
 }
