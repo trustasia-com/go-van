@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/deepzz0/go-van/pkg/server"
-	_ "github.com/deepzz0/go-van/pkg/server/grpc/redirect"
 	"github.com/deepzz0/go-van/pkg/server/grpc/resolver"
 
 	"google.golang.org/grpc"

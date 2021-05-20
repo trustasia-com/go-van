@@ -35,6 +35,7 @@ func newWatcher(ctx context.Context, key string, client *clientv3.Client) *watch
 		key:    key,
 		ctx:    ctx,
 	}
+	client.RequestProgress(ctx)
 	return w
 }
 
