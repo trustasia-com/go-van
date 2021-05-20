@@ -10,6 +10,7 @@ import (
 	"github.com/deepzz0/go-van/pkg/registry"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
 )
 
 // prefix store k/v prefix
@@ -30,6 +31,9 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 		TLS:         reg.options.TLS,
 		DialTimeout: time.Second * 5,
 		Endpoints:   reg.options.Addresses,
+		DialOptions: []grpc.DialOption{
+			grpc.WithBlock(),
+		},
 	}
 	// auth cred
 	if reg.options.Context != nil {
@@ -40,7 +44,11 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 		}
 	}
 	// ignore error, will call handle error
-	reg.client, _ = clientv3.New(config)
+	client, err := clientv3.New(config)
+	if err != nil {
+		// TODO logger
+	}
+	reg.client = client
 	return reg
 }
 

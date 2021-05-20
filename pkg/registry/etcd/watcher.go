@@ -30,7 +30,7 @@ func newWatcher(ctx context.Context, key string, client *clientv3.Client) *watch
 
 	w := &watcher{
 		client: client,
-		watch:  client.Watch(ctx, key, clientv3.WithPrefix()),
+		watch:  client.Watch(ctx, key, clientv3.WithPrefix(), clientv3.WithRev(0)),
 		stop:   stop,
 		key:    key,
 		ctx:    ctx,
