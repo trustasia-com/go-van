@@ -46,7 +46,7 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	// ignore error, will call handle error
 	client, err := clientv3.New(config)
 	if err != nil {
-		// TODO logger
+		// TODO logger fatal
 	}
 	reg.client = client
 	return reg
