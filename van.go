@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/deepzz0/go-van/registry"
+	"github.com/deepzz0/go-van/pkg/registry"
 
 	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"

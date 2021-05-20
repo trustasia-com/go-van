@@ -4,9 +4,9 @@ package grpc
 import (
 	"time"
 
-	"github.com/deepzz0/go-van/server"
-	_ "github.com/deepzz0/go-van/transport/grpc/redirect"
-	"github.com/deepzz0/go-van/transport/grpc/resolver"
+	"github.com/deepzz0/go-van/pkg/server"
+	_ "github.com/deepzz0/go-van/pkg/transport/grpc/redirect"
+	"github.com/deepzz0/go-van/pkg/transport/grpc/resolver"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"

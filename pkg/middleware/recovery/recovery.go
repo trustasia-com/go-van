@@ -5,8 +5,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deepzz0/go-van/codes"
-	"github.com/deepzz0/go-van/codes/status"
+	"github.com/deepzz0/go-van/pkg/codes"
+	"github.com/deepzz0/go-van/pkg/codes/status"
 
 	"google.golang.org/grpc"
 )

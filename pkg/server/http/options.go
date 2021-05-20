@@ -5,7 +5,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/deepzz0/go-van/server"
+	"github.com/deepzz0/go-van/pkg/server"
 )
 
 type handlerOptKey struct{}

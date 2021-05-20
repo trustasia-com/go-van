@@ -4,7 +4,7 @@ package etcd
 import (
 	"context"
 
-	"github.com/deepzz0/go-van/registry"
+	"github.com/deepzz0/go-van/pkg/registry"
 )
 
 type authKey struct{}

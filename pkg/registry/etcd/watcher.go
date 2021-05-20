@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/deepzz0/go-van/registry"
+	"github.com/deepzz0/go-van/pkg/registry"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )

@@ -4,8 +4,8 @@ package van
 import (
 	"context"
 
-	"github.com/deepzz0/go-van/registry"
-	"github.com/deepzz0/go-van/server"
+	"github.com/deepzz0/go-van/pkg/registry"
+	"github.com/deepzz0/go-van/pkg/server"
 )
 
 // Option one option
@@ -13,7 +13,7 @@ type Option func(*options)
 
 // options for micro service
 type options struct {
-	// service id
+	// service id, auto generate
 	id string
 	// service name
 	name string

@@ -7,8 +7,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/deepzz0/go-van/middleware/recovery"
-	"github.com/deepzz0/go-van/server"
+	"github.com/deepzz0/go-van/pkg/middleware/recovery"
+	"github.com/deepzz0/go-van/pkg/server"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"

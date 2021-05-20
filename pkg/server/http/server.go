@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/deepzz0/go-van/server"
+	"github.com/deepzz0/go-van/pkg/server"
 )
 
 // NewServer new http server

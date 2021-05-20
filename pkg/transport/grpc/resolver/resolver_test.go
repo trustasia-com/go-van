@@ -9,8 +9,8 @@ import (
 	"time"
 
 	pb "github.com/deepzz0/go-van/examples/helloworld"
-	"github.com/deepzz0/go-van/registry"
-	"github.com/deepzz0/go-van/registry/etcd"
+	"github.com/deepzz0/go-van/pkg/registry"
+	"github.com/deepzz0/go-van/pkg/registry/etcd"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"

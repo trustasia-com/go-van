@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/deepzz0/go-van/registry"
+	"github.com/deepzz0/go-van/pkg/registry"
 )
 
 // Option server option.

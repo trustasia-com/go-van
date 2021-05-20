@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/deepzz0/go-van/codes"
+	"github.com/deepzz0/go-van/pkg/codes"
 )
 
 var testCode codes.Code = 2000
