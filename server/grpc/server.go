@@ -2,6 +2,7 @@
 package grpc
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"time"
@@ -16,11 +17,12 @@ import (
 )
 
 // NewServer new grpc server
-func NewServer(opts ...server.Option) server.Server {
+func NewServer(opts ...server.Option) (server.Server, error) {
 	opt := server.Options{
 		Network:  "tcp",
 		Endpoint: ":0",
 		Timeout:  time.Second,
+		Context:  context.Background(),
 	}
 	svr := &grpcServer{options: opt}
 	// apply option
@@ -49,7 +51,7 @@ func NewServer(opts ...server.Option) server.Server {
 	reflection.Register(svr.Server)
 	// grpc health server
 	healthpb.RegisterHealthServer(svr.Server, svr.healthSvr)
-	return svr
+	return svr, nil
 }
 
 // grpcServer grpc server

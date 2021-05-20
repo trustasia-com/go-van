@@ -114,6 +114,36 @@ func (c Code) StatusCode() int {
 	return http.StatusBadRequest
 }
 
+// GRPCCodeFromStatus converts a HTTP error code into the corresponding gRPC response status.
+// See: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
+func GRPCCodeFromStatus(code Code) Code {
+	switch code {
+	case http.StatusOK:
+		return OK
+	case http.StatusBadRequest:
+		return InvalidArgument
+	case http.StatusUnauthorized:
+		return Unauthenticated
+	case http.StatusForbidden:
+		return PermissionDenied
+	case http.StatusNotFound:
+		return NotFound
+	case http.StatusConflict:
+		return Aborted
+	case http.StatusTooManyRequests:
+		return ResourceExhausted
+	case http.StatusInternalServerError:
+		return Internal
+	case http.StatusNotImplemented:
+		return Unimplemented
+	case http.StatusServiceUnavailable:
+		return Unavailable
+	case http.StatusGatewayTimeout:
+		return DeadlineExceeded
+	}
+	return Unknown
+}
+
 // Tr translate code to description
 func (c Code) Tr(lang string, args ...interface{}) string {
 	if globalI18n.translator == nil {
