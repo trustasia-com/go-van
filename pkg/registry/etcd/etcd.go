@@ -17,18 +17,19 @@ const prefix = "/go-van/registry"
 
 // NewRegistry return etcd regsitry
 func NewRegistry(opts ...registry.Option) registry.Registry {
-	opt := registry.Options{TTL: time.Second * 15}
-	reg := &etcdRegistry{options: opt}
+	options := registry.Options{
+		TTL: time.Second * 15,
+	}
 	// apply option
 	for _, o := range opts {
-		o(&reg.options)
+		o(&options)
 	}
-
+	reg := &etcdRegistry{options: options}
 	// new etcd client
 	config := clientv3.Config{
-		TLS:         reg.options.TLSConfig,
+		TLS:         reg.options.TLS,
 		DialTimeout: time.Second * 5,
-		Endpoints:   reg.options.Enpoints,
+		Endpoints:   reg.options.Addresses,
 	}
 	// auth cred
 	if reg.options.Context != nil {
@@ -39,8 +40,7 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 		}
 	}
 	// ignore error, will call handle error
-	client, _ := clientv3.New(config)
-	reg.client = client
+	reg.client, _ = clientv3.New(config)
 	return reg
 }
 
@@ -48,13 +48,13 @@ type etcdRegistry struct {
 	options registry.Options
 
 	client *clientv3.Client
-	lease  clientv3.Lease
 }
 
 // Register register service to registry
-func (r *etcdRegistry) Register(ctx context.Context, srv *registry.Service) error {
-	key := fmt.Sprintf("%s/%s/%s", prefix, srv.Name, srv.ID)
-	data, err := json.Marshal(srv)
+func (r *etcdRegistry) Register(ctx context.Context, ins *registry.Instance) error {
+	key := fmt.Sprintf("%s/%s/%s", prefix, ins.Name, ins.ID)
+
+	data, err := json.Marshal(ins)
 	if err != nil {
 		return err
 	}
@@ -74,29 +74,29 @@ func (r *etcdRegistry) Register(ctx context.Context, srv *registry.Service) erro
 	}
 	go func() {
 		for range ch {
+			// heartbeat
 		}
 	}()
 	return nil
 }
 
 // Deregister deregister service from registry
-func (r *etcdRegistry) Deregister(ctx context.Context, srv *registry.Service) error {
-	key := fmt.Sprintf("%s/%s/%s", prefix, srv.Name, srv.ID)
+func (r *etcdRegistry) Deregister(ctx context.Context, ins *registry.Instance) error {
+	key := fmt.Sprintf("%s/%s/%s", prefix, ins.Name, ins.ID)
 	_, err := r.client.Delete(ctx, key)
 	return err
 }
 
 // GetService get service from regsitry
-func (r *etcdRegistry) GetService(ctx context.Context, srvName string) ([]*registry.Service, error) {
-	key := fmt.Sprintf("%s/%s", prefix, srvName)
-	resp, err := r.client.Get(ctx, key, clientv3.WithPrefix(),
-		clientv3.WithSerializable())
+func (r *etcdRegistry) GetService(ctx context.Context, name string) ([]*registry.Instance, error) {
+	key := fmt.Sprintf("%s/%s", prefix, name)
+	resp, err := r.client.Get(ctx, key, clientv3.WithPrefix(), clientv3.WithSerializable())
 	if err != nil {
 		return nil, err
 	}
-	var items []*registry.Service
+	var items []*registry.Instance
 	for _, kv := range resp.Kvs {
-		srv := &registry.Service{}
+		srv := &registry.Instance{}
 		err = json.Unmarshal(kv.Value, srv)
 		if err != nil {
 			return nil, err
@@ -107,7 +107,7 @@ func (r *etcdRegistry) GetService(ctx context.Context, srvName string) ([]*regis
 }
 
 // Watch service change
-func (r *etcdRegistry) Watch(ctx context.Context, srvName string) (registry.Watcher, error) {
-	key := fmt.Sprintf("%s/%s", prefix, srvName)
+func (r *etcdRegistry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
+	key := fmt.Sprintf("%s/%s", prefix, name)
 	return newWatcher(ctx, key, r.client), nil
 }

@@ -13,14 +13,14 @@ type Option func(*options)
 
 // options for micro service
 type options struct {
+	// listen os signal
+	signal bool
 	// service id, auto generate
 	id string
 	// service name
 	name string
 	// service version
 	version string
-	// listen os signal
-	signal bool
 	// other options for implementations of the interface
 	// can be stored in a context
 	context context.Context
@@ -35,6 +35,11 @@ type options struct {
 	endpoints []string
 }
 
+// WithSignal specific service os signal
+func WithSignal(b bool) Option {
+	return func(opts *options) { opts.signal = b }
+}
+
 // WithName service name
 func WithName(name string) Option {
 	return func(opts *options) { opts.name = name }
@@ -43,11 +48,6 @@ func WithName(name string) Option {
 // WithVersion service version
 func WithVersion(ver string) Option {
 	return func(opts *options) { opts.version = ver }
-}
-
-// WithSignal specific service os signal
-func WithSignal(b bool) Option {
-	return func(opts *options) { opts.signal = b }
 }
 
 // WithContext specifc service context

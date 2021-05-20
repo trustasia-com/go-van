@@ -16,38 +16,38 @@ import (
 
 // NewService create and returns a new service
 func NewService(opts ...Option) Service {
-	opt := options{
+	options := options{
+		// context can not be null
 		context: context.Background(),
 		signal:  true,
 	}
 	// process options
 	for _, o := range opts {
-		o(&opt)
+		o(&options)
 	}
 	// service id
 	id, err := uuid.NewUUID()
 	if err == nil {
-		opt.id = id.String()
+		options.id = id.String()
 	}
-
-	return Service{opts: opt}
+	return Service{options: options}
 }
 
 // Service for micro services
 type Service struct {
-	opts options
+	options options
 }
 
 // Run run the micro service
 func (s *Service) Run() error {
-	g, ctx := errgroup.WithContext(s.opts.context)
+	g, ctx := errgroup.WithContext(s.options.context)
 	// start server
 	if err := s.start(ctx, g); err != nil {
 		return err
 	}
 	// os signal
 	ch := make(chan os.Signal, 1)
-	if s.opts.signal {
+	if s.options.signal {
 		signal.Notify(ch, syscall.SIGTERM, syscall.SIGQUIT,
 			syscall.SIGINT)
 	}
@@ -75,14 +75,14 @@ func (s *Service) Run() error {
 func (s *Service) start(ctx context.Context,
 	g *errgroup.Group) (err error) {
 
-	for _, svr := range s.opts.servers {
-		svr := svr
-		g.Go(func() error { return svr.Start() })
+	for _, srv := range s.options.servers {
+		srv := srv
+		g.Go(func() error { return srv.Start() })
 	}
 	// register service
-	if s.opts.registry != nil {
+	if s.options.registry != nil {
 		srv := s.regService()
-		err = s.opts.registry.Register(ctx, srv)
+		err = s.options.registry.Register(ctx, srv)
 	}
 	return
 }
@@ -90,32 +90,32 @@ func (s *Service) start(ctx context.Context,
 // stop the service
 func (s *Service) stop(ctx context.Context,
 	g *errgroup.Group) (err error) {
-	for _, svr := range s.opts.servers {
-		svr := svr
-		g.Go(func() error { return svr.Stop() })
+	for _, srv := range s.options.servers {
+		srv := srv
+		g.Go(func() error { return srv.Stop() })
 	}
 	// deregister service
-	if s.opts.registry != nil {
+	if s.options.registry != nil {
 		srv := s.regService()
-		err = s.opts.registry.Deregister(ctx, srv)
+		err = s.options.registry.Deregister(ctx, srv)
 	}
 	return
 }
 
 // regService discovery registry service
 func (s *Service) regService() *registry.Service {
-	if len(s.opts.endpoints) == 0 {
-		for _, srv := range s.opts.servers {
+	if len(s.options.endpoints) == 0 {
+		for _, srv := range s.options.servers {
 			if e, err := srv.Endpoint(); err == nil {
-				s.opts.endpoints = append(s.opts.endpoints, e)
+				s.options.endpoints = append(s.options.endpoints, e)
 			}
 		}
 	}
-	return &registry.Service{
-		ID:        s.opts.id,
-		Name:      s.opts.name,
-		Version:   s.opts.version,
-		Metadata:  s.opts.metadata,
-		Endpoints: s.opts.endpoints,
+	return &registry.Instance{
+		ID:        s.options.id,
+		Name:      s.options.name,
+		Version:   s.options.version,
+		Metadata:  s.options.metadata,
+		Endpoints: s.options.endpoints,
 	}
 }
