@@ -38,7 +38,7 @@ func newWatcher(ctx context.Context, key string, client *clientv3.Client) *watch
 	return w
 }
 
-func (w *watcher) Next() ([]*registry.Service, error) {
+func (w *watcher) Next() ([]*registry.Instance, error) {
 	for resp := range w.watch {
 		if err := resp.Err(); err != nil {
 			return nil, err
@@ -51,9 +51,9 @@ func (w *watcher) Next() ([]*registry.Service, error) {
 		if err != nil {
 			return nil, err
 		}
-		var items []*registry.Service
+		var items []*registry.Instance
 		for _, kv := range resp.Kvs {
-			srv := &registry.Service{}
+			srv := &registry.Instance{}
 			err = json.Unmarshal(kv.Value, &srv)
 			if err != nil {
 				return nil, err

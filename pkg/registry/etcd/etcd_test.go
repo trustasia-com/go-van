@@ -13,7 +13,7 @@ import (
 var reg registry.Registry
 
 func init() {
-	reg = NewRegistry(registry.WithEndpoint("127.0.0.1:2379"))
+	reg = NewRegistry(registry.WithAddress("127.0.0.1:2379"))
 	w, err := reg.Watch(context.Background(), "server1")
 	if err != nil {
 		panic(err)
@@ -40,11 +40,11 @@ func watch(w registry.Watcher) {
 }
 
 func TestRegistry(t *testing.T) {
-	srv1 := &registry.Service{
+	srv1 := &registry.Instance{
 		ID:   "1",
 		Name: "server1",
 	}
-	srv2 := &registry.Service{
+	srv2 := &registry.Instance{
 		ID:   "2",
 		Name: "server2",
 	}

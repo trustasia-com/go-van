@@ -103,7 +103,7 @@ func (s *Service) stop(ctx context.Context,
 }
 
 // regService discovery registry service
-func (s *Service) regService() *registry.Service {
+func (s *Service) regService() *registry.Instance {
 	if len(s.options.endpoints) == 0 {
 		for _, srv := range s.options.servers {
 			if e, err := srv.Endpoint(); err == nil {
