@@ -25,19 +25,18 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	for _, o := range opts {
 		o(&options)
 	}
-	reg := &etcdRegistry{options: options}
 	// new etcd client
 	config := clientv3.Config{
-		TLS:         reg.options.TLS,
+		TLS:         options.TLS,
 		DialTimeout: time.Second * 5,
-		Endpoints:   reg.options.Addresses,
+		Endpoints:   options.Addresses,
 		DialOptions: []grpc.DialOption{
 			grpc.WithBlock(),
 		},
 	}
 	// auth cred
-	if reg.options.Context != nil {
-		auth, ok := reg.options.Context.Value(authKey{}).(*authCreds)
+	if options.Context != nil {
+		auth, ok := options.Context.Value(authKey{}).(*authCreds)
 		if ok {
 			config.Username = auth.username
 			config.Password = auth.password
@@ -48,14 +47,14 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	if err != nil {
 		// TODO logger fatal
 	}
-	reg.client = client
-	return reg
+	return &etcdRegistry{options: options, client: client}
 }
 
 type etcdRegistry struct {
 	options registry.Options
 
-	client *clientv3.Client
+	client  *clientv3.Client
+	leaseID clientv3.LeaseID
 }
 
 // Register register service to registry
@@ -75,22 +74,14 @@ func (r *etcdRegistry) Register(ctx context.Context, ins *registry.Instance) err
 	if err != nil {
 		return err
 	}
-	// keep alive
-	ch, err := r.client.KeepAlive(context.TODO(), resp.ID)
-	if err != nil {
-		return err
-	}
-	go func() {
-		for range ch {
-			// heartbeat
-		}
-	}()
-	return nil
+	r.leaseID = resp.ID
+	return r.keepAliveAsync(ctx, ins)
 }
 
 // Deregister deregister service from registry
 func (r *etcdRegistry) Deregister(ctx context.Context, ins *registry.Instance) error {
 	key := fmt.Sprintf("%s/%s/%s", prefix, ins.Name, ins.ID)
+
 	_, err := r.client.Delete(ctx, key)
 	return err
 }
@@ -102,6 +93,7 @@ func (r *etcdRegistry) GetService(ctx context.Context, name string) ([]*registry
 	if err != nil {
 		return nil, err
 	}
+
 	var items []*registry.Instance
 	for _, kv := range resp.Kvs {
 		srv := &registry.Instance{}
@@ -118,4 +110,25 @@ func (r *etcdRegistry) GetService(ctx context.Context, name string) ([]*registry
 func (r *etcdRegistry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
 	key := fmt.Sprintf("%s/%s", prefix, name)
 	return newWatcher(ctx, key, r.client), nil
+}
+
+func (r *etcdRegistry) keepAliveAsync(ctx context.Context, ins *registry.Instance) error {
+	ch, err := r.client.KeepAlive(context.TODO(), r.leaseID)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case _, ok := <-ch:
+				if !ok {
+					r.client.Revoke(ctx, r.leaseID)
+					_ = r.Register(ctx, ins)
+					return
+				}
+			}
+		}
+	}()
+	return nil
 }
