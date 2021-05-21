@@ -30,7 +30,7 @@ func DialContext(opts ...server.Option) (*grpc.ClientConn, error) {
 		grpcOpts = append(grpcOpts, grpc.WithResolvers(builder))
 	}
 	// tls secure
-	if options.Secure {
+	if !options.Secure {
 		grpcOpts = append(grpcOpts, grpc.WithInsecure())
 	}
 	// context custom options

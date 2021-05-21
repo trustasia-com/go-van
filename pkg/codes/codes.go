@@ -2,7 +2,6 @@
 package codes
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -17,23 +16,23 @@ const (
 	// system embeded codes
 	// same: https://github.com/grpc/grpc-go/blob/master/codes/codes.go
 	// adjust for custom status
-	OK                 Code = 0  // 0
-	Canceled           Code = 1  // 1
-	Unknown            Code = 2  // 2
-	InvalidArgument    Code = 3  // 3
-	DeadlineExceeded   Code = 4  // 4
-	NotFound           Code = 5  // 5
-	AlreadyExist       Code = 6  // 6
-	PermissionDenied   Code = 7  // 7
-	ResourceExhausted  Code = 8  // 8
-	FailedPrecondition Code = 9  // 9
-	Aborted            Code = 10 // 10
-	OutOfRange         Code = 11 // 11
-	Unimplemented      Code = 12 // 12
-	Internal           Code = 13 // 13
-	Unavailable        Code = 14 // 14
-	DataLoss           Code = 15 // 15
-	Unauthenticated    Code = 16 // 16
+	OK                 Code = 0
+	Canceled           Code = 1
+	Unknown            Code = 2
+	InvalidArgument    Code = 3
+	DeadlineExceeded   Code = 4
+	NotFound           Code = 5
+	AlreadyExist       Code = 6
+	PermissionDenied   Code = 7
+	ResourceExhausted  Code = 8
+	FailedPrecondition Code = 9
+	Aborted            Code = 10
+	OutOfRange         Code = 11
+	Unimplemented      Code = 12
+	Internal           Code = 13
+	Unavailable        Code = 14
+	DataLoss           Code = 15
+	Unauthenticated    Code = 16
 
 	_maxCode = 17
 )
@@ -85,39 +84,9 @@ var (
 	}
 )
 
-// Code error code
-type Code uint32
-
-// StatusCode http status code
-func (c Code) StatusCode() int {
-	switch c {
-	case OK:
-		return http.StatusOK
-	case PermissionDenied:
-		return http.StatusForbidden
-	case Internal:
-		return http.StatusInternalServerError
-	case Unauthenticated:
-		return http.StatusUnauthorized
-	case FailedPrecondition:
-		return http.StatusPreconditionFailed
-	case AlreadyExist:
-		return http.StatusConflict
-	case DeadlineExceeded:
-		return http.StatusRequestTimeout
-	case Unimplemented:
-		return http.StatusNotImplemented
-	case Unavailable:
-		return http.StatusServiceUnavailable
-	}
-	// other codes
-	return http.StatusBadRequest
-}
-
-// GRPCCodeFromStatus converts a HTTP error code into the corresponding gRPC response status.
-// See: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-func GRPCCodeFromStatus(code Code) Code {
-	switch code {
+// GRPCCode http status code to codes.Code
+func GRPCCode(httpCode int) Code {
+	switch httpCode {
 	case http.StatusOK:
 		return OK
 	case http.StatusBadRequest:
@@ -140,9 +109,49 @@ func GRPCCodeFromStatus(code Code) Code {
 		return Unavailable
 	case http.StatusGatewayTimeout:
 		return DeadlineExceeded
+	case http.StatusPreconditionFailed:
+		return FailedPrecondition
 	}
 	return Unknown
 }
+
+// StatusCode codes.Code to http status code
+func StatusCode(grpcCode Code) int {
+	switch grpcCode {
+	case OK:
+		return http.StatusOK
+	case InvalidArgument:
+		return http.StatusBadRequest
+	case Unauthenticated:
+		return http.StatusUnauthorized
+	case PermissionDenied:
+		return http.StatusForbidden
+	case NotFound:
+		return http.StatusNotFound
+	case AlreadyExist:
+		return http.StatusConflict
+	case ResourceExhausted:
+		return http.StatusTooManyRequests
+	case Internal:
+		return http.StatusInternalServerError
+	case Unimplemented:
+		return http.StatusNotImplemented
+	case Unavailable:
+		return http.StatusServiceUnavailable
+	case DeadlineExceeded:
+		return http.StatusRequestTimeout
+	case FailedPrecondition:
+		return http.StatusPreconditionFailed
+	}
+	// other codes
+	return http.StatusBadRequest
+}
+
+// Code error code
+type Code uint32
+
+// StatusCode codes.Code to http status code
+func (c Code) StatusCode() int { return StatusCode(c) }
 
 // Tr translate code to description
 func (c Code) Tr(lang string, args ...interface{}) string {
@@ -168,7 +177,7 @@ func (c Code) Tr(lang string, args ...interface{}) string {
 		}
 		desc := codes[c]
 		for _, arg := range args {
-			desc += fmt.Sprintf("|%v", arg)
+			desc += fmt.Sprintf(" | %v", arg)
 		}
 		return desc
 	}
@@ -178,21 +187,4 @@ func (c Code) Tr(lang string, args ...interface{}) string {
 // String convert to string
 func (c Code) String() string {
 	return "(" + strconv.FormatInt(int64(c), 10) + ")"
-}
-
-// GetSupportedLang get supported lang
-func GetSupportedLang() []string {
-	return globalI18n.supportedLang
-}
-
-// SetTranslator change default translator
-func SetTranslator(trans translator) error {
-	langs := trans.SupportedLang()
-	if len(langs) == 0 {
-		return errors.New("codes: warning: not found supported lang")
-	}
-	globalI18n.translator = trans
-	// use first language as default
-	globalI18n.supportedLang = langs
-	return nil
 }

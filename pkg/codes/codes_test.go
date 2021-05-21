@@ -11,7 +11,7 @@ var (
 )
 
 func init() {
-	trans := MemoryTranslator{
+	trans := DefaultTranslator{
 		Code2Desc: map[string]map[Code]string{
 			LangZhCN: {
 				testCode:   "错误测试",
@@ -19,7 +19,7 @@ func init() {
 			},
 		},
 	}
-	SetTranslator(trans)
+	WithTranslator(trans)
 }
 
 func TestTrEmbeded(t *testing.T) {

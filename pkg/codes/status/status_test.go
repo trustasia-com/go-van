@@ -12,14 +12,14 @@ import (
 var testCode codes.Code = 2000
 
 func init() {
-	trans := codes.MemoryTranslator{
+	trans := codes.DefaultTranslator{
 		Code2Desc: map[string]map[codes.Code]string{
 			codes.LangEnUS: {
 				testCode: "test: %s",
 			},
 		},
 	}
-	codes.SetTranslator(trans)
+	codes.WithTranslator(trans)
 }
 
 func TestNew(t *testing.T) {
