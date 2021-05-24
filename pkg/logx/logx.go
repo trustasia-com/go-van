@@ -40,8 +40,3 @@ func Fatal(args ...interface{}) {
 func Fatalf(format string, args ...interface{}) {
 
 }
-
-// V reports whether verbosity level l is at least the requested verbose level.
-func V(level int) bool {
-
-}
