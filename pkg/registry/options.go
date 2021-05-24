@@ -8,7 +8,7 @@ import (
 )
 
 // Option regsitry option
-type Option func(o *Options)
+type Option func(opts *Options)
 
 // Options registry Options
 type Options struct {

@@ -9,7 +9,7 @@ import (
 )
 
 // Option server option.
-type Option func(o *Options)
+type Option func(opts *Options)
 
 // Options server Options, it's effective server and client
 type Options struct {
