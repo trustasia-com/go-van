@@ -2,8 +2,8 @@
 package logx
 
 import (
-	"io"
-	"sync"
+	"context"
+	"time"
 )
 
 // Logger represents a logger.
@@ -51,56 +51,22 @@ type Level int
 
 func (l Level) String() string { return levelName[l] }
 
-// Logging logging setup.
-type Logging struct {
-	lock   sync.Mutex
-	prefix string
-	level  Level
+// Entry log entry
+type Entry struct {
+	Level   Level                  `json:"level"`
+	Time    time.Time              `json:"time"`
+	File    string                 `json:"file"`
+	Message string                 `json:"message"`
+	Data    map[string]interface{} `json:"data"`
 
-	writer []io.WriteCloser
+	logging *Logging        `json:"-"`
+	context context.Context `json:"-"`
 }
 
-// Info logs to INFO log.
-func (log *Logging) Info(args ...interface{}) {
+// Output print log
+func (e *Entry) Output(calldepth int) {
+	defer func() {
 
-}
+	}()
 
-// Info logs to INFO log.
-func (log *Logging) Infof(format string, args ...interface{}) {
-
-}
-
-// Warning logs to WARNING log.
-func (log *Logging) Warning(args ...interface{}) {
-
-}
-
-// Warning logs to WARNING log.
-func (log *Logging) Warningf(format string, args ...interface{}) {
-
-}
-
-// Error logs to ERROR log.
-func (log *Logging) Error(args ...interface{}) {
-
-}
-
-// Error logs to ERROR log.
-func (log *Logging) Errorf(format string, args ...interface{}) {
-
-}
-
-// Fatal logs to ERROR log. with os.Exit(1).
-func (log *Logging) Fatal(args ...interface{}) {
-
-}
-
-// Fatal logs to ERROR log. with os.Exit(1).
-func (log *Logging) Fatalf(format string, args ...interface{}) {
-
-}
-
-// V reports whether verbosity level log is at least the requested verbose level.
-func (log *Logging) V(l Level) bool {
-	return l < log.level
 }
