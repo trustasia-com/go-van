@@ -17,16 +17,16 @@ type Option func(opts *Options)
 
 // Options logger options
 type Options struct {
-	prefix string    // service name
-	level  Level     // print severity
-	writer io.Writer // writer
+	service string    // service name
+	level   Level     // print severity
+	writer  io.Writer // writer
 
 	flag int // log flag
 }
 
-// WithName set service name
-func WithName(name string) Option {
-	return func(opts *Options) { opts.prefix = name }
+// WithService set service name
+func WithService(s string) Option {
+	return func(opts *Options) { opts.service = s }
 }
 
 // WithLevel set severity level

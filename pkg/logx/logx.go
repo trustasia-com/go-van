@@ -2,11 +2,11 @@
 package logx
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"log"
 	"os"
 	"sync"
-	"time"
 )
 
 var std = NewLogging()
@@ -16,95 +16,108 @@ func NewLogging(opts ...Option) *Logging {
 	options := Options{
 		level:  LevelInfo,
 		writer: os.Stderr,
-		flag:   log.LstdFlags | log.Lshortfile,
+		flag:   stdFlags,
 	}
 	// apply opts
 	for _, o := range opts {
 		o(&options)
 	}
+
 	// new logging
-	return &Logging{options: options}
+	logging := &Logging{options: options}
+	// object pool
+	logging.entryPool.New = logging.newEntry
+	logging.bufferPool.New = logging.newBuffer
+	return logging
 }
 
 // Logging logging setup.
 type Logging struct {
+	mu         sync.Mutex
 	entryPool  sync.Pool
 	bufferPool sync.Pool
 
 	options Options
 }
 
-// newEntry return obj of entry
-func (log *Logging) newEntry() *Entry {
-	entry, ok := log.entryPool.Get().(*Entry)
-	if ok {
-		return entry
-	}
+// newEntry new entry
+func (log *Logging) newEntry() interface{} {
 	return &Entry{
 		logging: log,
-		Data:    make(map[string]interface{}),
+		Data:    make(map[string]interface{}, 4),
 	}
 }
 
-// releaseEntry release entry to pool
-func (log *Logging) releaseEntry(entry *Entry) {
-	entry.Data = map[string]interface{}{}
-	log.entryPool.Put(entry)
+// releaseEntry release entry
+func (log *Logging) releaseEntry(e *Entry) {
+	e.Data = map[string]interface{}{}
+	log.entryPool.Put(e)
+}
+
+// newBuffer new buffer
+func (log *Logging) newBuffer() interface{} {
+	return new(bytes.Buffer)
+}
+
+// releaseBuffer release buffer
+func (log *Logging) releaseBuffer(buf *bytes.Buffer) {
+	buf.Reset()
+	log.bufferPool.Put(buf)
 }
 
 // output output log
-func (log *Logging) output(calldepth int, l Level, msg string) {
+func (log *Logging) output(l Level, msg string) {
 	if !log.V(l) {
 		return
 	}
-	entry := log.newEntry()
-	defer log.releaseEntry(entry)
-
+	// get & put
+	entry, _ := log.entryPool.Get().(*Entry)
 	entry.Level = l
-	entry.Time = time.Now()
 	entry.Message = msg
+
+	calldepth := 4
 	entry.Output(calldepth)
 }
 
 // Info logs to INFO log.
 func (log *Logging) Info(args ...interface{}) {
-	log.output(2, LevelInfo, fmt.Sprintln(args...))
+	log.output(LevelInfo, fmt.Sprintln(args...))
 }
 
 // Info logs to INFO log.
 func (log *Logging) Infof(format string, args ...interface{}) {
-	log.output(2, LevelInfo, fmt.Sprintf(format, args...))
+	log.output(LevelInfo, fmt.Sprintf(format, args...))
 }
 
 // Warning logs to WARNING log.
 func (log *Logging) Warning(args ...interface{}) {
-	log.output(2, LevelWarning, fmt.Sprintln(args...))
+	log.output(LevelWarning, fmt.Sprintln(args...))
 }
 
 // Warning logs to WARNING log.
 func (log *Logging) Warningf(format string, args ...interface{}) {
-	log.output(2, LevelWarning, fmt.Sprintf(format, args...))
+	log.output(LevelWarning, fmt.Sprintf(format, args...))
 }
 
 // Error logs to ERROR log.
 func (log *Logging) Error(args ...interface{}) {
-	log.output(2, LevelError, fmt.Sprintln(args...))
+	log.output(LevelError, fmt.Sprintln(args...))
 }
 
 // Error logs to ERROR log.
 func (log *Logging) Errorf(format string, args ...interface{}) {
-	log.output(2, LevelError, fmt.Sprintf(format, args...))
+	log.output(LevelError, fmt.Sprintf(format, args...))
 }
 
 // Fatal logs to ERROR log. with os.Exit(1).
 func (log *Logging) Fatal(args ...interface{}) {
-	log.output(2, LevelFatal, fmt.Sprintln(args...))
+	log.output(LevelFatal, fmt.Sprintln(args...))
 	os.Exit(1)
 }
 
 // Fatal logs to ERROR log. with os.Exit(1).
 func (log *Logging) Fatalf(format string, args ...interface{}) {
-	log.output(2, LevelFatal, fmt.Sprintf(format, args...))
+	log.output(LevelFatal, fmt.Sprintf(format, args...))
 	os.Exit(1)
 }
 
@@ -151,4 +164,18 @@ func Fatal(args ...interface{}) {
 // Fatal logs to ERROR log. with os.Exit(1).
 func Fatalf(format string, args ...interface{}) {
 	std.Fatalf(format, args...)
+}
+
+// WithData custom data
+func WithData(data map[string]interface{}) *Entry {
+	entry, _ := std.entryPool.Get().(*Entry)
+	entry.Data = data
+	return entry
+}
+
+// WithContext context
+func WithContext(ctx context.Context) *Entry {
+	entry, _ := std.entryPool.Get().(*Entry)
+	entry.context = ctx
+	return entry
 }

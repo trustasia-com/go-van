@@ -4,9 +4,9 @@ package logx
 import "testing"
 
 func init() {
-	std = NewLogging(WithShortFile())
+	std = NewLogging()
 }
 
 func TestInfo(t *testing.T) {
-	std.Info("test")
+	Infof("test")
 }
