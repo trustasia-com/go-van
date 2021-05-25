@@ -11,7 +11,7 @@ import (
 
 var std = NewLogging()
 
-// NewLogging log printer
+// NewLogger log logger
 func NewLogging(opts ...Option) *Logging {
 	options := Options{
 		level:  LevelInfo,

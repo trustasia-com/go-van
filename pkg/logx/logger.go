@@ -32,7 +32,7 @@ type Logger interface {
 	// Fatal logs to ERROR log. with os.Exit(1).
 	Fatalf(format string, args ...interface{})
 	// V reports whether verbosity level log is at least the requested verbose level.
-	V(level int) bool
+	V(level Level) bool
 }
 
 // list log level
