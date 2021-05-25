@@ -123,7 +123,7 @@ func (log *Logging) Fatalf(format string, args ...interface{}) {
 
 // V reports whether verbosity level log is at least the requested verbose level.
 func (log *Logging) V(l Level) bool {
-	return l <= log.options.level
+	return log.options.level <= l
 }
 
 // Info logs to INFO log.

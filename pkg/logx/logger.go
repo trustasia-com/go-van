@@ -9,6 +9,8 @@ import (
 	"os"
 	"runtime"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Logger represents a logger.
@@ -56,6 +58,13 @@ type Level int
 
 func (l Level) String() string { return levelName[l] }
 
+func NewEntry(log *Logging) *Entry {
+	return &Entry{
+		logging: log,
+		Data:    make(map[string]interface{}, 6),
+	}
+}
+
 // Entry log entry
 type Entry struct {
 	Level   Level
@@ -85,49 +94,49 @@ func (e *Entry) WithContext(ctx context.Context) *Entry {
 func (e *Entry) Info(args ...interface{}) {
 	e.Level = LevelInfo
 	e.Message = fmt.Sprintln(args...)
-	e.Output(4)
+	e.Output(2)
 }
 
 // Info logs to INFO log.
 func (e *Entry) Infof(format string, args ...interface{}) {
 	e.Level = LevelInfo
 	e.Message = fmt.Sprintf(format, args...)
-	e.Output(4)
+	e.Output(2)
 }
 
 // Warning logs to WARNING log.
 func (e *Entry) Warning(args ...interface{}) {
 	e.Level = LevelWarning
 	e.Message = fmt.Sprintln(args...)
-	e.Output(4)
+	e.Output(2)
 }
 
 // Warning logs to WARNING log.
 func (e *Entry) Warningf(format string, args ...interface{}) {
 	e.Level = LevelWarning
 	e.Message = fmt.Sprintf(format, args...)
-	e.Output(4)
+	e.Output(2)
 }
 
 // Error logs to ERROR log.
 func (e *Entry) Error(args ...interface{}) {
 	e.Level = LevelError
 	e.Message = fmt.Sprintln(args...)
-	e.Output(4)
+	e.Output(2)
 }
 
 // Error logs to ERROR log.
 func (e *Entry) Errorf(format string, args ...interface{}) {
 	e.Level = LevelError
 	e.Message = fmt.Sprintf(format, args...)
-	e.Output(4)
+	e.Output(2)
 }
 
 // Fatal logs to ERROR log. with os.Exit(1).
 func (e *Entry) Fatal(args ...interface{}) {
 	e.Level = LevelFatal
 	e.Message = fmt.Sprintln(args...)
-	e.Output(4)
+	e.Output(2)
 	os.Exit(1)
 }
 
@@ -135,7 +144,7 @@ func (e *Entry) Fatal(args ...interface{}) {
 func (e *Entry) Fatalf(format string, args ...interface{}) {
 	e.Level = LevelFatal
 	e.Message = fmt.Sprintln(args...)
-	e.Output(4)
+	e.Output(2)
 	os.Exit(1)
 }
 
@@ -148,7 +157,7 @@ func (e *Entry) Output(calldepth int) {
 	}()
 
 	// serialize
-	data := make(map[string]interface{}, len(e.Data))
+	data := make(map[string]interface{}, len(e.Data)+5)
 	for k, v := range e.Data {
 		switch v := v.(type) {
 		case error:
@@ -163,6 +172,7 @@ func (e *Entry) Output(calldepth int) {
 	}
 	data["time"] = e.Time.Format(time.RFC3339)
 	data["msg"] = e.Message
+	// file line
 	if e.logging.options.flag&FlagFile > 0 {
 		_, file, line, ok := runtime.Caller(calldepth)
 		if !ok {
@@ -177,12 +187,23 @@ func (e *Entry) Output(calldepth int) {
 		}
 		data["file"] = fmt.Sprintf("%s:%d", file, line)
 	}
+	// service name
+	if e.logging.options.service != "" {
+		data["service"] = e.logging.options.service
+	}
+	// opentelemetry tracing
+	if e.context != nil {
+		spanCtx := trace.SpanContextFromContext(e.context)
+		if spanCtx.IsValid() {
+			data["trace_id"] = spanCtx.SpanID().String
+		}
+	}
+
 	encoder := json.NewEncoder(buf)
 	if err := encoder.Encode(data); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to obtain reader, %v\n", err)
 		return
 	}
-
 	e.logging.mu.Lock()
 	defer e.logging.mu.Unlock()
 	_, err := e.logging.options.writer.Write(buf.Bytes())
