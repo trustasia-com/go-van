@@ -7,7 +7,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/deepzz0/go-van/pkg/middleware/recovery"
+	"github.com/deepzz0/go-van/pkg/logx"
+	"github.com/deepzz0/go-van/pkg/recovery"
 	"github.com/deepzz0/go-van/pkg/server"
 
 	"google.golang.org/grpc"
@@ -70,6 +71,7 @@ func (s *grpcServer) Start() error {
 	}
 
 	s.healthSvr.Resume()
+	logx.Infof("[gRPC] server listening on: %s", lis.Addr().String())
 	return s.Serve(lis)
 }
 

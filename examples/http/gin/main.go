@@ -31,7 +31,7 @@ func main() {
 		http.WithHandler(e),
 	)
 	service := van.NewService(
-		van.WithName("gin"),
+		van.WithName("gin-http"),
 		van.WithServer(srv),
 		van.WithRegistry(reg),
 	)

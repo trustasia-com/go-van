@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"go.opentelemetry.io/otel/trace"
@@ -171,7 +172,9 @@ func (e *Entry) Output(calldepth int) {
 		e.Time = time.Now()
 	}
 	data["time"] = e.Time.Format(time.RFC3339)
-	data["msg"] = e.Message
+	if msg := strings.TrimSpace(e.Message); msg != "" {
+		data["msg"] = msg
+	}
 	// file line
 	if e.logging.options.flag&FlagFile > 0 {
 		_, file, line, ok := runtime.Caller(calldepth)

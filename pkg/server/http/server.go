@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/deepzz0/go-van/pkg/logx"
 	"github.com/deepzz0/go-van/pkg/server"
+	"github.com/deepzz0/go-van/pkg/tools"
 )
 
 // NewServer new http server
@@ -19,7 +21,11 @@ func NewServer(opts ...server.Option) server.Server {
 		Timeout:  time.Second,
 		Context:  context.Background(),
 	}
-	svr := &httpServer{options: opt}
+	svr := &httpServer{
+		handler: http.DefaultServeMux,
+		options: opt,
+	}
+	svr.Server = &http.Server{Handler: svr}
 	// apply option
 	for _, o := range opts {
 		o(&svr.options)
@@ -27,13 +33,14 @@ func NewServer(opts ...server.Option) server.Server {
 	// handler opts from context
 	h, ok := svr.options.Context.Value(handlerOptKey{}).(http.Handler)
 	if ok {
-		svr.Server = &http.Server{Handler: h}
+		svr.handler = h
 	}
 	return svr
 }
 
 // httpServer http server
 type httpServer struct {
+	handler http.Handler
 	options server.Options
 
 	*http.Server
@@ -45,6 +52,7 @@ func (s *httpServer) Start() error {
 	if err != nil {
 		return err
 	}
+	logx.Infof("[HTTP] server listening on: %s", lis.Addr().String())
 	return s.Serve(lis)
 }
 
@@ -56,5 +64,15 @@ func (s *httpServer) Stop() error {
 
 // Endpoint return endpoint
 func (s *httpServer) Endpoint() (string, error) {
-	return fmt.Sprintf("http://%s", s.options.Endpoint), nil
+	addr, err := tools.Extract(s.options.Endpoint)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("http://%s", addr), nil
+}
+
+// ServeHTTP wrapper http.Handler
+func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// more
+	s.handler.ServeHTTP(w, r)
 }

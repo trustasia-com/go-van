@@ -4,9 +4,11 @@ package recovery
 import (
 	"context"
 	"fmt"
+	"runtime"
 
 	"github.com/deepzz0/go-van/pkg/codes"
 	"github.com/deepzz0/go-van/pkg/codes/status"
+	"github.com/deepzz0/go-van/pkg/logx"
 
 	"google.golang.org/grpc"
 )
@@ -39,11 +41,10 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 
 		defer func() {
 			if r := recover(); r != nil || panicked {
-				// TODO print log
-				// buf := make([]byte, 64<<10)
-				// n := runtime.Stack(buf, false)
-				// buf = buf[:n]
-				// logger.Errorf("[Recovery]%v: %+v\n%s\n", p, buf)
+				buf := make([]byte, 64<<10)
+				n := runtime.Stack(buf, false)
+				buf = buf[:n]
+				logx.Errorf("[Recovery]%v: %+v\n%s\n", r, req, buf)
 				err = options.handler(ctx, r)
 			}
 		}()
@@ -67,11 +68,10 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 
 		defer func() {
 			if r := recover(); r != nil || panicked {
-				// TODO print log
-				// buf := make([]byte, 64<<10)
-				// n := runtime.Stack(buf, false)
-				// buf = buf[:n]
-				// logger.Errorf("[Recovery]%v: %+v\n%s\n", p, buf)
+				buf := make([]byte, 64<<10)
+				n := runtime.Stack(buf, false)
+				buf = buf[:n]
+				logx.Errorf("[Recovery]%v: %+v\n%s\n", r, info, buf)
 				err = options.handler(stream.Context(), r)
 			}
 		}()
@@ -83,5 +83,5 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 }
 
 func defaultHandler(ctx context.Context, p interface{}) error {
-	return status.Err(codes.Internal, fmt.Sprintf("%v"), p)
+	return status.Err(codes.Internal, fmt.Sprintf("%v", p))
 }

@@ -90,14 +90,14 @@ func (s *Service) start(ctx context.Context,
 // stop the service
 func (s *Service) stop(ctx context.Context,
 	g *errgroup.Group) (err error) {
-	for _, srv := range s.options.servers {
-		srv := srv
-		g.Go(func() error { return srv.Stop() })
-	}
 	// deregister service
 	if s.options.registry != nil {
 		srv := s.regService()
 		err = s.options.registry.Deregister(ctx, srv)
+	}
+	for _, srv := range s.options.servers {
+		srv := srv
+		g.Go(func() error { return srv.Stop() })
 	}
 	return
 }

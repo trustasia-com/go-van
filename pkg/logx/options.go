@@ -9,7 +9,7 @@ import (
 const (
 	FlagFile = 1 << iota
 
-	stdFlags = FlagFile
+	stdFlags = 0
 )
 
 // Option logger option
