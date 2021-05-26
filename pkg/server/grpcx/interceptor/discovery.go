@@ -1,5 +1,5 @@
-// Package recovery provides ...
-package recovery
+// Package interceptor provides ...
+package interceptor
 
 import (
 	"context"

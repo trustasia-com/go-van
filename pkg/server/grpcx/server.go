@@ -9,8 +9,8 @@ import (
 
 	"github.com/deepzz0/go-van/pkg/internal"
 	"github.com/deepzz0/go-van/pkg/logx"
-	"github.com/deepzz0/go-van/pkg/recovery"
 	"github.com/deepzz0/go-van/pkg/server"
+	"github.com/deepzz0/go-van/pkg/server/grpcx/interceptor"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -36,8 +36,8 @@ func NewServer(opts ...server.Option) server.Server {
 	// recover options
 	if svr.options.Recover {
 		grpcOpts = append(grpcOpts,
-			grpc.ChainUnaryInterceptor(recovery.UnaryServerInterceptor()),
-			grpc.ChainStreamInterceptor(recovery.StreamServerInterceptor()),
+			grpc.ChainUnaryInterceptor(interceptor.UnaryServerInterceptor()),
+			grpc.ChainStreamInterceptor(interceptor.StreamServerInterceptor()),
 		)
 	}
 	// other server option or middleware
