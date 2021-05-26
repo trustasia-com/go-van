@@ -24,6 +24,9 @@ func main() {
 	e.GET("/hello", func(c *gin.Context) {
 		c.String(200, "hello world")
 	})
+	e.GET("/panic", func(c *gin.Context) {
+		panic("panic error")
+	})
 
 	srv := httpx.NewServer(
 		server.WithRecover(true),

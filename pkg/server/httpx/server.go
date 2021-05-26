@@ -11,6 +11,9 @@ import (
 	"github.com/deepzz0/go-van/pkg/internal"
 	"github.com/deepzz0/go-van/pkg/logx"
 	"github.com/deepzz0/go-van/pkg/server"
+	"github.com/deepzz0/go-van/pkg/server/httpx/handler"
+
+	"github.com/justinas/alice"
 )
 
 // NewServer new http server
@@ -29,9 +32,11 @@ func NewServer(opts ...server.ServerOption) server.Server {
 		o(&svr.options)
 	}
 	// recover options
+	chain := alice.New()
 	if svr.options.Recover {
-		// TODO
+		chain = chain.Append(handler.RecoverHandler)
 	}
+	svr.Handler = chain.Then(svr.Handler)
 	return svr
 }
 
