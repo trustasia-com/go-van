@@ -9,7 +9,7 @@ import (
 	"github.com/deepzz0/go-van/pkg/registry"
 	"github.com/deepzz0/go-van/pkg/registry/etcd"
 	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/http"
+	"github.com/deepzz0/go-van/pkg/server/httpx"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,10 +25,10 @@ func main() {
 		c.String(200, "hello world")
 	})
 
-	srv := http.NewServer(
+	srv := httpx.NewServer(
 		server.WithRecover(true),
-		server.WithEndpoint(":9000"),
-		http.WithHandler(e),
+		server.WithAddress(":9000"),
+		server.WithHandler(e),
 	)
 	service := van.NewService(
 		van.WithName("gin-http"),

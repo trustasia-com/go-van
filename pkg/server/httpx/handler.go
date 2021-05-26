@@ -1,5 +1,5 @@
-// Package http provides ...
-package http
+// Package httpx provides ...
+package httpx
 
 import "net/http"
 

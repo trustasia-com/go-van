@@ -3,24 +3,59 @@ package server
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/deepzz0/go-van/pkg/registry"
 )
 
-// Option server option.
-type Option func(opts *Options)
+// ServerOption server option
+type ServerOption func(opts *ServerOptions)
 
-// Options server Options, it's effective server and client
-type Options struct {
+// ServerOptions server Options
+type ServerOptions struct {
 	// server listen network tcp/udp
-	// client dial network
 	Network string
-	// server run endpoint
+	// server run address
+	Address string
+	// handler for server
+	Handler http.Handler
+
+	// server: recover from panic
+	Recover bool
+}
+
+// WithNetwork server network
+func WithNetwork(network string) ServerOption {
+	return func(opts *ServerOptions) { opts.Network = network }
+}
+
+// WithAddress server endpoint
+func WithAddress(addr string) ServerOption {
+	return func(opts *ServerOptions) { opts.Address = addr }
+}
+
+// WithHandler server handler
+func WithHandler(h http.Handler) ServerOption {
+	return func(opts *ServerOptions) { opts.Handler = h }
+}
+
+// WithRecover server panic recover
+func WithRecover(rec bool) ServerOption {
+	return func(opts *ServerOptions) { opts.Recover = rec }
+}
+
+// DialOption client dial option
+type DialOption func(opts *DialOptions)
+
+// DialOptions client dial Options
+type DialOptions struct {
 	// client connect to endpoint
 	Endpoint string
 	// connect timeout
 	Timeout time.Duration
+	// user-agent
+	UserAgent string
 	// other options for implementations of the interface
 	// can be stored in a context
 	Context context.Context
@@ -29,42 +64,34 @@ type Options struct {
 	Secure bool
 	// client: discovery registry
 	Registry registry.Registry
-
-	// server: recover from panic
-	Recover bool
 }
 
-// WithNetwork server network
-func WithNetwork(network string) Option {
-	return func(opts *Options) { opts.Network = network }
+// WithEndpoint connect to server endpoint
+func WithEndpoint(addr string) DialOption {
+	return func(opts *DialOptions) { opts.Endpoint = addr }
 }
 
-// WithEndpoint server endpoint
-func WithEndpoint(addr string) Option {
-	return func(opts *Options) { opts.Endpoint = addr }
+// WithTimeout dial timeout
+func WithTimeout(timeout time.Duration) DialOption {
+	return func(opts *DialOptions) { opts.Timeout = timeout }
 }
 
-// WithTimeout server timeout
-func WithTimeout(timeout time.Duration) Option {
-	return func(opts *Options) { opts.Timeout = timeout }
+// WithContext client context
+func WithContext(ctx context.Context) DialOption {
+	return func(opts *DialOptions) { opts.Context = ctx }
 }
 
-// WithContext server context
-func WithContext(ctx context.Context) Option {
-	return func(opts *Options) { opts.Context = ctx }
+// WithUserAgent client user-agent
+func WithUserAgent(ua string) DialOption {
+	return func(opts *DialOptions) { opts.UserAgent = ua }
 }
 
 // WithSecure endpoint secure
-func WithSecure(secure bool) Option {
-	return func(opts *Options) { opts.Secure = secure }
+func WithSecure(secure bool) DialOption {
+	return func(opts *DialOptions) { opts.Secure = secure }
 }
 
 // WithRegistry registry for discovery
-func WithRegistry(reg registry.Registry) Option {
-	return func(opts *Options) { opts.Registry = reg }
-}
-
-// WithRecover server panic recover
-func WithRecover(rec bool) Option {
-	return func(opts *Options) { opts.Recover = rec }
+func WithRegistry(reg registry.Registry) DialOption {
+	return func(opts *DialOptions) { opts.Registry = reg }
 }

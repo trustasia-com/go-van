@@ -1,5 +1,5 @@
-// Package grpc provides ...
-package grpc
+// Package grpcx provides ...
+package grpcx
 
 import (
 	"context"

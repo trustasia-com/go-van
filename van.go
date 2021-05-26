@@ -4,6 +4,7 @@ package van
 import (
 	"context"
 	"errors"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -65,7 +66,8 @@ func (s *Service) Run() error {
 	})
 	// block unsless error
 	if err := g.Wait(); err != nil &&
-		!errors.Is(err, context.Canceled) {
+		!errors.Is(err, context.Canceled) &&
+		!errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 	return nil

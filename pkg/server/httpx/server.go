@@ -1,5 +1,5 @@
-// Package http provides ...
-package http
+// Package httpx provides ...
+package httpx
 
 import (
 	"context"
@@ -14,16 +14,14 @@ import (
 )
 
 // NewServer new http server
-func NewServer(opts ...server.Option) server.Server {
-	opt := server.Options{
-		Network:  "tcp",
-		Endpoint: ":0",
-		Timeout:  time.Second,
-		Context:  context.Background(),
+func NewServer(opts ...server.ServerOption) server.Server {
+	options := server.ServerOptions{
+		Network: "tcp",
+		Address: ":0",
+		Handler: http.DefaultServeMux,
 	}
 	svr := &httpServer{
-		handler: http.DefaultServeMux,
-		options: opt,
+		options: options,
 	}
 	svr.Server = &http.Server{Handler: svr}
 	// apply option
@@ -32,27 +30,21 @@ func NewServer(opts ...server.Option) server.Server {
 	}
 	// recover options
 	if svr.options.Recover {
-
-	}
-	// handler opts from context
-	h, ok := svr.options.Context.Value(handlerOptKey{}).(http.Handler)
-	if ok {
-		svr.handler = h
+		// TODO
 	}
 	return svr
 }
 
 // httpServer http server
 type httpServer struct {
-	handler http.Handler
-	options server.Options
+	options server.ServerOptions
 
 	*http.Server
 }
 
 // Start start http server
 func (s *httpServer) Start() error {
-	lis, err := net.Listen(s.options.Network, s.options.Endpoint)
+	lis, err := net.Listen(s.options.Network, s.options.Address)
 	if err != nil {
 		return err
 	}
@@ -62,14 +54,17 @@ func (s *httpServer) Start() error {
 
 // Stop stop http server
 func (s *httpServer) Stop() error {
-	s.Shutdown(s.options.Context)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	s.Shutdown(ctx)
 	logx.Info("[HTTP] server stopping")
 	return nil
 }
 
 // Endpoint return endpoint
 func (s *httpServer) Endpoint() (string, error) {
-	addr, err := internal.Extract(s.options.Endpoint)
+	addr, err := internal.Extract(s.options.Address)
 	if err != nil {
 		return "", err
 	}
@@ -78,6 +73,8 @@ func (s *httpServer) Endpoint() (string, error) {
 
 // ServeHTTP wrapper http.Handler
 func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// TODO
 	// more
-	s.handler.ServeHTTP(w, r)
+	// eg. health check
+	s.options.Handler.ServeHTTP(w, r)
 }

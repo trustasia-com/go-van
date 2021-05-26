@@ -1,19 +1,19 @@
-// Package grpc provides ...
-package grpc
+// Package grpcx provides ...
+package grpcx
 
 import (
 	"time"
 
 	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/grpc/resolver"
+	"github.com/deepzz0/go-van/pkg/server/grpcx/resolver"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
 )
 
 // DialContext dial to grpc server
-func DialContext(opts ...server.Option) (*grpc.ClientConn, error) {
-	options := server.Options{
+func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
+	options := server.DialOptions{
 		Endpoint: ":0",
 		Timeout:  time.Second,
 	}
