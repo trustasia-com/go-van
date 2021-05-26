@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/deepzz0/go-van/pkg/registry"
+
+	"google.golang.org/grpc"
 )
 
 // ServerOption server option
@@ -18,8 +20,10 @@ type ServerOptions struct {
 	Network string
 	// server run address
 	Address string
-	// handler for server
+	// handler for http server
 	Handler http.Handler
+	// Options for gRPC server
+	Options []grpc.ServerOption
 
 	// server: recover from panic
 	Recover bool
@@ -38,6 +42,13 @@ func WithAddress(addr string) ServerOption {
 // WithHandler server handler
 func WithHandler(h http.Handler) ServerOption {
 	return func(opts *ServerOptions) { opts.Handler = h }
+}
+
+// WithOptions gRPC server option
+func WithOptions(sopts ...grpc.ServerOption) ServerOption {
+	return func(opts *ServerOptions) {
+		opts.Options = append(opts.Options, sopts...)
+	}
 }
 
 // WithRecover server panic recover

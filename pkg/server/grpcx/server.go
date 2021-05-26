@@ -2,10 +2,8 @@
 package grpcx
 
 import (
-	"context"
 	"fmt"
 	"net"
-	"time"
 
 	"github.com/deepzz0/go-van/pkg/internal"
 	"github.com/deepzz0/go-van/pkg/logx"
@@ -19,12 +17,10 @@ import (
 )
 
 // NewServer new grpc server
-func NewServer(opts ...server.Option) server.Server {
-	opt := server.Options{
-		Network:  "tcp",
-		Endpoint: ":0",
-		Timeout:  time.Second,
-		Context:  context.Background(),
+func NewServer(opts ...server.ServerOption) server.Server {
+	opt := server.ServerOptions{
+		Network: "tcp",
+		Address: ":0",
 	}
 	svr := &grpcServer{options: opt}
 	// apply option
@@ -41,11 +37,8 @@ func NewServer(opts ...server.Option) server.Server {
 		)
 	}
 	// other server option or middleware
-	if svr.options.Context != nil {
-		opts, ok := svr.options.Context.Value(grpcOptsKey{}).([]grpc.ServerOption)
-		if ok {
-			grpcOpts = append(grpcOpts, opts...)
-		}
+	if len(svr.options.Options) > 0 {
+		grpcOpts = append(grpcOpts, svr.options.Options...)
 	}
 	// new grpc server
 	svr.Server = grpc.NewServer(grpcOpts...)
@@ -58,7 +51,7 @@ func NewServer(opts ...server.Option) server.Server {
 
 // grpcServer grpc server
 type grpcServer struct {
-	options  server.Options
+	options  server.ServerOptions
 	grpcOpts []grpc.ServerOption
 
 	*grpc.Server
@@ -66,7 +59,7 @@ type grpcServer struct {
 }
 
 func (s *grpcServer) Start() error {
-	lis, err := net.Listen(s.options.Network, s.options.Endpoint)
+	lis, err := net.Listen(s.options.Network, s.options.Address)
 	if err != nil {
 		return err
 	}
@@ -87,7 +80,7 @@ func (s *grpcServer) Stop() error {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *grpcServer) Endpoint() (string, error) {
-	addr, err := internal.Extract(s.options.Endpoint)
+	addr, err := internal.Extract(s.options.Address)
 	if err != nil {
 		return "", err
 	}
