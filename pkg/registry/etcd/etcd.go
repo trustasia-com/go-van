@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/deepzz0/go-van/pkg/logx"
 	"github.com/deepzz0/go-van/pkg/registry"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -45,7 +46,7 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	// ignore error, will call handle error
 	client, err := clientv3.New(config)
 	if err != nil {
-		// TODO logger fatal
+		logx.Fatal(err)
 	}
 	return &etcdRegistry{options: options, client: client}
 }

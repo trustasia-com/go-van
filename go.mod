@@ -3,6 +3,7 @@ module github.com/deepzz0/go-van
 go 1.15
 
 require (
+	github.com/gin-gonic/gin v1.7.2
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.2.0
 	go.etcd.io/etcd/client/v3 v3.5.0-beta.3

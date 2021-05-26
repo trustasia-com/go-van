@@ -23,14 +23,9 @@ func (s *testServer) Start() error {
 	return nil
 }
 
-func (s *testServer) Stop() error {
-	s.done <- struct{}{}
-	return nil
-}
+func (s *testServer) Stop() error { s.done <- struct{}{}; return nil }
 
-func (s *testServer) Endpoint() (string, error) {
-	return "", nil
-}
+func (s *testServer) Endpoint() (string, error) { return "", nil }
 
 func TestService(t *testing.T) {
 	svr := &testServer{done: make(chan struct{})}

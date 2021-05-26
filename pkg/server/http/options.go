@@ -16,7 +16,7 @@ func WithHandler(h http.Handler) server.Option {
 		if opts.Context == nil {
 			opts.Context = context.Background()
 		}
-		opts.Context = context.WithValue(opts.Context, handlerOptKey{}, opts)
+		opts.Context = context.WithValue(opts.Context, handlerOptKey{}, h)
 	}
 }
 

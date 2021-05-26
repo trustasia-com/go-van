@@ -12,7 +12,7 @@ import (
 )
 
 // NewServer new http server
-func NewServer(opts ...server.Option) (server.Server, error) {
+func NewServer(opts ...server.Option) server.Server {
 	opt := server.Options{
 		Network:  "tcp",
 		Endpoint: ":0",
@@ -29,7 +29,7 @@ func NewServer(opts ...server.Option) (server.Server, error) {
 	if ok {
 		svr.Server = &http.Server{Handler: h}
 	}
-	return svr, nil
+	return svr
 }
 
 // httpServer http server
