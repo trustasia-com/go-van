@@ -25,12 +25,12 @@ type Options struct {
 	// can be stored in a context
 	Context context.Context
 
-	// secure with tls for client
+	// client: secure with tls
 	Secure bool
-	// discovery registry for client
+	// client: discovery registry
 	Registry registry.Registry
 
-	// recover from panic for server
+	// server: recover from panic
 	Recover bool
 }
 

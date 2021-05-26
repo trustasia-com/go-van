@@ -1,5 +1,5 @@
-// Package tools provides ...
-package tools
+// Package internal provides ...
+package internal
 
 import (
 	"net"

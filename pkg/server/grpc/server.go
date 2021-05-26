@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/deepzz0/go-van/pkg/internal"
 	"github.com/deepzz0/go-van/pkg/logx"
 	"github.com/deepzz0/go-van/pkg/recovery"
 	"github.com/deepzz0/go-van/pkg/server"
@@ -78,6 +79,7 @@ func (s *grpcServer) Start() error {
 func (s *grpcServer) Stop() error {
 	s.GracefulStop()
 	s.healthSvr.Shutdown()
+	logx.Info("[gRPC] server stopping")
 	return nil
 }
 
@@ -85,5 +87,9 @@ func (s *grpcServer) Stop() error {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *grpcServer) Endpoint() (string, error) {
-	return fmt.Sprintf("grpc://%s" + s.options.Endpoint), nil
+	addr, err := internal.Extract(s.options.Endpoint)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("grpc://%s", addr), nil
 }

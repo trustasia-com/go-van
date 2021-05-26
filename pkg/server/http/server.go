@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/deepzz0/go-van/pkg/internal"
 	"github.com/deepzz0/go-van/pkg/logx"
 	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/tools"
 )
 
 // NewServer new http server
@@ -29,6 +29,10 @@ func NewServer(opts ...server.Option) server.Server {
 	// apply option
 	for _, o := range opts {
 		o(&svr.options)
+	}
+	// recover options
+	if svr.options.Recover {
+
 	}
 	// handler opts from context
 	h, ok := svr.options.Context.Value(handlerOptKey{}).(http.Handler)
@@ -59,12 +63,13 @@ func (s *httpServer) Start() error {
 // Stop stop http server
 func (s *httpServer) Stop() error {
 	s.Shutdown(s.options.Context)
+	logx.Info("[HTTP] server stopping")
 	return nil
 }
 
 // Endpoint return endpoint
 func (s *httpServer) Endpoint() (string, error) {
-	addr, err := tools.Extract(s.options.Endpoint)
+	addr, err := internal.Extract(s.options.Endpoint)
 	if err != nil {
 		return "", err
 	}

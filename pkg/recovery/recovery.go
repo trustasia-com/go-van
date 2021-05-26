@@ -40,12 +40,12 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 		panicked := true
 
 		defer func() {
-			if r := recover(); r != nil || panicked {
+			if e := recover(); e != nil || panicked {
 				buf := make([]byte, 64<<10)
 				n := runtime.Stack(buf, false)
 				buf = buf[:n]
-				logx.Errorf("[Recovery]%v: %+v\n%s\n", r, req, buf)
-				err = options.handler(ctx, r)
+				logx.Errorf("[Recovery]%v: %+v\n%s\n", e, req, buf)
+				err = options.handler(ctx, e)
 			}
 		}()
 
@@ -67,12 +67,12 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 		panicked := true
 
 		defer func() {
-			if r := recover(); r != nil || panicked {
+			if e := recover(); e != nil || panicked {
 				buf := make([]byte, 64<<10)
 				n := runtime.Stack(buf, false)
 				buf = buf[:n]
-				logx.Errorf("[Recovery]%v: %+v\n%s\n", r, info, buf)
-				err = options.handler(stream.Context(), r)
+				logx.Errorf("[Recovery]%v: %+v\n%s\n", e, info, buf)
+				err = options.handler(stream.Context(), e)
 			}
 		}()
 
