@@ -38,8 +38,8 @@ func InitProvider(opts ...Option) (shutdown func()) {
 		o(&options)
 	}
 	// init exporter
+	options.options = append(options.options, otlpgrpc.WithDialOption(grpc.WithBlock()))
 	exp, err := otlp.NewExporter(options.context, otlpgrpc.NewDriver(
-		otlpgrpc.WithDialOption(grpc.WithBlock()),
 		options.options...,
 	))
 	if err != nil {
@@ -56,7 +56,7 @@ func InitProvider(opts ...Option) (shutdown func()) {
 	}
 	// metrics
 	if options.metrics {
-		metricShutdown, err := initMetric(exp, options)
+		metricShutdown, err = initMetric(exp, options)
 		if err != nil {
 			logx.Fatal(err)
 		}
@@ -64,8 +64,12 @@ func InitProvider(opts ...Option) (shutdown func()) {
 	// logger
 	//
 	shutdown = func() {
-		tracerShutdown(options.context)
-		metricShutdown(options.context)
+		if tracerShutdown != nil {
+			tracerShutdown(options.context)
+		}
+		if metricShutdown != nil {
+			metricShutdown(options.context)
+		}
 		exp.Shutdown(options.context)
 	}
 	return shutdown

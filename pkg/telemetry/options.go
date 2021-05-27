@@ -8,7 +8,7 @@ import (
 )
 
 // Option telemetry option
-type Option func(opts *Options)
+type Option func(opts *options)
 
 // options registry Options
 type options struct {

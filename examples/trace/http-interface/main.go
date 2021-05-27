@@ -2,12 +2,11 @@
 package main
 
 import (
-	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/deepzz0/go-van"
-	pb "github.com/deepzz0/go-van/examples/grpc/helloworld"
+	pb "github.com/deepzz0/go-van/examples/trace/proto"
 	"github.com/deepzz0/go-van/pkg/logx"
 	"github.com/deepzz0/go-van/pkg/server"
 	"github.com/deepzz0/go-van/pkg/server/grpcx"
@@ -15,7 +14,6 @@ import (
 	"github.com/deepzz0/go-van/pkg/telemetry"
 
 	"github.com/gin-gonic/gin"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -33,10 +31,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	grpcClient = pb.NewGreeterClient(conn)
+	grpcClient = pb.NewUserClient(conn)
 	// http client
 	httpClient = httpx.NewClient(
-		server.WithTransport(otelhttp.NewTransport(http.DefaultTransport)),
+		server.WithCliFlag(server.FlagTracing),
 	)
 
 	shutdown := telemetry.InitProvider(
@@ -52,7 +50,7 @@ func main() {
 	srv := httpx.NewServer(
 		server.WithAddress(":9000"),
 		server.WithHandler(r),
-		server.WithFlag(server.FlagTracing),
+		server.WithSrvFlag(server.FlagTracing),
 	)
 	service := van.NewService(
 		van.WithName("http-interface"),
@@ -74,14 +72,14 @@ func handleHTTP2HTTP(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	resp, err := httpClient.Do(req)
+
+	var data []byte
+	err = httpClient.Do(ctx, req, &data)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	defer resp.Body.Close()
 
-	data, _ := ioutil.ReadAll(resp.Body)
 	c.Data(http.StatusOK, "text/html", data)
 }
 

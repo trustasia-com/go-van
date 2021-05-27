@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "telemetry/examples/proto;proto";
+
+package proto;
+
+service User {
+	rpc GetUserInfo (UserInfoReq) returns (UserInfoResp) {}
+	rpc GetUserInfoProxy (UserInfoReq) returns (UserInfoResp) {}
+}
+
+message UserInfoReq {
+	string id = 1;
+}
+
+message UserInfoResp {
+	string username = 1;
+}

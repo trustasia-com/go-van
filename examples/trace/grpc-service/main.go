@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/deepzz0/go-van"
-	pb "github.com/deepzz0/go-van/examples/grpc/helloworld"
+	pb "github.com/deepzz0/go-van/examples/trace/proto"
 	"github.com/deepzz0/go-van/pkg/codes"
 	"github.com/deepzz0/go-van/pkg/codes/status"
 	"github.com/deepzz0/go-van/pkg/logx"
@@ -33,8 +33,8 @@ func main() {
 		server.WithAddress(":8000"),
 		server.WithSrvFlag(server.FlagTracing),
 	)
-	s := &serverGRPC{}
-	pb.RegisterGreeterServer(srv, s)
+	s := &userServer{}
+	pb.RegisterUserServer(srv, s)
 
 	service := van.NewService(
 		van.WithName("grpc-service"),

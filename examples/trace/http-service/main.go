@@ -26,7 +26,7 @@ func main() {
 	srv := httpx.NewServer(
 		server.WithAddress(":9001"),
 		server.WithHandler(r),
-		server.WithFlag(server.FlagTracing),
+		server.WithSrvFlag(server.FlagTracing),
 	)
 	service := van.NewService(
 		van.WithName("http-service"),
