@@ -17,7 +17,7 @@ import (
 )
 
 // NewServer new http server
-func NewServer(opts ...server.ServerOption) server.Server {
+func NewServer(opts ...server.ServerOption) *httpServer {
 	options := server.ServerOptions{
 		Network: "tcp",
 		Address: ":0",

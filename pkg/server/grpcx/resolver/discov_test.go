@@ -4,9 +4,7 @@ package resolver
 import (
 	"context"
 	"testing"
-	"time"
 
-	pb "github.com/deepzz0/go-van/examples/helloworld"
 	"github.com/deepzz0/go-van/pkg/registry"
 	"github.com/deepzz0/go-van/pkg/registry/etcd"
 
@@ -28,7 +26,7 @@ func init() {
 }
 
 func TestDiscovResolver(t *testing.T) {
-	cc, err := grpc.Dial("discov:///helloworld",
+	_, err := grpc.Dial("discov:///helloworld",
 		grpc.WithResolvers(resolv),
 		grpc.WithInsecure(),
 		grpc.WithBalancerName(roundrobin.Name),
@@ -36,15 +34,4 @@ func TestDiscovResolver(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client := pb.NewGreeterClient(cc)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	resp, err := client.SayHello(ctx, &pb.HelloRequest{
-		Name: "go-van",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("%+v\n", resp)
 }

@@ -84,6 +84,12 @@ var (
 	}
 )
 
+func init() {
+	defaultTrans := &DefaultTranslator{}
+	globalI18n.supportedLang = defaultTrans.SupportedLang()
+	globalI18n.translator = defaultTrans
+}
+
 // GRPCCode http status code to codes.Code
 func GRPCCode(httpCode int) Code {
 	switch httpCode {

@@ -17,7 +17,7 @@ import (
 )
 
 // NewServer new grpc server
-func NewServer(opts ...server.ServerOption) server.Server {
+func NewServer(opts ...server.ServerOption) *grpcServer {
 	opt := server.ServerOptions{
 		Network: "tcp",
 		Address: ":0",
@@ -42,6 +42,7 @@ func NewServer(opts ...server.ServerOption) server.Server {
 	}
 	// new grpc server
 	svr.Server = grpc.NewServer(grpcOpts...)
+	svr.healthSvr = health.NewServer()
 	// Register reflection service on gRPC server.
 	reflection.Register(svr.Server)
 	// grpc health server

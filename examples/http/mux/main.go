@@ -11,6 +11,7 @@ import (
 	"github.com/deepzz0/go-van/pkg/registry/etcd"
 	"github.com/deepzz0/go-van/pkg/server"
 	"github.com/deepzz0/go-van/pkg/server/httpx"
+
 	"github.com/gorilla/mux"
 )
 
