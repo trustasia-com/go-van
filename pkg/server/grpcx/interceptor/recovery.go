@@ -83,5 +83,5 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 }
 
 func defaultHandler(ctx context.Context, p interface{}) error {
-	return status.Err(codes.Internal, fmt.Sprintf("%v", p))
+	return status.Err(codes.Internal, fmt.Sprintf("[Panic]%v", p))
 }

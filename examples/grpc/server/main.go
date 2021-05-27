@@ -27,6 +27,9 @@ func (s *serverGRPC) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.Hel
 	if in.Name == "error" {
 		return nil, status.Err(codes.InvalidArgument, "name invalid")
 	}
+	if in.Name == "panic" {
+		panic("panic error")
+	}
 	return &pb.HelloReply{Message: fmt.Sprintf("Welcome %+v!", in.Name)}, nil
 }
 

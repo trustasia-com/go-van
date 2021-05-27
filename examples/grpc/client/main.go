@@ -45,4 +45,9 @@ func main() {
 		}
 	}
 
+	// panic error
+	_, err = cli.SayHello(context.Background(), &pb.HelloRequest{Name: "panic"})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
