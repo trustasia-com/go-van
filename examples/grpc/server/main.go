@@ -4,15 +4,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/deepzz0/go-van"
 	pb "github.com/deepzz0/go-van/examples/grpc/helloworld"
 	"github.com/deepzz0/go-van/pkg/codes"
 	"github.com/deepzz0/go-van/pkg/codes/status"
 	"github.com/deepzz0/go-van/pkg/logx"
-	"github.com/deepzz0/go-van/pkg/registry"
-	"github.com/deepzz0/go-van/pkg/registry/etcd"
 	"github.com/deepzz0/go-van/pkg/server"
 	"github.com/deepzz0/go-van/pkg/server/grpcx"
 )
@@ -34,10 +31,6 @@ func (s *serverGRPC) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.Hel
 }
 
 func main() {
-	reg := etcd.NewRegistry(
-		registry.WithTTL(time.Second*10),
-		registry.WithAddress("localhost:2379"),
-	)
 	// grpc server
 	srv := grpcx.NewServer(
 		server.WithAddress(":8000"),
@@ -48,7 +41,6 @@ func main() {
 	service := van.NewService(
 		van.WithName("grpc"),
 		van.WithServer(srv),
-		van.WithRegistry(reg),
 	)
 	if err := service.Run(); err != nil {
 		logx.Fatal(err)

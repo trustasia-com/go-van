@@ -1,5 +1,5 @@
-// Package interceptor provides ...
-package interceptor
+// Package serverinterceptor provides ...
+package serverinterceptor
 
 import (
 	"context"

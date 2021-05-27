@@ -20,6 +20,8 @@ const (
 	FlagRecover = 1 << iota
 	// tracing with opentelemetry
 	FlagTracing
+	// metric
+	FlagMetric
 	// client secure for tls
 	FlagSecure
 

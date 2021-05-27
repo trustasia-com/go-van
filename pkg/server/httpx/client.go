@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/deepzz0/go-van/pkg/server"
+	"github.com/deepzz0/go-van/pkg/server/httpx/handler"
 )
 
 // NewClient new http client
@@ -23,13 +24,12 @@ func NewClient(opts ...server.DialOption) *Client {
 	for _, o := range opts {
 		o(&options)
 	}
-	// change transport?
-	if options.Context != nil {
-		trans, ok := options.Context.Value(transportOptKey{}).(*http.Transport)
-		if ok {
-			cli.transport = trans
-		}
+
+	// apply client flag
+	if options.Flag&server.FlagTracing > 0 {
+		cli.transport = handler.TraceCliHandler(cli.transport)
 	}
+
 	return cli
 }
 

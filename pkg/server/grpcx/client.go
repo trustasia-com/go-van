@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/deepzz0/go-van/pkg/server"
+	"github.com/deepzz0/go-van/pkg/server/grpcx/clientinterceptor"
 	"github.com/deepzz0/go-van/pkg/server/grpcx/resolver"
 
 	"google.golang.org/grpc"
@@ -31,10 +32,18 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 		builder := resolver.NewBuilder(options.Registry)
 		grpcOpts = append(grpcOpts, grpc.WithResolvers(builder))
 	}
-	// tls secure
+
+	// flag apply option
 	if options.Flag&server.FlagSecure == 0 {
 		grpcOpts = append(grpcOpts, grpc.WithInsecure())
 	}
+	if options.Flag&server.FlagTracing > 0 {
+		grpcOpts = append(grpcOpts,
+			grpc.WithUnaryInterceptor(clientinterceptor.UnaryTraceInterceptor()),
+			grpc.WithStreamInterceptor(clientinterceptor.StreamTraceInterceptor()),
+		)
+	}
+
 	// context custom options
 	if options.Context != nil {
 		opts, ok := options.Context.Value(grpcOptsKey{}).([]grpc.DialOption)

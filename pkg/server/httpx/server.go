@@ -35,9 +35,13 @@ func NewServer(opts ...server.ServerOption) *httpServer {
 	}
 
 	chain := alice.New()
+
 	// flag apply options
 	if svr.options.Flag&server.FlagRecover > 0 {
 		chain = chain.Append(handler.RecoverHandler)
+	}
+	if svr.options.Flag&server.FlagTracing > 0 {
+		chain = chain.Append(handler.TraceSrvHandler)
 	}
 	svr.Handler = chain.Then(svr.Handler)
 

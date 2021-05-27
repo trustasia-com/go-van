@@ -8,7 +8,7 @@ import (
 	"github.com/deepzz0/go-van/pkg/internal"
 	"github.com/deepzz0/go-van/pkg/logx"
 	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/grpcx/interceptor"
+	"github.com/deepzz0/go-van/pkg/server/grpcx/serverinterceptor"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -35,8 +35,14 @@ func NewServer(opts ...server.ServerOption) *grpcServer {
 	// flag apply options
 	if svr.options.Flag&server.FlagRecover > 0 {
 		grpcOpts = append(grpcOpts,
-			grpc.ChainUnaryInterceptor(interceptor.UnaryServerInterceptor()),
-			grpc.ChainStreamInterceptor(interceptor.StreamServerInterceptor()),
+			grpc.ChainUnaryInterceptor(serverinterceptor.UnaryServerInterceptor()),
+			grpc.ChainStreamInterceptor(serverinterceptor.StreamServerInterceptor()),
+		)
+	}
+	if svr.options.Flag&server.FlagTracing > 0 {
+		grpcOpts = append(grpcOpts,
+			grpc.ChainUnaryInterceptor(serverinterceptor.UnaryTraceInterceptor()),
+			grpc.ChainStreamInterceptor(serverinterceptor.StreamTraceInterceptor()),
 		)
 	}
 
