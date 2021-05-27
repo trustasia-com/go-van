@@ -24,6 +24,9 @@ func main() {
 	e.GET("/hello", func(c *gin.Context) {
 		c.String(200, "hello world")
 	})
+	e.Use(func(c *gin.Context) {
+		c.Writer.WriteString("gin middleware")
+	})
 	e.GET("/panic", func(c *gin.Context) {
 		panic("panic error")
 	})
