@@ -22,6 +22,8 @@ func NewServer(opts ...server.ServerOption) *httpServer {
 		Network: "tcp",
 		Address: ":0",
 		Handler: http.DefaultServeMux,
+
+		Flag: server.ServerStdFlag,
 	}
 	svr := &httpServer{
 		options: options,
@@ -31,12 +33,14 @@ func NewServer(opts ...server.ServerOption) *httpServer {
 	for _, o := range opts {
 		o(&svr.options)
 	}
-	// recover options
+
 	chain := alice.New()
-	if svr.options.Recover {
+	// flag apply options
+	if svr.options.Flag&server.FlagRecover > 0 {
 		chain = chain.Append(handler.RecoverHandler)
 	}
 	svr.Handler = chain.Then(svr.Handler)
+
 	return svr
 }
 

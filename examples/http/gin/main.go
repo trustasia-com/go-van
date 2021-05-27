@@ -32,7 +32,6 @@ func main() {
 	})
 
 	srv := httpx.NewServer(
-		server.WithRecover(true),
 		server.WithAddress(":9000"),
 		server.WithHandler(e),
 	)

@@ -40,7 +40,6 @@ func main() {
 	)
 	// grpc server
 	srv := grpcx.NewServer(
-		server.WithRecover(true),
 		server.WithAddress(":8000"),
 	)
 	s := &serverGRPC{}

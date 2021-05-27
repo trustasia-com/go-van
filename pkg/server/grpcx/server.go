@@ -21,6 +21,8 @@ func NewServer(opts ...server.ServerOption) *grpcServer {
 	opt := server.ServerOptions{
 		Network: "tcp",
 		Address: ":0",
+
+		Flag: server.ServerStdFlag,
 	}
 	svr := &grpcServer{options: opt}
 	// apply option
@@ -29,13 +31,15 @@ func NewServer(opts ...server.ServerOption) *grpcServer {
 	}
 	// prepare grpc option
 	grpcOpts := []grpc.ServerOption{}
-	// recover options
-	if svr.options.Recover {
+
+	// flag apply options
+	if svr.options.Flag&server.FlagRecover > 0 {
 		grpcOpts = append(grpcOpts,
 			grpc.ChainUnaryInterceptor(interceptor.UnaryServerInterceptor()),
 			grpc.ChainStreamInterceptor(interceptor.StreamServerInterceptor()),
 		)
 	}
+
 	// other server option or middleware
 	if len(svr.options.Options) > 0 {
 		grpcOpts = append(grpcOpts, svr.options.Options...)

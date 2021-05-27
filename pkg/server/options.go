@@ -11,6 +11,22 @@ import (
 	"google.golang.org/grpc"
 )
 
+// FlagOption to flag with 0/1
+type FlagOption int
+
+// flag list
+const (
+	// recover from panic
+	FlagRecover = 1 << iota
+	// tracing with opentelemetry
+	FlagTracing
+	// client secure for tls
+	FlagSecure
+
+	ServerStdFlag = FlagRecover
+	ClientStdFlag = 0
+)
+
 // ServerOption server option
 type ServerOption func(opts *ServerOptions)
 
@@ -25,8 +41,8 @@ type ServerOptions struct {
 	// Options for gRPC server
 	Options []grpc.ServerOption
 
-	// server: recover from panic
-	Recover bool
+	// server flag
+	Flag FlagOption
 }
 
 // WithNetwork server network
@@ -51,9 +67,13 @@ func WithOptions(sopts ...grpc.ServerOption) ServerOption {
 	}
 }
 
-// WithRecover server panic recover
-func WithRecover(rec bool) ServerOption {
-	return func(opts *ServerOptions) { opts.Recover = rec }
+// WithSrvFlag server flag
+func WithSrvFlag(flags ...FlagOption) ServerOption {
+	return func(opts *ServerOptions) {
+		for _, f := range flags {
+			opts.Flag |= f
+		}
+	}
 }
 
 // DialOption client dial option
@@ -71,10 +91,10 @@ type DialOptions struct {
 	// can be stored in a context
 	Context context.Context
 
-	// client: secure with tls
-	Secure bool
-	// client: discovery registry
+	// discovery registry to server
 	Registry registry.Registry
+	// client flag
+	Flag FlagOption
 }
 
 // WithEndpoint connect to server endpoint
@@ -97,12 +117,16 @@ func WithUserAgent(ua string) DialOption {
 	return func(opts *DialOptions) { opts.UserAgent = ua }
 }
 
-// WithSecure endpoint secure
-func WithSecure(secure bool) DialOption {
-	return func(opts *DialOptions) { opts.Secure = secure }
-}
-
 // WithRegistry registry for discovery
 func WithRegistry(reg registry.Registry) DialOption {
 	return func(opts *DialOptions) { opts.Registry = reg }
+}
+
+// WithCliFlag client flag
+func WithCliFlag(flags ...FlagOption) DialOption {
+	return func(opts *DialOptions) {
+		for _, f := range flags {
+			opts.Flag |= f
+		}
+	}
 }

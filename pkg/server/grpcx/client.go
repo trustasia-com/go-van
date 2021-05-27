@@ -16,6 +16,8 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 	options := server.DialOptions{
 		Endpoint: ":0",
 		Timeout:  time.Second,
+
+		Flag: server.ClientStdFlag,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -30,7 +32,7 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 		grpcOpts = append(grpcOpts, grpc.WithResolvers(builder))
 	}
 	// tls secure
-	if !options.Secure {
+	if options.Flag&server.FlagSecure == 0 {
 		grpcOpts = append(grpcOpts, grpc.WithInsecure())
 	}
 	// context custom options
