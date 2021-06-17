@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/deepzz0/go-van/pkg/version"
+	"github.com/deepzz0/go-van/pkg"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
@@ -21,7 +21,7 @@ func TraceSrvHandler(next http.Handler) http.Handler {
 	propagators := otel.GetTextMapPropagator()
 	tracer := otel.GetTracerProvider().Tracer(
 		tracerName,
-		oteltrace.WithInstrumentationVersion(version.Version),
+		oteltrace.WithInstrumentationVersion(pkg.Version),
 	)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
