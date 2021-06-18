@@ -183,7 +183,7 @@ func (c Code) Tr(lang string, args ...interface{}) string {
 		}
 		desc := codes[c]
 		for _, arg := range args {
-			desc += fmt.Sprintf(" | %v", arg)
+			desc += fmt.Sprintf(": %v", arg)
 		}
 		return desc
 	}
