@@ -1,0 +1,6 @@
+database:
+  driver: postgres
+  source: xxxx
+ports:
+  - 8000
+  - 9000

@@ -4,10 +4,10 @@ package etcd
 import (
 	"context"
 	"encoding/json"
-	"errors"
 
 	"github.com/deepzz0/go-van/pkg/registry"
 
+	"github.com/pkg/errors"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 

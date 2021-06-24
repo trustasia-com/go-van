@@ -2,11 +2,12 @@
 package status
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/deepzz0/go-van/pkg/codes"
+
+	"github.com/pkg/errors"
 )
 
 var testCode codes.Code = 2000
