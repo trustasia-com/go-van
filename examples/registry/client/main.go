@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	pb "github.com/trustasia-com/go-van/examples/grpc/helloworld"
 	"github.com/trustasia-com/go-van/pkg/codes"
 	"github.com/trustasia-com/go-van/pkg/codes/status"
 	"github.com/trustasia-com/go-van/pkg/registry"

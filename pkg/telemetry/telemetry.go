@@ -8,8 +8,8 @@ import (
 	"github.com/trustasia-com/go-van/pkg/logx"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
@@ -18,7 +18,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
-	"google.golang.org/grpc"
 )
 
 // examples:
@@ -37,26 +36,21 @@ func InitProvider(opts ...Option) (shutdown func()) {
 	for _, o := range opts {
 		o(&options)
 	}
-	// init exporter
-	options.options = append(options.options, otlpgrpc.WithDialOption(grpc.WithBlock()))
-	exp, err := otlp.NewExporter(options.context, otlpgrpc.NewDriver(
-		options.options...,
-	))
-	if err != nil {
-		logx.Fatal(err)
-	}
 
-	var tracerShutdown, metricShutdown shutdownFunc
+	var (
+		err                            error
+		tracerShutdown, metricShutdown shutdownFunc
+	)
 	// tracer
 	if options.tracerName != "" {
-		tracerShutdown, err = initTracer(exp, options)
+		tracerShutdown, err = initTracer(options)
 		if err != nil {
 			logx.Fatal(err)
 		}
 	}
 	// metrics
 	if options.metrics {
-		metricShutdown, err = initMetric(exp, options)
+		metricShutdown, err = initMetric(options)
 		if err != nil {
 			logx.Fatal(err)
 		}
@@ -70,13 +64,19 @@ func InitProvider(opts ...Option) (shutdown func()) {
 		if metricShutdown != nil {
 			metricShutdown(options.context)
 		}
-		exp.Shutdown(options.context)
 	}
 	return shutdown
 }
 
 // initTracer trace provider
-func initTracer(exp *otlp.Exporter, opts options) (shutdownFunc, error) {
+func initTracer(opts options) (shutdownFunc, error) {
+	// init exporter
+	exp, err := otlptracegrpc.New(
+		opts.context,
+		otlptracegrpc.WithEndpoint(opts.endpoint),
+		otlptracegrpc.WithDialOption(opts.options...),
+	)
+
 	res, err := resource.New(context.Background(),
 		resource.WithAttributes(
 			// service name
@@ -99,7 +99,14 @@ func initTracer(exp *otlp.Exporter, opts options) (shutdownFunc, error) {
 }
 
 // initMetric metric provider
-func initMetric(exp *otlp.Exporter, opts options) (shutdownFunc, error) {
+func initMetric(opts options) (shutdownFunc, error) {
+	// init exporter
+	exp, err := otlpmetricgrpc.New(
+		opts.context,
+		otlpmetricgrpc.WithEndpoint(opts.endpoint),
+		otlpmetricgrpc.WithDialOption(opts.options...),
+	)
+
 	cont := controller.New(
 		processor.New(
 			simple.NewWithExactDistribution(),
@@ -110,7 +117,7 @@ func initMetric(exp *otlp.Exporter, opts options) (shutdownFunc, error) {
 	)
 	// set global propagator to tracecontext (the default is no-op).
 	global.SetMeterProvider(cont.MeterProvider())
-	err := cont.Start(context.Background())
+	err = cont.Start(context.Background())
 	if err != nil {
 		return nil, err
 	}
