@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/deepzz0/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/registry"
 
 	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"

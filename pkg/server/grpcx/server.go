@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/deepzz0/go-van/pkg/internal"
-	"github.com/deepzz0/go-van/pkg/logx"
-	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/grpcx/serverinterceptor"
+	"github.com/trustasia-com/go-van/pkg/internal"
+	"github.com/trustasia-com/go-van/pkg/logx"
+	"github.com/trustasia-com/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/server/grpcx/serverinterceptor"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"

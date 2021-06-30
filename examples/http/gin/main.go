@@ -2,10 +2,10 @@
 package main
 
 import (
-	"github.com/deepzz0/go-van"
-	"github.com/deepzz0/go-van/pkg/logx"
-	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/httpx"
+	"github.com/trustasia-com/go-van"
+	"github.com/trustasia-com/go-van/pkg/logx"
+	"github.com/trustasia-com/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/server/httpx"
 
 	"github.com/gin-gonic/gin"
 )

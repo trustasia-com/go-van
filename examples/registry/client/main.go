@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/deepzz0/go-van/pkg/codes"
-	"github.com/deepzz0/go-van/pkg/codes/status"
-	"github.com/deepzz0/go-van/pkg/registry"
-	"github.com/deepzz0/go-van/pkg/registry/etcd"
-	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/grpcx"
+	"github.com/trustasia-com/go-van/pkg/codes"
+	"github.com/trustasia-com/go-van/pkg/codes/status"
+	"github.com/trustasia-com/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/registry/etcd"
+	"github.com/trustasia-com/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/server/grpcx"
 )
 
 func main() {

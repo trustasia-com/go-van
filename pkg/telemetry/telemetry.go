@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/deepzz0/go-van/pkg/logx"
+	"github.com/trustasia-com/go-van/pkg/logx"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp"

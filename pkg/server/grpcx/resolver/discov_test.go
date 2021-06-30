@@ -5,8 +5,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/deepzz0/go-van/pkg/registry"
-	"github.com/deepzz0/go-van/pkg/registry/etcd"
+	"github.com/trustasia-com/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/registry/etcd"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"

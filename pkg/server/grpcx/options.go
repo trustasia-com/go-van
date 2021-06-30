@@ -4,7 +4,7 @@ package grpcx
 import (
 	"context"
 
-	"github.com/deepzz0/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/server"
 
 	"google.golang.org/grpc"
 )

@@ -4,7 +4,7 @@ package apollo
 import (
 	"context"
 
-	"github.com/deepzz0/go-van/pkg/confx"
+	"github.com/trustasia-com/go-van/pkg/confx"
 )
 
 type apolloLoader struct{}

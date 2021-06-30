@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/deepzz0/go-van/pkg/logx"
+	"github.com/trustasia-com/go-van/pkg/logx"
 )
 
 // RecoverHandler returns a middleware that recover the request.

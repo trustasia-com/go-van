@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/deepzz0/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/registry"
 
 	"google.golang.org/grpc"
 )

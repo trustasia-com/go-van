@@ -4,7 +4,7 @@ package status
 import (
 	"context"
 
-	"github.com/deepzz0/go-van/pkg/codes"
+	"github.com/trustasia-com/go-van/pkg/codes"
 
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	gcodes "google.golang.org/grpc/codes"

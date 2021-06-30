@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/deepzz0/go-van/pkg/codes"
-	"github.com/deepzz0/go-van/pkg/codes/status"
-	"github.com/deepzz0/go-van/pkg/logx"
+	"github.com/trustasia-com/go-van/pkg/codes"
+	"github.com/trustasia-com/go-van/pkg/codes/status"
+	"github.com/trustasia-com/go-van/pkg/logx"
 
 	"google.golang.org/grpc"
 )

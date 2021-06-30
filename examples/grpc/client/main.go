@@ -5,11 +5,11 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/deepzz0/go-van/examples/grpc/helloworld"
-	"github.com/deepzz0/go-van/pkg/codes"
-	"github.com/deepzz0/go-van/pkg/codes/status"
-	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/grpcx"
+	pb "github.com/trustasia-com/go-van/examples/grpc/helloworld"
+	"github.com/trustasia-com/go-van/pkg/codes"
+	"github.com/trustasia-com/go-van/pkg/codes/status"
+	"github.com/trustasia-com/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/server/grpcx"
 )
 
 func main() {

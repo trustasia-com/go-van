@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/deepzz0/go-van/pkg/codec/yaml"
-	"github.com/deepzz0/go-van/pkg/confx"
-	"github.com/deepzz0/go-van/pkg/logx"
+	"github.com/trustasia-com/go-van/pkg/codec/yaml"
+	"github.com/trustasia-com/go-van/pkg/confx"
+	"github.com/trustasia-com/go-van/pkg/logx"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"

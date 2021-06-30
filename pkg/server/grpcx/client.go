@@ -4,9 +4,9 @@ package grpcx
 import (
 	"time"
 
-	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/grpcx/clientinterceptor"
-	"github.com/deepzz0/go-van/pkg/server/grpcx/resolver"
+	"github.com/trustasia-com/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/server/grpcx/clientinterceptor"
+	"github.com/trustasia-com/go-van/pkg/server/grpcx/resolver"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"

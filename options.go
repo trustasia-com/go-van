@@ -4,8 +4,8 @@ package van
 import (
 	"context"
 
-	"github.com/deepzz0/go-van/pkg/registry"
-	"github.com/deepzz0/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/server"
 )
 
 // Option one option

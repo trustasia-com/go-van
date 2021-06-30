@@ -1,4 +1,4 @@
-module github.com/deepzz0/go-van
+module github.com/trustasia-com/go-van
 
 go 1.15
 

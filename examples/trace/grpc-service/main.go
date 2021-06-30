@@ -7,14 +7,14 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/deepzz0/go-van"
-	pb "github.com/deepzz0/go-van/examples/trace/proto"
-	"github.com/deepzz0/go-van/pkg/codes"
-	"github.com/deepzz0/go-van/pkg/codes/status"
-	"github.com/deepzz0/go-van/pkg/logx"
-	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/grpcx"
-	"github.com/deepzz0/go-van/pkg/telemetry"
+	"github.com/trustasia-com/go-van"
+	pb "github.com/trustasia-com/go-van/examples/trace/proto"
+	"github.com/trustasia-com/go-van/pkg/codes"
+	"github.com/trustasia-com/go-van/pkg/codes/status"
+	"github.com/trustasia-com/go-van/pkg/logx"
+	"github.com/trustasia-com/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/server/grpcx"
+	"github.com/trustasia-com/go-van/pkg/telemetry"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )

@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/deepzz0/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/registry"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"

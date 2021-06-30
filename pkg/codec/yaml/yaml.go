@@ -2,7 +2,7 @@
 package yaml
 
 import (
-	"github.com/deepzz0/go-van/pkg/codec"
+	"github.com/trustasia-com/go-van/pkg/codec"
 
 	"gopkg.in/yaml.v3"
 )

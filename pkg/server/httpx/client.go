@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/deepzz0/go-van/pkg/server"
-	"github.com/deepzz0/go-van/pkg/server/httpx/handler"
+	"github.com/trustasia-com/go-van/pkg/server"
+	"github.com/trustasia-com/go-van/pkg/server/httpx/handler"
 )
 
 // NewClient new http client

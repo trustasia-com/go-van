@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/deepzz0/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/registry"
 
 	"github.com/pkg/errors"
 	clientv3 "go.etcd.io/etcd/client/v3"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/deepzz0/go-van/pkg/codes"
+	"github.com/trustasia-com/go-van/pkg/codes"
 
 	"github.com/pkg/errors"
 )

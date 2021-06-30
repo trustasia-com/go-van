@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/deepzz0/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/registry"
 )
 
 var reg registry.Registry
