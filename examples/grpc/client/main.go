@@ -22,7 +22,7 @@ func main() {
 	}
 	cli := pb.NewGreeterClient(conn)
 
-	for _, name := range []string{"go-van", "error", "panic"} {
+	for _, name := range []string{"go-van", "error"} {
 		reply, err := cli.SayHello(context.Background(), &pb.HelloRequest{Name: name})
 		if err != nil {
 			code := status.Code(err)

@@ -4,7 +4,7 @@ package telemetry
 import (
 	"context"
 
-	"go.opentelemetry.io/otel/exporters/otlp/otlpgrpc"
+	"google.golang.org/grpc"
 )
 
 // Option telemetry option
@@ -18,8 +18,8 @@ type options struct {
 	tracerName string
 	// export metrics
 	metrics bool
-	// otel options
-	options []otlpgrpc.Option
+	// otel tracer options
+	options []grpc.DialOption
 	// other options for implementations of the interface
 	// can be stored in a context
 	context context.Context
@@ -41,9 +41,9 @@ func WithMetrics() Option {
 }
 
 // WithOptions otlpgrpc options
-func WithOptions(oopts ...otlpgrpc.Option) Option {
+func WithOptions(dialOpts ...grpc.DialOption) Option {
 	return func(opts *options) {
-		opts.options = append(opts.options, oopts...)
+		opts.options = append(opts.options, dialOpts...)
 	}
 }
 
