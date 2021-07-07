@@ -2,25 +2,36 @@
 package apollo
 
 import (
+	"context"
 	"fmt"
 	"github.com/trustasia-com/go-van/pkg/codec/yaml"
 	"testing"
+	"time"
 )
 
-var (
-	conf struct {
-		Database struct {
-			Driver string
-			Source string
-		}
-		Ports []int
-		Grpc  map[string]string
+type Conf struct {
+	Database struct {
+		Driver string
+		Source string
 	}
+	Ports []int
+	Grpc  struct {
+		User string
+	}
+}
+
+var (
+	conf   Conf
 	loader *apolloLoader
 )
 
 func init() {
-	load, err := NewApolloLoader("test2", "dev", "http://101.132.140.237:8080", "test.yml,test2.yml", "5a9940521184403b86150ccc5e8de75d")
+	load, err := NewApolloLoader(WithAppId("test2"),
+		WithCluster("dev"),
+		WithAddr("http://101.132.140.237:8080"),
+		WithNamespaceNames([]string{"test.yml", "test2.yml"}),
+		WithSecret("5a9940521184403b86150ccc5e8de75d"),
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -28,15 +39,18 @@ func init() {
 }
 
 func TestApolloLoader_LoadFiles(t *testing.T) {
-	err := loader.LoadFiles(&conf, "test2.yml")
+	err := loader.LoadFiles(&conf, "test.yml", "test2.yml")
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 	t.Log(conf)
 }
 
 func TestApolloLoader_WatchFiles(t *testing.T) {
-	err := loader.WatchFiles(watchFunc, "test.yml")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	defer cancel()
+
+	err := loader.WatchFiles(ctx, watchFunc, "test.yml")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -2,46 +2,48 @@
 package apollo
 
 import (
+	"bytes"
 	"fmt"
-	"github.com/pkg/errors"
+	"path/filepath"
+	"strings"
+	"sync"
+
 	"github.com/trustasia-com/go-van/pkg/codec/yaml"
 	"github.com/trustasia-com/go-van/pkg/confx"
 	"github.com/trustasia-com/go-van/pkg/logx"
+
+	"github.com/pkg/errors"
 	"github.com/zouyx/agollo/v4"
 	"github.com/zouyx/agollo/v4/constant"
 	"github.com/zouyx/agollo/v4/env/config"
 	"github.com/zouyx/agollo/v4/extension"
 	"github.com/zouyx/agollo/v4/storage"
-	"strings"
-	"sync"
 )
 
 type apolloLoader struct {
-	conf   *config.AppConfig
-	client *agollo.Client
+	options Options
+	client  *agollo.Client
 }
 
-// create a apolloLoader
-func NewApolloLoader(appId, cluster, ip, namespaceNames, secret string) (*apolloLoader, error) {
-	conf := &config.AppConfig{
-		AppID:          appId,
-		Cluster:        cluster,
-		IP:             ip,
-		NamespaceName:  namespaceNames,
-		IsBackupConfig: false,
-		Secret:         secret,
+// New a apolloLoader
+func NewApolloLoader(opt ...Option) (*apolloLoader, error) {
+	// apply opts
+	opts := Options{}
+	for _, o := range opt {
+		o(&opts)
 	}
 
-	agollo.SetBackupFileHandler(&FileHandler{})
+	names := strings.Join(opts.NamespaceNames, ",")
+	conf := &config.AppConfig{
+		AppID:         opts.AppId,
+		Cluster:       opts.Cluster,
+		IP:            opts.Addr,
+		NamespaceName: names,
+		Secret:        opts.Secret,
+	}
 
-	str := strings.Split(namespaceNames, ",")
-	for _, namespaceName := range str {
-
-		t := strings.Split(namespaceName, ".")
-		if len(t) < 2 {
-			return nil, errors.New("namespaceName error")
-		}
-		suffix := "." + t[1]
+	for _, namespaceName := range opts.NamespaceNames {
+		suffix := filepath.Ext(namespaceName)
 		switch constant.ConfigFileFormat(suffix) {
 		case constant.YML:
 			extension.AddFormatParser(constant.YML, nil)
@@ -60,56 +62,67 @@ func NewApolloLoader(appId, cluster, ip, namespaceNames, secret string) (*apollo
 	}
 
 	return &apolloLoader{
-		conf:   conf,
-		client: client,
+		options: opts,
+		client:  client,
 	}, nil
 }
 
-// LoadFiles load config from backend
-func (l *apolloLoader) LoadFiles(obj interface{}, namespaceName string) error {
+// LoadFiles load configs from backend
+func (l *apolloLoader) LoadFiles(obj interface{}, namespaceName ...string) error {
 	if l.client == nil {
-		return errors.New("apolloLoader  client is nil")
+		return errors.New("apolloLoader client is nil")
+	}
+	if len(namespaceName) == 0 {
+		return errors.New("The number of namespaceName cannot be 0")
 	}
 
-	s := l.client.GetConfig(namespaceName)
-	content := s.GetValue("content")
-	if content == "" {
-		return errors.New("content is empty")
-	}
-	logx.Infof("namespaceName %s content is : %s", namespaceName, content)
+	buff := new(bytes.Buffer)
+	for _, name := range namespaceName {
+		suffix := filepath.Ext(name)
+		if !(suffix == ".yaml" || suffix == ".yml") {
+			return errors.New("unsupported file suffix: " + suffix)
+		}
 
-	t := strings.SplitAfter(namespaceName, ".")
-	if len(t) < 2 {
-		return errors.New("namespaceName error")
-	}
-	suffix := "." + t[1]
+		if !in(name, l.options.GetNamespaceNames()) {
+			return errors.New(fmt.Sprintf("namespaceName %s not loading", name))
+		}
 
-	var err error
-	data := []byte(content)
-	switch suffix {
-	case ".yaml", ".yml":
-		err = yaml.NewCodec().Unmarshal(data, obj)
-	default:
-		return errors.New("unsupported file suffix: " + suffix)
+		s := l.client.GetConfig(name)
+		content := s.GetValue("content")
+		if content == "" {
+			return errors.New(fmt.Sprintf("namespacename %s content is empty", name))
+		}
+		logx.Infof("namespaceName %s content is : %s", name, content)
+		buff.WriteString(content)
 	}
+
+	data := buff.Bytes()
+	logx.Infof("all namespaceName content is : %s", data)
+	c := yaml.NewCodec()
+	err := c.Unmarshal(data, obj)
 	if err != nil {
-		return errors.Wrap(err, namespaceName)
+		return errors.Wrap(err, "unmarshal fail")
 	}
 	return nil
 }
 
 // WatchFiles watch file change
-func (l *apolloLoader) WatchFiles(do confx.WatchFunc, namespaceName string) error {
+func (l *apolloLoader) WatchFiles(do confx.WatchFunc, namespaceName ...string) error {
 	if l.client == nil {
-		return errors.New("apolloLoader  client is nil")
+		return errors.New("apolloLoader client is nil")
 	}
 
 	if do == nil {
 		return errors.New("do watchFunc is nil")
 	}
 
-	listener := &CustomChangeListener{
-		doFunc: do,
+	if len(namespaceName) == 0 {
+		return errors.New("The number of namespaceName cannot be 0")
+	}
+
+	listener := &ConfigChangeListener{
+		namespaceNames: namespaceName,
+		doFunc:         do,
 	}
 
 	listener.wg.Add(1)
@@ -120,39 +133,35 @@ func (l *apolloLoader) WatchFiles(do confx.WatchFunc, namespaceName string) erro
 	return nil
 }
 
-type FileHandler struct {
+func in(target string, strArray []string) bool {
+	for _, element := range strArray {
+		if target == element {
+			return true
+		}
+	}
+	return false
 }
 
-// WriteConfigFile write config to file
-func (fileHandler *FileHandler) WriteConfigFile(config *config.ApolloConfig, configPath string) error {
-	//fmt.Println(config.Configurations)
-	return nil
-}
-
-// GetConfigFile get real config file
-func (fileHandler *FileHandler) GetConfigFile(configDir string, appID string, namespace string) string {
-	return ""
-}
-
-//LoadConfigFile load config from file
-func (fileHandler *FileHandler) LoadConfigFile(configDir string, appID string, namespace string) (*config.ApolloConfig, error) {
-	return &config.ApolloConfig{}, nil
-}
-
-type CustomChangeListener struct {
-	wg     sync.WaitGroup
-	doFunc confx.WatchFunc
+type ConfigChangeListener struct {
+	// These namespace changes will being listened
+	namespaceNames []string
+	wg             sync.WaitGroup
+	doFunc         confx.WatchFunc
 }
 
 // listener config change
-func (c *CustomChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
-	logx.Infof("change event: %+v", changeEvent.Changes)
-	content := changeEvent.Changes["content"]
-	logx.Infof("change value:%+v", content)
-	data := []byte(fmt.Sprintf("%+v", content.NewValue))
-	c.doFunc(changeEvent.Namespace, data)
+func (c *ConfigChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
+	logx.Infof("change namespace: %s", changeEvent.Namespace)
+	changeNamespace := changeEvent.Namespace
+	for _, space := range c.namespaceNames {
+		if space == changeNamespace {
+			content := changeEvent.Changes["content"]
+			logx.Infof("change value:%+v", content)
+			data := []byte(fmt.Sprintf("%+v", content.NewValue))
+			c.doFunc(changeEvent.Namespace, data)
+		}
+	}
 }
 
-func (c *CustomChangeListener) OnNewestChange(event *storage.FullChangeEvent) {
-	//write your code here
+func (c *ConfigChangeListener) OnNewestChange(event *storage.FullChangeEvent) {
 }
