@@ -69,7 +69,7 @@ func (l *apolloLoader) LoadFiles(obj interface{}, namespaces ...string) error {
 		}
 
 		s := l.client.GetConfigAndInit(name)
-		if s == nil {
+		if s == nil || !s.GetIsInit() {
 			return errors.New("namespace not init with NewLoader")
 		}
 		content := s.GetValue("content")
@@ -121,15 +121,6 @@ func (l *apolloLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, names
 			return ctx.Err()
 		}
 	}
-}
-
-func in(target string, strArray []string) bool {
-	for _, element := range strArray {
-		if target == element {
-			return true
-		}
-	}
-	return false
 }
 
 type event struct {
