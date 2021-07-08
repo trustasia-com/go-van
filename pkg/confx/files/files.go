@@ -16,42 +16,39 @@ import (
 )
 
 type filesLoader struct {
-	filepath string
+	filesDir string
 }
 
-func NewFilesLoader(filepath string) *filesLoader {
+// NewLoader files loader instance
+func NewLoader(dir string) confx.Confx {
 	return &filesLoader{
-		filepath: filepath,
+		filesDir: dir,
 	}
 }
 
 // LoadFiles load config from backend
-func (l *filesLoader) LoadFiles(obj interface{}, fileNames ...string) error {
-	if l.filepath == "" {
-		return errors.New("filepath not set")
-	}
-
-	buff := new(bytes.Buffer)
-	for _, name := range fileNames {
+func (l *filesLoader) LoadFiles(obj interface{}, files ...string) error {
+	buf := new(bytes.Buffer)
+	for _, name := range files {
 		suffix := filepath.Ext(name)
 		if !(suffix == ".yaml" || suffix == ".yml") {
 			return errors.New("unsupported file suffix: " + suffix)
 		}
 
-		file := filepath.Join(l.filepath, name)
+		path := filepath.Join(l.filesDir, name)
 
-		data, err := os.ReadFile(file)
+		data, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
-		buff.Write(data)
+		buf.Write(data)
+		buf.WriteByte('\n')
 	}
 
-	data := buff.Bytes()
+	data := buf.Bytes()
 	c := yaml.NewCodec()
 	err := c.Unmarshal(data, obj)
 	if err != nil {
-		logx.Error("error:", err)
 		return errors.Wrap(err, "unmarshal fail")
 	}
 	return nil
@@ -59,10 +56,6 @@ func (l *filesLoader) LoadFiles(obj interface{}, fileNames ...string) error {
 
 // WatchFiles watch file change
 func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, fileNames ...string) error {
-	if l.filepath == "" {
-		return errors.New("filepath not set")
-	}
-
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
@@ -71,8 +64,8 @@ func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, fileNa
 
 	// watch file
 	for _, fileName := range fileNames {
-		file := filepath.Join(l.filepath, fileName)
-		err = watcher.Add(file)
+		path := filepath.Join(l.filesDir, fileName)
+		err = watcher.Add(path)
 		if err != nil {
 			return err
 		}
@@ -103,5 +96,4 @@ func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, fileNa
 			return ctx.Err()
 		}
 	}
-	return nil
 }

@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/trustasia-com/go-van/pkg/confx"
 )
 
 var (
@@ -18,11 +20,11 @@ var (
 		Ports []int
 		Grpc  map[string]string
 	}
-	loader *filesLoader
+	loader confx.Confx
 )
 
 func init() {
-	loader = NewFilesLoader("../testdata/")
+	loader = NewLoader("../testdata/")
 }
 
 func TestLoadFiles(t *testing.T) {

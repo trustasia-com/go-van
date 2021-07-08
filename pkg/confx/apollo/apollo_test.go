@@ -8,6 +8,9 @@ import (
 	"time"
 
 	"github.com/trustasia-com/go-van/pkg/codec/yaml"
+	"github.com/trustasia-com/go-van/pkg/confx"
+
+	"github.com/zouyx/agollo/v4/env/config"
 )
 
 type Conf struct {
@@ -23,24 +26,28 @@ type Conf struct {
 
 var (
 	conf   Conf
-	loader *apolloLoader
+	loader confx.Confx
 )
 
 func init() {
-	load, err := NewApolloLoader(WithAppId("test2"),
-		WithCluster("dev"),
-		WithAddr("http://101.132.140.237:8080"),
-		WithNamespaceNames([]string{"test.yml", "test2.yml"}),
-		WithSecret("5a9940521184403b86150ccc5e8de75d"),
+	conf := config.AppConfig{
+		AppID:         "SampleApp",
+		Cluster:       "dev",
+		IP:            "http://192.168.252.177:8080",
+		NamespaceName: "test.yml,test2.yml,test3.yml",
+		Secret:        "1546e81f147b4e608b3af12ce10bed96",
+	}
+	var err error
+	loader, err = NewLoader(
+		WithConfig(conf),
 	)
 	if err != nil {
 		panic(err)
 	}
-	loader = load
 }
 
 func TestApolloLoader_LoadFiles(t *testing.T) {
-	err := loader.LoadFiles(&conf, "test.yml", "test2.yml")
+	err := loader.LoadFiles(&conf, "test.yml", "test2.yml", "test3.yml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +55,7 @@ func TestApolloLoader_LoadFiles(t *testing.T) {
 }
 
 func TestApolloLoader_WatchFiles(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	err := loader.WatchFiles(ctx, watchFunc, "test2.yml")
