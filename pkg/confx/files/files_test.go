@@ -18,11 +18,15 @@ var (
 		Ports []int
 		Grpc  map[string]string
 	}
-	loader filesLoader
+	loader *filesLoader
 )
 
+func init() {
+	loader = NewFilesLoader("../testdata/")
+}
+
 func TestLoadFiles(t *testing.T) {
-	err := loader.LoadFiles(&conf, "../testdata/test.yml")
+	err := loader.LoadFiles(&conf, "test.yml", "test2.yml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +37,7 @@ func TestWatchFiles(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
-	err := loader.WatchFiles(ctx, watchFunc, "../testdata/test.yml")
+	err := loader.WatchFiles(ctx, watchFunc, "test.yml", "test2.yml")
 	if err != nil {
 		t.Fatal(err)
 	}

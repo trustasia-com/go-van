@@ -2,6 +2,7 @@
 package files
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
@@ -14,48 +15,67 @@ import (
 	"github.com/pkg/errors"
 )
 
-type filesLoader struct{}
+type filesLoader struct {
+	filepath string
+}
+
+func NewFilesLoader(filepath string) *filesLoader {
+	return &filesLoader{
+		filepath: filepath,
+	}
+}
 
 // LoadFiles load config from backend
-func (l *filesLoader) LoadFiles(obj interface{}, glob string) error {
-	files, err := filepath.Glob(glob)
-	if err != nil {
-		return err
+func (l *filesLoader) LoadFiles(obj interface{}, fileNames ...string) error {
+	if l.filepath == "" {
+		return errors.New("filepath not set")
 	}
 
-	ext := filepath.Ext(glob)
-	for _, file := range files {
+	buff := new(bytes.Buffer)
+	for _, name := range fileNames {
+		suffix := filepath.Ext(name)
+		if !(suffix == ".yaml" || suffix == ".yml") {
+			return errors.New("unsupported file suffix: " + suffix)
+		}
+
+		file := filepath.Join(l.filepath, name)
+
 		data, err := os.ReadFile(file)
 		if err != nil {
 			return err
 		}
+		buff.Write(data)
+	}
 
-		switch ext {
-		case ".yaml", ".yml":
-			c := yaml.NewCodec()
-			err = c.Unmarshal(data, obj)
-		default:
-			return errors.New("unsupported file ext: " + ext)
-		}
-		if err != nil {
-			return errors.Wrap(err, file)
-		}
+	data := buff.Bytes()
+	c := yaml.NewCodec()
+	err := c.Unmarshal(data, obj)
+	if err != nil {
+		logx.Error("error:", err)
+		return errors.Wrap(err, "unmarshal fail")
 	}
 	return nil
 }
 
 // WatchFiles watch file change
-func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, glob string) error {
+func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, fileNames ...string) error {
+	if l.filepath == "" {
+		return errors.New("filepath not set")
+	}
+
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
 	}
 	defer watcher.Close()
+
 	// watch file
-	dir := filepath.Dir(glob)
-	err = watcher.Add(dir)
-	if err != nil {
-		return err
+	for _, fileName := range fileNames {
+		file := filepath.Join(l.filepath, fileName)
+		err = watcher.Add(file)
+		if err != nil {
+			return err
+		}
 	}
 
 	for {
@@ -74,9 +94,10 @@ func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, glob s
 			// Remove Create Rename Chmod
 		case err, ok := <-watcher.Errors:
 			if !ok {
+				logx.Error("error:", err)
 				return err
 			}
-			logx.Error("error:", err)
+
 		case <-ctx.Done():
 			logx.Error("error:", ctx.Err())
 			return ctx.Err()

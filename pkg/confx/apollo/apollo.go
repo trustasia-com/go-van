@@ -3,10 +3,10 @@ package apollo
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/trustasia-com/go-van/pkg/codec/yaml"
 	"github.com/trustasia-com/go-van/pkg/confx"
@@ -87,12 +87,11 @@ func (l *apolloLoader) LoadFiles(obj interface{}, namespaceName ...string) error
 			return errors.New(fmt.Sprintf("namespaceName %s not loading", name))
 		}
 
-		s := l.client.GetConfig(name)
+		s := l.client.GetConfigAndInit(name)
 		content := s.GetValue("content")
 		if content == "" {
 			return errors.New(fmt.Sprintf("namespacename %s content is empty", name))
 		}
-		logx.Infof("namespaceName %s content is : %s", name, content)
 		buff.WriteString(content)
 	}
 
@@ -107,7 +106,7 @@ func (l *apolloLoader) LoadFiles(obj interface{}, namespaceName ...string) error
 }
 
 // WatchFiles watch file change
-func (l *apolloLoader) WatchFiles(do confx.WatchFunc, namespaceName ...string) error {
+func (l *apolloLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, namespaceName ...string) error {
 	if l.client == nil {
 		return errors.New("apolloLoader client is nil")
 	}
@@ -122,14 +121,22 @@ func (l *apolloLoader) WatchFiles(do confx.WatchFunc, namespaceName ...string) e
 
 	listener := &ConfigChangeListener{
 		namespaceNames: namespaceName,
-		doFunc:         do,
+		eventChan:      make(chan event),
 	}
 
-	listener.wg.Add(1)
-
 	l.client.AddChangeListener(listener)
-
-	listener.wg.Wait()
+	for {
+		select {
+		case ev, ok := <-listener.eventChan:
+			if !ok {
+				return nil
+			}
+			do(ev.Name, ev.Data)
+		case <-ctx.Done():
+			logx.Error("error:", ctx.Err())
+			return ctx.Err()
+		}
+	}
 	return nil
 }
 
@@ -142,11 +149,15 @@ func in(target string, strArray []string) bool {
 	return false
 }
 
+type event struct {
+	Name string
+	Data []byte
+}
+
 type ConfigChangeListener struct {
 	// These namespace changes will being listened
 	namespaceNames []string
-	wg             sync.WaitGroup
-	doFunc         confx.WatchFunc
+	eventChan      chan event
 }
 
 // listener config change
@@ -157,8 +168,8 @@ func (c *ConfigChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
 		if space == changeNamespace {
 			content := changeEvent.Changes["content"]
 			logx.Infof("change value:%+v", content)
-			data := []byte(fmt.Sprintf("%+v", content.NewValue))
-			c.doFunc(changeEvent.Namespace, data)
+			dataByte := []byte(fmt.Sprintf("%+v", content.NewValue))
+			c.eventChan <- event{Name: changeNamespace, Data: dataByte}
 		}
 	}
 }

@@ -1,6 +1,8 @@
 // Package confx provides ...
 package confx
 
+import "context"
+
 // WatchFunc file change exec
 type WatchFunc = func(name string, data []byte) error
 
@@ -9,5 +11,5 @@ type Confx interface {
 	// LoadFiles load config from backend
 	LoadFiles(obj interface{}, files ...string) error
 	// WatchFiles watch file change
-	WatchFiles(do WatchFunc, files ...string) error
+	WatchFiles(ctx context.Context, do WatchFunc, files ...string) error
 }

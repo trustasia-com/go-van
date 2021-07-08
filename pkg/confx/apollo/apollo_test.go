@@ -4,9 +4,10 @@ package apollo
 import (
 	"context"
 	"fmt"
-	"github.com/trustasia-com/go-van/pkg/codec/yaml"
 	"testing"
 	"time"
+
+	"github.com/trustasia-com/go-van/pkg/codec/yaml"
 )
 
 type Conf struct {
@@ -41,16 +42,16 @@ func init() {
 func TestApolloLoader_LoadFiles(t *testing.T) {
 	err := loader.LoadFiles(&conf, "test.yml", "test2.yml")
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	t.Log(conf)
 }
 
 func TestApolloLoader_WatchFiles(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()
 
-	err := loader.WatchFiles(ctx, watchFunc, "test.yml")
+	err := loader.WatchFiles(ctx, watchFunc, "test2.yml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +62,7 @@ func watchFunc(name string, data []byte) error {
 	fmt.Println(string(data))
 	err := yaml.NewCodec().Unmarshal(data, &conf)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	fmt.Println(conf)
 	return nil
