@@ -9,18 +9,18 @@ import (
 
 // NewCodec new encoder & decoder
 func NewCodec() codec.Codec {
-	return Codec{}
+	return yamlCodec{}
 }
 
-// Codec yaml codec
-type Codec struct{}
+// yamlCodec yaml codec
+type yamlCodec struct{}
 
 // Marshal returns the wire format of v.
-func (_ Codec) Marshal(v interface{}) ([]byte, error) {
+func (yamlCodec) Marshal(v interface{}) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
 // Unmarshal parses the wire format into v.
-func (_ Codec) Unmarshal(data []byte, v interface{}) error {
+func (yamlCodec) Unmarshal(data []byte, v interface{}) error {
 	return yaml.Unmarshal(data, v)
 }

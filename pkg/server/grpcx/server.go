@@ -17,7 +17,7 @@ import (
 )
 
 // NewServer new grpc server
-func NewServer(opts ...server.ServerOption) *grpcServer {
+func NewServer(opts ...server.ServerOption) server.Server {
 	opt := server.ServerOptions{
 		Network: "tcp",
 		Address: ":0",
