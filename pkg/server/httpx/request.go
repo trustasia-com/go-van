@@ -12,7 +12,7 @@ import (
 type Request struct {
 	Method string      // http method
 	Header http.Header // header
-	URL    string      // request url
+	Path   string      // url path
 	Query  url.Values  // query uri
 	Body   io.Reader   // request body
 
@@ -20,11 +20,12 @@ type Request struct {
 }
 
 // httpRequest generate http request
-func (req *Request) httpRequest() (*http.Request, error) {
-	u, err := url.Parse(req.URL)
+func (req *Request) httpRequest(host string) (*http.Request, error) {
+	u, err := url.Parse(host)
 	if err != nil {
 		return nil, err
 	}
+	u.Path = req.Path
 	if req.Query != nil {
 		u.RawQuery = req.Query.Encode()
 	}

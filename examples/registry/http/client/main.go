@@ -23,11 +23,11 @@ func main() {
 		server.WithEndpoint("http://gin-http"),
 	)
 
-	req, err := http.NewRequest(http.MethodGet, "http://gin-http/hello", nil)
-	if err != nil {
-		panic(err)
+	req := &httpx.Request{
+		Method: http.MethodGet,
+		// Path:   "/hello",
 	}
-	err = cli.Do(req, nil)
+	err := cli.Do(req, nil)
 	if err != nil {
 		panic(err)
 	}
