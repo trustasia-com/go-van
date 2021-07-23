@@ -43,7 +43,7 @@ type Service struct {
 func (s *Service) Run() error {
 	g, ctx := errgroup.WithContext(s.options.context)
 	// start server
-	if err := s.start(ctx, g); err != nil {
+	if err := s.start(g); err != nil {
 		return err
 	}
 	// os signal
@@ -59,7 +59,7 @@ func (s *Service) Run() error {
 		case <-ctx.Done():
 			err = ctx.Err()
 		}
-		if e := s.stop(ctx, g); e != nil {
+		if e := s.stop(g); e != nil {
 			err = e
 		}
 		return err
@@ -74,8 +74,7 @@ func (s *Service) Run() error {
 }
 
 // start the service
-func (s *Service) start(ctx context.Context,
-	g *errgroup.Group) (err error) {
+func (s *Service) start(g *errgroup.Group) (err error) {
 
 	for _, srv := range s.options.servers {
 		srv := srv
@@ -84,18 +83,17 @@ func (s *Service) start(ctx context.Context,
 	// register service
 	if s.options.registry != nil {
 		srv := s.regService()
-		err = s.options.registry.Register(ctx, srv)
+		err = s.options.registry.Register(s.options.context, srv)
 	}
 	return
 }
 
 // stop the service
-func (s *Service) stop(ctx context.Context,
-	g *errgroup.Group) (err error) {
+func (s *Service) stop(g *errgroup.Group) (err error) {
 	// deregister service
 	if s.options.registry != nil {
 		srv := s.regService()
-		err = s.options.registry.Deregister(ctx, srv)
+		err = s.options.registry.Deregister(s.options.context, srv)
 	}
 	for _, srv := range s.options.servers {
 		srv := srv

@@ -17,6 +17,8 @@ import (
 )
 
 func main() {
+	rand.Seed(time.Now().Unix())
+	// registry
 	reg := etcd.NewRegistry(
 		registry.WithTTL(time.Second*10),
 		registry.WithAddress("192.168.252.177:2379"),
