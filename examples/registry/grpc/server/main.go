@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/trustasia-com/go-van"
@@ -36,12 +37,13 @@ func (s *serverGRPC) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.Hel
 func main() {
 	reg := etcd.NewRegistry(
 		registry.WithTTL(time.Second*10),
-		registry.WithAddress("localhost:2379"),
+		registry.WithAddress("192.168.252.177:2379"),
 	)
 
 	// grpc server
+	port := rand.Intn(999) + 8000
 	srv := grpcx.NewServer(
-		server.WithAddress(":8000"),
+		server.WithAddress(fmt.Sprintf(":%d", port)),
 	)
 	s := &serverGRPC{}
 	pb.RegisterGreeterServer(srv, s)

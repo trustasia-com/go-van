@@ -11,7 +11,7 @@ import (
 type transportOptKey struct{}
 
 // WithTransport http transport for client
-func WithTransport(trans http.RoundTripper) server.DialOption {
+func WithTransport(trans *http.Transport) server.DialOption {
 	return func(opts *server.DialOptions) {
 		if opts.Context == nil {
 			opts.Context = context.Background()

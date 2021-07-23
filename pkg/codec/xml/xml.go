@@ -1,5 +1,5 @@
-// Package json provides ...
-package json
+// Package xml provides ...
+package xml
 
 import (
 	"encoding/xml"

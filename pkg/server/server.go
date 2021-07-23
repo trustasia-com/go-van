@@ -2,7 +2,6 @@
 package server
 
 import (
-	"context"
 	"net/http"
 )
 
@@ -15,5 +14,5 @@ type Server interface {
 
 // HTTPClient http client
 type HTTPClient interface {
-	Do(ctx context.Context, req *http.Request, resp interface{}) error
+	Do(req *http.Request, resp interface{}) error
 }

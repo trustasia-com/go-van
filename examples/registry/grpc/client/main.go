@@ -18,7 +18,7 @@ import (
 func main() {
 	reg := etcd.NewRegistry(
 		registry.WithTTL(time.Second*10),
-		registry.WithAddress("localhost:2379"),
+		registry.WithAddress("192.168.252.177:2379"),
 	)
 
 	// grpc client
