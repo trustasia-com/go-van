@@ -3,7 +3,6 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/url"
 	"strings"
@@ -45,7 +44,6 @@ func (d *resolveBuilder) Build(endpoint string) (Dialer, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(u.Host)
 	w, err := d.registry.Watch(context.TODO(), u.Host)
 	if err != nil {
 		return nil, err

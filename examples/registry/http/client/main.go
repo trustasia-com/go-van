@@ -25,7 +25,7 @@ func main() {
 
 	req := &httpx.Request{
 		Method: http.MethodGet,
-		// Path:   "/hello",
+		Path:   "/hello",
 	}
 	err := cli.Do(req, nil)
 	if err != nil {

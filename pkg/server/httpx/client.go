@@ -2,7 +2,6 @@
 package httpx
 
 import (
-	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -25,13 +24,14 @@ func NewClient(opts ...server.DialOption) HTTPClient {
 	options := server.DialOptions{
 		Timeout: time.Second * 5,
 	}
-
-	cli := &client{options: options}
-	cli.Client = &http.Client{Transport: cli}
 	// apply option
 	for _, o := range opts {
 		o(&options)
 	}
+
+	cli := &client{options: options}
+	cli.Client = &http.Client{Transport: cli}
+
 	// transport apply
 	transport := http.DefaultTransport
 	if options.Context != nil {
@@ -89,7 +89,6 @@ func (c *client) Do(req *Request, resp interface{}) error {
 	if err != nil {
 		return nil
 	}
-	fmt.Println(media)
 	switch media {
 	case "application/xml": // codec xml
 		err = xml.NewCodec().Unmarshal(data, resp)
