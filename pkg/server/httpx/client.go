@@ -15,8 +15,13 @@ import (
 	"github.com/trustasia-com/go-van/pkg/server/httpx/resolver"
 )
 
+// HTTPClient http client
+type HTTPClient interface {
+	Do(req *Request, resp interface{}) error
+}
+
 // NewClient new http client, concurrent security
-func NewClient(opts ...server.DialOption) server.HTTPClient {
+func NewClient(opts ...server.DialOption) HTTPClient {
 	options := server.DialOptions{
 		Timeout: time.Second * 5,
 	}
@@ -35,10 +40,10 @@ func NewClient(opts ...server.DialOption) server.HTTPClient {
 			transport = trans
 		}
 	}
-	// discovery
+	// NOTE discovery, experimental nature, not recommended
 	if options.Registry != nil {
 		builder := resolver.NewBuilder(options.Registry)
-		transport.(*http.Transport).DialContext, _ = builder.Build()
+		transport.(*http.Transport).DialContext, _ = builder.Build(options.Endpoint)
 	}
 	cli.transport = transport
 
@@ -58,17 +63,13 @@ type client struct {
 	addresses []string
 }
 
-// RoundTrip implements http.RoundTripper as http.Transport
-func (c *client) RoundTrip(req *http.Request) (*http.Response, error) {
-	if req.UserAgent() == "" && c.options.UserAgent != "" {
-		req.Header.Set("User-Agent", c.options.UserAgent)
-	}
-	return c.transport.RoundTrip(req)
-}
-
 // Do request to server
-func (c *client) Do(req *http.Request, resp interface{}) error {
-	httpResp, err := c.Client.Do(req)
+func (c *client) Do(req *Request, resp interface{}) error {
+	httpReq, err := req.httpRequest()
+	if err != nil {
+		return err
+	}
+	httpResp, err := c.Client.Do(httpReq)
 	if err != nil {
 		return err
 	}
@@ -101,4 +102,12 @@ func (c *client) Do(req *http.Request, resp interface{}) error {
 		*resp.(*[]byte) = data
 	}
 	return err
+}
+
+// RoundTrip implements http.RoundTripper as http.Transport
+func (c *client) RoundTrip(req *http.Request) (*http.Response, error) {
+	if req.UserAgent() == "" && c.options.UserAgent != "" {
+		req.Header.Set("User-Agent", c.options.UserAgent)
+	}
+	return c.transport.RoundTrip(req)
 }

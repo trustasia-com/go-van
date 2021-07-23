@@ -25,7 +25,7 @@ func main() {
 	)
 
 	// gin server
-	e := gin.New()
+	e := gin.Default()
 	e.GET("/hello", func(c *gin.Context) {
 		c.String(200, "hello world")
 	})

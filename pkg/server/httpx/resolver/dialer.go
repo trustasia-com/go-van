@@ -3,6 +3,7 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/url"
 	"strings"
@@ -10,6 +11,8 @@ import (
 	"time"
 
 	"github.com/trustasia-com/go-van/pkg/registry"
+
+	"github.com/pkg/errors"
 )
 
 var dialer = &net.Dialer{
@@ -36,14 +39,26 @@ type resolveBuilder struct {
 	ch chan struct{}
 }
 
-func (d *resolveBuilder) Build() (Dialer, error) {
+func (d *resolveBuilder) Build(endpoint string) (Dialer, error) {
+	// watch addrs change
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(u.Host)
+	w, err := d.registry.Watch(context.TODO(), u.Host)
+	if err != nil {
+		return nil, err
+	}
+	d.w = w
+	go d.watch()
 	return d.DialContext, nil
 }
 
 func (d *resolveBuilder) DialContext(ctx context.Context, network,
 	addr string) (net.Conn, error) {
 
-	host, port, err := net.SplitHostPort(addr)
+	host, _, err := net.SplitHostPort(addr)
 	if err != nil {
 		return nil, err
 	}
@@ -52,9 +67,19 @@ func (d *resolveBuilder) DialContext(ctx context.Context, network,
 		return dialer.DialContext(ctx, network, addr)
 	}
 	// discovery name
-	ip := d.cache.pick()
-
-	return dialer.DialContext(ctx, network, ip+":"+port)
+	count := 0
+	for count < 3 {
+		addr = d.cache.pick()
+		if addr != "" {
+			break
+		}
+		time.Sleep(time.Millisecond * 200)
+		count++
+	}
+	if addr == "" {
+		return nil, errors.New("last resolver error: produced zero addresses")
+	}
+	return dialer.DialContext(ctx, network, addr)
 }
 
 // watch watch the registry change
@@ -115,9 +140,13 @@ func (c *cache) updateAddresses(addrs []string) {
 // pick pick address
 func (c *cache) pick() string {
 	c.l.RLock()
-	addr := c.addrs[c.next]
-	c.next = (c.next + 1) % len(c.addrs)
-	c.l.RUnlock()
+	defer c.l.RUnlock()
 
+	length := len(c.addrs)
+	if length == 0 {
+		return ""
+	}
+	addr := c.addrs[c.next]
+	c.next = (c.next + 1) % length
 	return addr
 }

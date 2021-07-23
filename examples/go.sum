@@ -275,6 +275,8 @@ github.com/trustasia-com/go-van v0.1.1-0.20210723011038-f03a8c361f36 h1:W46zPMCb
 github.com/trustasia-com/go-van v0.1.1-0.20210723011038-f03a8c361f36/go.mod h1:uCu4YhoAJxzLBXVncnhZ1OaWcSYeMX2zAljOkYDiK5g=
 github.com/trustasia-com/go-van v0.1.1-0.20210723015254-ebdafeff52fb h1:gWi0GW+/eyrOUV6PivNRa8TyZwmmzHRLdnRZj9zgv44=
 github.com/trustasia-com/go-van v0.1.1-0.20210723015254-ebdafeff52fb/go.mod h1:uCu4YhoAJxzLBXVncnhZ1OaWcSYeMX2zAljOkYDiK5g=
+github.com/trustasia-com/go-van v0.1.1-0.20210723053041-35a525fd49d8 h1:7J+Wu7jwD/yILq8do9WF4QNb8ERRlzDaBT8YA8qrNa0=
+github.com/trustasia-com/go-van v0.1.1-0.20210723053041-35a525fd49d8/go.mod h1:uCu4YhoAJxzLBXVncnhZ1OaWcSYeMX2zAljOkYDiK5g=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
 github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs=

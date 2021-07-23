@@ -20,10 +20,20 @@ func main() {
 	cli := httpx.NewClient(
 		server.WithTimeout(time.Second*2),
 		server.WithRegistry(reg),
-		server.WithEndpoint("https://gin-http"),
+		server.WithEndpoint("http://gin-http"),
 	)
 
-	req, err := http.NewRequest(http.MethodGet, "http://baidu.com", nil)
+	req, err := http.NewRequest(http.MethodGet, "http://gin-http/hello", nil)
+	if err != nil {
+		panic(err)
+	}
+	err = cli.Do(req, nil)
+	if err != nil {
+		panic(err)
+	}
+	// idle conn timeout
+	time.Sleep(time.Second * 91)
+	err = cli.Do(req, nil)
 	if err != nil {
 		panic(err)
 	}

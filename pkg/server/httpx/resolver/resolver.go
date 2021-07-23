@@ -8,7 +8,7 @@ import (
 
 // Builder creates a resolver
 type Builder interface {
-	Build() (Dialer, error)
+	Build(endpoint string) (Dialer, error)
 }
 
 // Dialer return dial function

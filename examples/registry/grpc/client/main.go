@@ -23,7 +23,7 @@ func main() {
 
 	// grpc client
 	conn, err := grpcx.DialContext(
-		server.WithEndpoint("discov:///grpc"),
+		server.WithEndpoint("discov:///grpc-srv"),
 		server.WithRegistry(reg),
 	)
 	if err != nil {

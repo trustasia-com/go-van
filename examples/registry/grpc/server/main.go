@@ -51,7 +51,7 @@ func main() {
 	pb.RegisterGreeterServer(srv, s)
 
 	service := van.NewService(
-		van.WithName("grpc"),
+		van.WithName("grpc-srv"),
 		van.WithServer(srv),
 		van.WithRegistry(reg),
 	)
