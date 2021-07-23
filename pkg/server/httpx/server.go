@@ -17,7 +17,7 @@ import (
 )
 
 // NewServer new http server
-func NewServer(opts ...server.ServerOption) server.Server {
+func NewServer(opts ...server.ServerOption) *Server {
 	options := server.ServerOptions{
 		Network: "tcp",
 		Address: ":0",
@@ -25,7 +25,7 @@ func NewServer(opts ...server.ServerOption) server.Server {
 
 		Flag: server.ServerStdFlag,
 	}
-	svr := &httpServer{
+	svr := &Server{
 		options: options,
 	}
 	svr.Server = &http.Server{Handler: svr}
@@ -48,15 +48,15 @@ func NewServer(opts ...server.ServerOption) server.Server {
 	return svr
 }
 
-// httpServer http server
-type httpServer struct {
+// Server http server
+type Server struct {
 	options server.ServerOptions
 
 	*http.Server
 }
 
 // Start start http server
-func (s *httpServer) Start() error {
+func (s *Server) Start() error {
 	lis, err := net.Listen(s.options.Network, s.options.Address)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (s *httpServer) Start() error {
 }
 
 // Stop stop http server
-func (s *httpServer) Stop() error {
+func (s *Server) Stop() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
@@ -76,7 +76,7 @@ func (s *httpServer) Stop() error {
 }
 
 // Endpoint return endpoint
-func (s *httpServer) Endpoint() (string, error) {
+func (s *Server) Endpoint() (string, error) {
 	addr, err := internal.Extract(s.options.Address)
 	if err != nil {
 		return "", err
@@ -85,7 +85,7 @@ func (s *httpServer) Endpoint() (string, error) {
 }
 
 // ServeHTTP wrapper http.Handler
-func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// TODO
 	// more
 	// eg. health check

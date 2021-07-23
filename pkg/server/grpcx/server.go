@@ -17,14 +17,14 @@ import (
 )
 
 // NewServer new grpc server
-func NewServer(opts ...server.ServerOption) server.Server {
+func NewServer(opts ...server.ServerOption) *Server {
 	opt := server.ServerOptions{
 		Network: "tcp",
 		Address: ":0",
 
 		Flag: server.ServerStdFlag,
 	}
-	svr := &grpcServer{options: opt}
+	svr := &Server{options: opt}
 	// apply option
 	for _, o := range opts {
 		o(&svr.options)
@@ -60,8 +60,8 @@ func NewServer(opts ...server.ServerOption) server.Server {
 	return svr
 }
 
-// grpcServer grpc server
-type grpcServer struct {
+// Server grpc server
+type Server struct {
 	options  server.ServerOptions
 	grpcOpts []grpc.ServerOption
 
@@ -69,7 +69,8 @@ type grpcServer struct {
 	healthSvr *health.Server
 }
 
-func (s *grpcServer) Start() error {
+// Start server
+func (s *Server) Start() error {
 	lis, err := net.Listen(s.options.Network, s.options.Address)
 	if err != nil {
 		return err
@@ -80,7 +81,8 @@ func (s *grpcServer) Start() error {
 	return s.Serve(lis)
 }
 
-func (s *grpcServer) Stop() error {
+// Stop server
+func (s *Server) Stop() error {
 	s.GracefulStop()
 	s.healthSvr.Shutdown()
 	logx.Info("[gRPC] server stopping")
@@ -90,7 +92,7 @@ func (s *grpcServer) Stop() error {
 // Endpoint return a real address to registry endpoint.
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
-func (s *grpcServer) Endpoint() (string, error) {
+func (s *Server) Endpoint() (string, error) {
 	addr, err := internal.Extract(s.options.Address)
 	if err != nil {
 		return "", err
