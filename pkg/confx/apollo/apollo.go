@@ -12,12 +12,12 @@ import (
 	"github.com/trustasia-com/go-van/pkg/confx"
 	"github.com/trustasia-com/go-van/pkg/logx"
 
+	"github.com/apolloconfig/agollo/v4"
+	"github.com/apolloconfig/agollo/v4/constant"
+	"github.com/apolloconfig/agollo/v4/env/config"
+	"github.com/apolloconfig/agollo/v4/extension"
+	"github.com/apolloconfig/agollo/v4/storage"
 	"github.com/pkg/errors"
-	"github.com/zouyx/agollo/v4"
-	"github.com/zouyx/agollo/v4/constant"
-	"github.com/zouyx/agollo/v4/env/config"
-	"github.com/zouyx/agollo/v4/extension"
-	"github.com/zouyx/agollo/v4/storage"
 )
 
 type apolloLoader struct {
@@ -73,11 +73,10 @@ func (l *apolloLoader) LoadFiles(obj interface{}, namespaces ...string) error {
 			return errors.New("namespace not init with NewLoader")
 		}
 		content := s.GetValue("content")
-		if content == "" {
-			return errors.New(fmt.Sprintf("namespacename %s content is empty", name))
+		if content != "" {
+			buf.WriteString(content)
+			buf.WriteByte('\n')
 		}
-		buf.WriteString(content)
-		buf.WriteByte('\n')
 	}
 
 	data := buf.Bytes()

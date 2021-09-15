@@ -1,7 +1,7 @@
 package apollo
 
 import (
-	"github.com/zouyx/agollo/v4/env/config"
+	"github.com/apolloconfig/agollo/v4/env/config"
 )
 
 // Option apollo option

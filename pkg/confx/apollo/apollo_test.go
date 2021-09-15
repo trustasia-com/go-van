@@ -10,7 +10,7 @@ import (
 	"github.com/trustasia-com/go-van/pkg/codec/yaml"
 	"github.com/trustasia-com/go-van/pkg/confx"
 
-	"github.com/zouyx/agollo/v4/env/config"
+	"github.com/apolloconfig/agollo/v4/env/config"
 )
 
 type Conf struct {
@@ -34,8 +34,8 @@ func init() {
 		AppID:         "SampleApp",
 		Cluster:       "dev",
 		IP:            "http://192.168.252.177:8080",
-		NamespaceName: "test.yml,test2.yml,test3.yml",
-		Secret:        "1546e81f147b4e608b3af12ce10bed96",
+		NamespaceName: "app.yml,connect.yml",
+		Secret:        "a5ce81b8767e4d4cbc0baf94fea57bfb",
 	}
 	var err error
 	loader, err = NewLoader(
@@ -47,7 +47,7 @@ func init() {
 }
 
 func TestApolloLoader_LoadFiles(t *testing.T) {
-	err := loader.LoadFiles(&conf, "test.yml", "test2.yml", "test3.yml")
+	err := loader.LoadFiles(&conf, "app.yml", "connect.yml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestApolloLoader_WatchFiles(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
-	err := loader.WatchFiles(ctx, watchFunc, "test2.yml")
+	err := loader.WatchFiles(ctx, watchFunc, "app.yml")
 	if err != nil {
 		t.Fatal(err)
 	}

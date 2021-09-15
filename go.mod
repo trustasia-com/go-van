@@ -3,11 +3,11 @@ module github.com/trustasia-com/go-van
 go 1.16
 
 require (
+	github.com/apolloconfig/agollo/v4 v4.0.9
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/google/uuid v1.2.0
 	github.com/justinas/alice v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/zouyx/agollo/v4 v4.0.7
 	go.etcd.io/etcd/client/v3 v3.5.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.21.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.21.0
