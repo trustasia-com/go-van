@@ -8,39 +8,62 @@ import (
 	"net/url"
 )
 
-// Request for http request
-type Request struct {
-	Method string      // http method
-	Header http.Header // header
-	Path   string      // url path
-	Query  url.Values  // query uri
-	Body   io.Reader   // request body
+// NewRequest new request for client
+func NewRequest(method, path string, body io.Reader) *Request {
+	req := &Request{
+		method: method,
+		path:   path,
+		body:   body,
 
-	Context context.Context // context
+		header: make(map[string][]string),
+	}
+	return req
 }
 
-// httpRequest generate http request
-func (req *Request) httpRequest(host string) (*http.Request, error) {
+// Request for http request
+type Request struct {
+	method string    // http method
+	path   string    // url path & query
+	body   io.Reader // request body
+
+	header  http.Header     // header
+	context context.Context // context
+}
+
+// ToHTTP generate http request
+func (req *Request) ToHTTP(host string) (*http.Request, error) {
 	u, err := url.Parse(host)
 	if err != nil {
 		return nil, err
 	}
-	u.Path = req.Path
-	if req.Query != nil {
-		u.RawQuery = req.Query.Encode()
-	}
-	httpReq, err := http.NewRequest(req.Method, u.String(), req.Body)
+	u.Path = req.path
+	httpReq, err := http.NewRequest(req.method, u.String(), req.body)
 	if err != nil {
 		return nil, err
 	}
 	// context
-	if req.Context != nil {
-		httpReq = httpReq.WithContext(req.Context)
+	if req.context != nil {
+		httpReq = httpReq.WithContext(req.context)
 	}
-	if req.Header != nil {
-		httpReq.Header = req.Header
+	if req.header != nil {
+		httpReq.Header = req.header
 	}
 	return httpReq, nil
 }
 
 // TODO more function migrate Request
+
+// SetHeader set http header
+func (req *Request) SetHeader(key, val string) {
+	req.header.Set(key, val)
+}
+
+// AddHeader add http header
+func (req *Request) AddHeader(key, val string) {
+	req.header.Add(key, val)
+}
+
+// Context set context
+func (req *Request) Context(ctx context.Context) {
+	req.context = ctx
+}

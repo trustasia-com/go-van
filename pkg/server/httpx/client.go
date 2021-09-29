@@ -65,7 +65,7 @@ type client struct {
 
 // Do request to server
 func (c *client) Do(req *Request, resp interface{}) error {
-	httpReq, err := req.httpRequest(c.options.Endpoint)
+	httpReq, err := req.ToHTTP(c.options.Endpoint)
 	if err != nil {
 		return err
 	}
