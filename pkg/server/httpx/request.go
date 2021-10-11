@@ -26,8 +26,9 @@ type Request struct {
 	path   string    // url path & query
 	body   io.Reader // request body
 
-	header  http.Header     // header
-	context context.Context // context
+	header             http.Header     // header
+	context            context.Context // context
+	username, password string          // basic auth
 }
 
 // ToHTTP generate http request
@@ -48,6 +49,9 @@ func (req *Request) ToHTTP(host string) (*http.Request, error) {
 	if req.header != nil {
 		httpReq.Header = req.header
 	}
+	if req.username != "" && req.password != "" {
+		httpReq.SetBasicAuth(req.username, req.password)
+	}
 	return httpReq, nil
 }
 
@@ -66,4 +70,10 @@ func (req *Request) AddHeader(key, val string) {
 // Context set context
 func (req *Request) Context(ctx context.Context) {
 	req.context = ctx
+}
+
+// SetBasicAuth basic auth
+func (req *Request) SetBasicAuth(username, password string) {
+	req.username = username
+	req.password = password
 }

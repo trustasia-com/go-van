@@ -2,13 +2,11 @@
 package httpx
 
 import (
+	"fmt"
 	"io"
-	"mime"
 	"net/http"
 	"time"
 
-	"github.com/trustasia-com/go-van/pkg/codec/json"
-	"github.com/trustasia-com/go-van/pkg/codec/xml"
 	"github.com/trustasia-com/go-van/pkg/server"
 	"github.com/trustasia-com/go-van/pkg/server/httpx/handler"
 	"github.com/trustasia-com/go-van/pkg/server/httpx/resolver"
@@ -16,7 +14,7 @@ import (
 
 // HTTPClient http client
 type HTTPClient interface {
-	Do(req *Request, resp interface{}) error
+	Do(req *Request) (Response, error)
 }
 
 // NewClient new http client, concurrent security
@@ -64,43 +62,39 @@ type client struct {
 }
 
 // Do request to server
-func (c *client) Do(req *Request, resp interface{}) error {
+func (c *client) Do(req *Request) (resp Response, err error) {
 	httpReq, err := req.ToHTTP(c.options.Endpoint)
 	if err != nil {
-		return err
+		return
 	}
 	httpResp, err := c.Client.Do(httpReq)
 	if err != nil {
-		return err
+		return
 	}
 	defer httpResp.Body.Close()
+	resp.response = httpResp
 
+	// check http status code
+	if httpResp.StatusCode/100 != 2 {
+		err = fmt.Errorf("httpx: http status: %s", httpResp.Status)
+		return
+	}
+	// no content
+	if httpResp.StatusCode == 201 {
+		return
+	}
+	// check content length
+	if httpResp.ContentLength > 1<<10 { // 1m
+		err = fmt.Errorf("httpx: too large: %d", httpResp.ContentLength)
+		return
+	}
+	// read data
 	data, err := io.ReadAll(httpResp.Body)
 	if err != nil {
-		return err
+		return
 	}
-	// check length
-	if httpResp.StatusCode == 201 || resp == nil {
-		return nil
-	}
-
-	ct := httpResp.Header.Get("Content-Type")
-	media, _, err := mime.ParseMediaType(ct)
-	if err != nil {
-		return nil
-	}
-	switch media {
-	case "application/xml": // codec xml
-		err = xml.NewCodec().Unmarshal(data, resp)
-	case "application/json": // codec json
-		err = json.NewCodec().Unmarshal(data, resp)
-	case "text/html": // codec text
-		str := string(data)
-		*resp.(*string) = str
-	default:
-		*resp.(*[]byte) = data
-	}
-	return err
+	resp.Data = data
+	return
 }
 
 // RoundTrip implements http.RoundTripper as http.Transport
