@@ -15,10 +15,11 @@ func main() {
 	)
 
 	req := httpx.NewRequest(http.MethodGet, "", nil)
-	var resp string
-	err := cli.Do(req, &resp)
+	resp, err := cli.Do(req)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(resp)
+	var result []byte
+	resp.Scan(&result)
+	fmt.Println(string(result))
 }
