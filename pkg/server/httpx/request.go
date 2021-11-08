@@ -22,13 +22,13 @@ func NewRequest(method, path string, body io.Reader) *Request {
 
 // Request for http request
 type Request struct {
-	method string    // http method
-	path   string    // url path & query
-	body   io.Reader // request body
+	method             string    // http method
+	path               string    // url path & query
+	body               io.Reader // request body
+	username, password string    // basic auth
 
-	header             http.Header     // header
-	context            context.Context // context
-	username, password string          // basic auth
+	header  http.Header     // header
+	context context.Context // context
 }
 
 // ToHTTP generate http request
@@ -57,6 +57,17 @@ func (req *Request) ToHTTP(host string) (*http.Request, error) {
 
 // TODO more function migrate Request
 
+// SetBasicAuth basic auth
+func (req *Request) SetBasicAuth(username, password string) {
+	req.username = username
+	req.password = password
+}
+
+// GetHeader get header
+func (req *Request) GetHeader() http.Header {
+	return req.header
+}
+
 // SetHeader set http header
 func (req *Request) SetHeader(key, val string) {
 	req.header.Set(key, val)
@@ -70,10 +81,4 @@ func (req *Request) AddHeader(key, val string) {
 // Context set context
 func (req *Request) Context(ctx context.Context) {
 	req.context = ctx
-}
-
-// SetBasicAuth basic auth
-func (req *Request) SetBasicAuth(username, password string) {
-	req.username = username
-	req.password = password
 }
