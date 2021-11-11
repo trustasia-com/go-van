@@ -39,8 +39,3 @@ func WithTLS(tls *tls.Config) Option {
 func WithTTL(ttl time.Duration) Option {
 	return func(opts *Options) { opts.TTL = ttl }
 }
-
-// WithContext register with context
-func WithContext(ctx context.Context) Option {
-	return func(opts *Options) { opts.Context = ctx }
-}

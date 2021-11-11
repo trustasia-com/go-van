@@ -28,10 +28,8 @@ import (
 type shutdownFunc func(context.Context) error
 
 // InitProvider init telemetry provider
-func InitProvider(opts ...Option) (shutdown func()) {
-	options := options{
-		context: context.Background(),
-	}
+func InitProvider(ctx context.Context, opts ...Option) (shutdown func()) {
+	options := options{}
 	// apply opts
 	for _, o := range opts {
 		o(&options)
@@ -43,14 +41,14 @@ func InitProvider(opts ...Option) (shutdown func()) {
 	)
 	// tracer
 	if options.tracerName != "" {
-		tracerShutdown, err = initTracer(options)
+		tracerShutdown, err = initTracer(ctx, options)
 		if err != nil {
 			logx.Fatal(err)
 		}
 	}
 	// metrics
 	if options.metrics {
-		metricShutdown, err = initMetric(options)
+		metricShutdown, err = initMetric(ctx, options)
 		if err != nil {
 			logx.Fatal(err)
 		}
@@ -58,21 +56,24 @@ func InitProvider(opts ...Option) (shutdown func()) {
 	// logger
 	//
 	shutdown = func() {
+		ctx, cancel := context.WithTimeout(ctx, time.Second*20)
+		defer cancel()
+
 		if tracerShutdown != nil {
-			tracerShutdown(options.context)
+			tracerShutdown(ctx)
 		}
 		if metricShutdown != nil {
-			metricShutdown(options.context)
+			metricShutdown(ctx)
 		}
 	}
 	return shutdown
 }
 
 // initTracer trace provider
-func initTracer(opts options) (shutdownFunc, error) {
+func initTracer(ctx context.Context, opts options) (shutdownFunc, error) {
 	// init exporter
 	exp, err := otlptracegrpc.New(
-		opts.context,
+		ctx,
 		otlptracegrpc.WithEndpoint(opts.endpoint),
 		otlptracegrpc.WithDialOption(opts.options...),
 	)
@@ -99,10 +100,10 @@ func initTracer(opts options) (shutdownFunc, error) {
 }
 
 // initMetric metric provider
-func initMetric(opts options) (shutdownFunc, error) {
+func initMetric(ctx context.Context, opts options) (shutdownFunc, error) {
 	// init exporter
 	exp, err := otlpmetricgrpc.New(
-		opts.context,
+		ctx,
 		otlpmetricgrpc.WithEndpoint(opts.endpoint),
 		otlpmetricgrpc.WithDialOption(opts.options...),
 	)

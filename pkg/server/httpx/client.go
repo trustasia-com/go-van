@@ -2,6 +2,7 @@
 package httpx
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,13 +13,13 @@ import (
 	"github.com/trustasia-com/go-van/pkg/server/httpx/resolver"
 )
 
-// HTTPClient http client
-type HTTPClient interface {
-	Do(req *Request) (Response, error)
+// Client http client
+type Client interface {
+	Do(ctx context.Context, req *Request) (Response, error)
 }
 
 // NewClient new http client, concurrent security
-func NewClient(opts ...server.DialOption) HTTPClient {
+func NewClient(opts ...server.DialOption) Client {
 	options := server.DialOptions{
 		Timeout: time.Second * 5,
 	}
@@ -62,17 +63,18 @@ type client struct {
 }
 
 // Do request to server
-func (c *client) Do(req *Request) (resp Response, err error) {
-	httpReq, err := req.ToHTTP(c.options.Endpoint)
+func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error) {
+	httpReq, err := req.HTTP(c.options.Endpoint)
 	if err != nil {
 		return
 	}
+	httpReq = httpReq.WithContext(ctx)
 	httpResp, err := c.Client.Do(httpReq)
 	if err != nil {
 		return
 	}
 	defer httpResp.Body.Close()
-	resp.response = httpResp
+	resp.Response = httpResp
 
 	// check http status code
 	if httpResp.StatusCode/100 != 2 {

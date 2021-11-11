@@ -31,8 +31,8 @@ type Request struct {
 	context context.Context // context
 }
 
-// ToHTTP generate http request
-func (req *Request) ToHTTP(host string) (*http.Request, error) {
+// HTTP generate http request
+func (req *Request) HTTP(host string) (*http.Request, error) {
 	u, err := url.Parse(host)
 	if err != nil {
 		return nil, err
@@ -54,8 +54,6 @@ func (req *Request) ToHTTP(host string) (*http.Request, error) {
 	}
 	return httpReq, nil
 }
-
-// TODO more function migrate Request
 
 // SetBasicAuth basic auth
 func (req *Request) SetBasicAuth(username, password string) {

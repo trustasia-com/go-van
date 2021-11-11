@@ -5,5 +5,4 @@ package confx
 type Option func(opts *Options)
 
 // Options confx options
-type Options struct {
-}
+type Options struct{}

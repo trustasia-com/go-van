@@ -26,6 +26,9 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	for _, o := range opts {
 		o(&options)
 	}
+	if len(options.Addresses) == 0 {
+		logx.Error("etcd: not found addresses, please specify")
+	}
 	// new etcd client
 	config := clientv3.Config{
 		TLS:         options.TLS,
@@ -46,7 +49,7 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	// ignore error, will call handle error
 	client, err := clientv3.New(config)
 	if err != nil {
-		logx.Fatal(err)
+		logx.Errorf("etcd: new etcd client: %s", err)
 	}
 	return &etcdRegistry{options: options, client: client}
 }

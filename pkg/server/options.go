@@ -109,11 +109,6 @@ func WithTimeout(timeout time.Duration) DialOption {
 	return func(opts *DialOptions) { opts.Timeout = timeout }
 }
 
-// WithContext client context
-func WithContext(ctx context.Context) DialOption {
-	return func(opts *DialOptions) { opts.Context = ctx }
-}
-
 // WithUserAgent client user-agent
 func WithUserAgent(ua string) DialOption {
 	return func(opts *DialOptions) { opts.UserAgent = ua }
