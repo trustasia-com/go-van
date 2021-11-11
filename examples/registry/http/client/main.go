@@ -2,6 +2,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -23,21 +25,19 @@ func main() {
 		server.WithEndpoint("http://gin-http"),
 	)
 
-	req := &httpx.Request{
-		Method: http.MethodGet,
-		Path:   "/hello",
-	}
-	err := cli.Do(req, nil)
+	req := httpx.NewRequest(http.MethodGet, "/hello", nil)
+	resp, err := cli.Do(context.Background(), req)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(string(resp.Data))
 	// idle conn timeout
 	time.Sleep(time.Second * 91)
-	err = cli.Do(req, nil)
+	_, err = cli.Do(context.Background(), req)
 	if err != nil {
 		panic(err)
 	}
-	err = cli.Do(req, nil)
+	_, err = cli.Do(context.Background(), req)
 	if err != nil {
 		panic(err)
 	}

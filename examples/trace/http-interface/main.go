@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -14,11 +15,12 @@ import (
 	"github.com/trustasia-com/go-van/pkg/telemetry"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
 var (
-	httpClient *httpx.Client
+	httpClient httpx.Client
 	grpcClient pb.UserClient
 )
 
@@ -34,12 +36,15 @@ func main() {
 	grpcClient = pb.NewUserClient(conn)
 	// http client
 	httpClient = httpx.NewClient(
+		server.WithEndpoint("http://localhost:9001"),
 		server.WithCliFlag(server.FlagTracing),
 	)
 
 	shutdown := telemetry.InitProvider(
-		telemetry.WithEndpoint("0.0.0.0:4317"),
+		context.Background(),
+		telemetry.WithEndpoint("192.168.252.177:4317"),
 		telemetry.WithTracerName("http-interface-app"),
+		telemetry.WithOptions(grpc.WithInsecure()),
 	)
 	defer shutdown()
 
@@ -65,22 +70,15 @@ func handleHTTP2HTTP(c *gin.Context) {
 	id := c.Param("id")
 
 	// span
+	req := httpx.NewRequest(http.MethodGet, "/user/"+id, nil)
 	ctx := c.Request.Context()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet,
-		"http://localhost:9001/user/"+id, nil)
+
+	resp, err := httpClient.Do(ctx, req)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-
-	var data []byte
-	err = httpClient.Do(ctx, req, &data)
-	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
-		return
-	}
-
-	c.Data(http.StatusOK, "text/html", data)
+	c.Data(http.StatusOK, "text/html", resp.Data)
 }
 
 func handleHTTP2GRPC(c *gin.Context) {

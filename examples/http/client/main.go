@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -15,7 +16,7 @@ func main() {
 	)
 
 	req := httpx.NewRequest(http.MethodGet, "", nil)
-	resp, err := cli.Do(req)
+	resp, err := cli.Do(context.Background(), req)
 	if err != nil {
 		panic(err)
 	}

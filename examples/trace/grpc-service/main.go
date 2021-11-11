@@ -17,14 +17,17 @@ import (
 	"github.com/trustasia-com/go-van/pkg/telemetry"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"google.golang.org/grpc"
 )
 
 var httpClient = http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 func main() {
 	shutdown := telemetry.InitProvider(
-		telemetry.WithEndpoint("0.0.0.0:4317"),
+		context.Background(),
+		telemetry.WithEndpoint("192.168.252.177:4317"),
 		telemetry.WithTracerName("grpc-service-app"),
+		telemetry.WithOptions(grpc.WithInsecure()),
 	)
 	defer shutdown()
 
