@@ -76,9 +76,16 @@ func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error
 	defer httpResp.Body.Close()
 	resp.Response = httpResp
 
+	// read data
+	data, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		return
+	}
+	resp.Data = data
+
 	// check http status code
 	if httpResp.StatusCode/100 != 2 {
-		err = fmt.Errorf("httpx: http status: %s", httpResp.Status)
+		err = fmt.Errorf("httpx: http status: %s, body: %s", httpResp.Status, data)
 		return
 	}
 	// no content
@@ -87,15 +94,9 @@ func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error
 	}
 	// check content length
 	if httpResp.ContentLength > 1<<10 { // 1m
-		err = fmt.Errorf("httpx: too large: %d", httpResp.ContentLength)
+		err = fmt.Errorf("httpx: too large: %d over 1M", httpResp.ContentLength)
 		return
 	}
-	// read data
-	data, err := io.ReadAll(httpResp.Body)
-	if err != nil {
-		return
-	}
-	resp.Data = data
 	return
 }
 
