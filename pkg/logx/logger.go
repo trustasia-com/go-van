@@ -38,7 +38,8 @@ type Logger interface {
 
 // list log level
 const (
-	LevelInfo Level = iota
+	LevelDebug Level = iota
+	LevelInfo
 	LevelWarning
 	LevelError
 	LevelFatal
@@ -48,6 +49,7 @@ const (
 
 // level string
 var levelName = []string{
+	"DEBUG",
 	"INFO",
 	"WARNING",
 	"ERROR",
@@ -59,6 +61,7 @@ type Level int
 
 func (l Level) String() string { return levelName[l] }
 
+// NewEntry log entry
 func NewEntry(log *Logging) *Entry {
 	return &Entry{
 		logging: log,
@@ -91,6 +94,20 @@ func (e *Entry) WithContext(ctx context.Context) *Entry {
 	return e
 }
 
+// Debug logs to DEBUG log.
+func (e *Entry) Debug(args ...interface{}) {
+	e.Level = LevelDebug
+	e.Message = fmt.Sprintln(args...)
+	e.Output(2)
+}
+
+// Debugf logs to DEBUG log.
+func (e *Entry) Debugf(format string, args ...interface{}) {
+	e.Level = LevelDebug
+	e.Message = fmt.Sprintf(format, args...)
+	e.Output(2)
+}
+
 // Info logs to INFO log.
 func (e *Entry) Info(args ...interface{}) {
 	e.Level = LevelInfo
@@ -98,7 +115,7 @@ func (e *Entry) Info(args ...interface{}) {
 	e.Output(2)
 }
 
-// Info logs to INFO log.
+// Infof logs to INFO log.
 func (e *Entry) Infof(format string, args ...interface{}) {
 	e.Level = LevelInfo
 	e.Message = fmt.Sprintf(format, args...)
@@ -112,7 +129,7 @@ func (e *Entry) Warning(args ...interface{}) {
 	e.Output(2)
 }
 
-// Warning logs to WARNING log.
+// Warningf logs to WARNING log.
 func (e *Entry) Warningf(format string, args ...interface{}) {
 	e.Level = LevelWarning
 	e.Message = fmt.Sprintf(format, args...)
@@ -126,7 +143,7 @@ func (e *Entry) Error(args ...interface{}) {
 	e.Output(2)
 }
 
-// Error logs to ERROR log.
+// Errorf logs to ERROR log.
 func (e *Entry) Errorf(format string, args ...interface{}) {
 	e.Level = LevelError
 	e.Message = fmt.Sprintf(format, args...)
@@ -141,7 +158,7 @@ func (e *Entry) Fatal(args ...interface{}) {
 	os.Exit(1)
 }
 
-// Fatal logs to ERROR log. with os.Exit(1).
+// Fatalf logs to ERROR log. with os.Exit(1).
 func (e *Entry) Fatalf(format string, args ...interface{}) {
 	e.Level = LevelFatal
 	e.Message = fmt.Sprintln(args...)

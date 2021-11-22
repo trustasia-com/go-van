@@ -11,7 +11,7 @@ import (
 
 var std = NewLogging()
 
-// NewLogger log logger
+// NewLogging log logger
 func NewLogging(opts ...Option) *Logging {
 	options := Options{
 		level:  LevelInfo,
@@ -79,12 +79,22 @@ func (log *Logging) output(l Level, msg string) {
 	entry.Output(calldepth)
 }
 
+// Debug logs to DEBUG log.
+func (log *Logging) Debug(args ...interface{}) {
+	log.output(LevelDebug, fmt.Sprintln(args...))
+}
+
+// Debugf logs to DEBUG log.
+func (log *Logging) Debugf(format string, args ...interface{}) {
+	log.output(LevelDebug, fmt.Sprintf(format, args...))
+}
+
 // Info logs to INFO log.
 func (log *Logging) Info(args ...interface{}) {
 	log.output(LevelInfo, fmt.Sprintln(args...))
 }
 
-// Info logs to INFO log.
+// Infof logs to INFO log.
 func (log *Logging) Infof(format string, args ...interface{}) {
 	log.output(LevelInfo, fmt.Sprintf(format, args...))
 }
@@ -94,7 +104,7 @@ func (log *Logging) Warning(args ...interface{}) {
 	log.output(LevelWarning, fmt.Sprintln(args...))
 }
 
-// Warning logs to WARNING log.
+// Warningf logs to WARNING log.
 func (log *Logging) Warningf(format string, args ...interface{}) {
 	log.output(LevelWarning, fmt.Sprintf(format, args...))
 }
@@ -104,7 +114,7 @@ func (log *Logging) Error(args ...interface{}) {
 	log.output(LevelError, fmt.Sprintln(args...))
 }
 
-// Error logs to ERROR log.
+// Errorf logs to ERROR log.
 func (log *Logging) Errorf(format string, args ...interface{}) {
 	log.output(LevelError, fmt.Sprintf(format, args...))
 }
@@ -115,7 +125,7 @@ func (log *Logging) Fatal(args ...interface{}) {
 	os.Exit(1)
 }
 
-// Fatal logs to ERROR log. with os.Exit(1).
+// Fatalf logs to ERROR log. with os.Exit(1).
 func (log *Logging) Fatalf(format string, args ...interface{}) {
 	log.output(LevelFatal, fmt.Sprintf(format, args...))
 	os.Exit(1)
@@ -126,12 +136,22 @@ func (log *Logging) V(l Level) bool {
 	return log.options.level <= l
 }
 
+// Debug logs to DEBUG log.
+func Debug(args ...interface{}) {
+	std.Debug(args...)
+}
+
+// Debugf logs to DEBUG log.
+func Debugf(format string, args ...interface{}) {
+	std.Debugf(format, args...)
+}
+
 // Info logs to INFO log.
 func Info(args ...interface{}) {
 	std.Info(args...)
 }
 
-// Info logs to INFO log.
+// Infof logs to INFO log.
 func Infof(format string, args ...interface{}) {
 	std.Infof(format, args...)
 }
@@ -141,7 +161,7 @@ func Warning(args ...interface{}) {
 	std.Warning(args...)
 }
 
-// Warning logs to WARNING log.
+// Warningf logs to WARNING log.
 func Warningf(format string, args ...interface{}) {
 	std.Warningf(format, args...)
 }
@@ -151,7 +171,7 @@ func Error(args ...interface{}) {
 	std.Error(args...)
 }
 
-// Error logs to ERROR log.
+// Errorf logs to ERROR log.
 func Errorf(format string, args ...interface{}) {
 	std.Errorf(format, args...)
 }
@@ -161,7 +181,7 @@ func Fatal(args ...interface{}) {
 	std.Fatal(args...)
 }
 
-// Fatal logs to ERROR log. with os.Exit(1).
+// Fatalf logs to ERROR log. with os.Exit(1).
 func Fatalf(format string, args ...interface{}) {
 	std.Fatalf(format, args...)
 }
