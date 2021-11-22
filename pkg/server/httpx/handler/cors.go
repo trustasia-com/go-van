@@ -96,7 +96,7 @@ func (opts CORSOptions) handlePreflight(w http.ResponseWriter, r *http.Request) 
 	if opts.MaxAge > 0 {
 		headers.Set(CORSHeaderAccessControlMaxAge, strconv.Itoa(opts.MaxAge))
 	}
-	logx.Infof(" Preflight response headers: %v", headers)
+	logx.Debugf(" Preflight response headers: %v", headers)
 }
 
 func (opts CORSOptions) handleActualRequest(w http.ResponseWriter, r *http.Request) {
@@ -133,7 +133,7 @@ func (opts CORSOptions) handleActualRequest(w http.ResponseWriter, r *http.Reque
 	if opts.AllowCredentials {
 		headers.Set(CORSHeaderAccessControlAllowCredentials, "true")
 	}
-	logx.Infof("  Actual response added headers: %v", headers)
+	logx.Debugf("  Actual response added headers: %v", headers)
 }
 
 func (opts CORSOptions) isOriginAllowed(r *http.Request, origin string) bool {
