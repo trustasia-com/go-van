@@ -86,13 +86,14 @@ func (d *discovBuilder) update(inss []*registry.Instance) error {
 			if u.Scheme != "grpc" {
 				continue
 			}
-			var pairs []interface{}
+
+			var attrs *attributes.Attributes
 			for k, v := range ins.Metadata {
-				pairs = append(pairs, k, v)
+				attrs.WithValue(k, v)
 			}
 			addr := resolver.Address{
 				ServerName: ins.Name,
-				Attributes: attributes.New(pairs...),
+				Attributes: attrs,
 				Addr:       u.Host,
 			}
 			addrs = append(addrs, addr)
