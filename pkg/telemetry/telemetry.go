@@ -17,7 +17,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
 // examples:
@@ -94,7 +94,9 @@ func initTracer(ctx context.Context, opts options) (shutdownFunc, error) {
 		sdktrace.WithSpanProcessor(bsp),
 	)
 	// set global propagator to tracecontext (the default is no-op).
-	otel.SetTextMapPropagator(propagation.TraceContext{})
+	ctmp := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{},
+		propagation.Baggage{})
+	otel.SetTextMapPropagator(ctmp)
 	otel.SetTracerProvider(tracerProvider)
 	return tracerProvider.Shutdown, nil
 }
@@ -108,19 +110,19 @@ func initMetric(ctx context.Context, opts options) (shutdownFunc, error) {
 		otlpmetricgrpc.WithDialOption(opts.options...),
 	)
 
-	cont := controller.New(
-		processor.New(
-			simple.NewWithExactDistribution(),
+	pusher := controller.New(
+		processor.NewFactory(
+			simple.NewWithHistogramDistribution(),
 			exp,
 		),
 		controller.WithCollectPeriod(7*time.Second),
 		controller.WithExporter(exp),
 	)
 	// set global propagator to tracecontext (the default is no-op).
-	global.SetMeterProvider(cont.MeterProvider())
-	err = cont.Start(context.Background())
+	global.SetMeterProvider(pusher)
+	err = pusher.Start(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	return cont.Stop, nil
+	return pusher.Stop, nil
 }
