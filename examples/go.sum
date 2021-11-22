@@ -321,8 +321,8 @@ github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5Cc
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/tevid/gohamcrest v1.1.1/go.mod h1:3UvtWlqm8j5JbwYZh80D/PVBt0mJ1eJiYgZMibh0H/k=
-github.com/trustasia-com/go-van v0.1.6-0.20211122081305-1114ad2abb0e h1:zSssa+dp9DZQEc2yl191Nquoc/DfSE9mWnq/oBsgz7s=
-github.com/trustasia-com/go-van v0.1.6-0.20211122081305-1114ad2abb0e/go.mod h1:dwQryLljOqBhY1eq0veMJJwp4oJuJqg9NLYBrQB9gnI=
+github.com/trustasia-com/go-van v0.1.6 h1:ChLo0FC0C1F7t+ePm0WUbM1o2iSCkeFXVoAcMIk62q0=
+github.com/trustasia-com/go-van v0.1.6/go.mod h1:dwQryLljOqBhY1eq0veMJJwp4oJuJqg9NLYBrQB9gnI=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
 github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs=
