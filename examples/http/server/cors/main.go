@@ -14,6 +14,8 @@ import (
 func main() {
 	// net/http handler
 	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("X-WeKey-Token", "asfdjasklfjqwi12131")
+		w.Header().Add("X-WeKey-Key", "asfdjasklfjqwi12131")
 		w.Write([]byte("hello world"))
 	})
 	http.HandleFunc("/panic", func(w http.ResponseWriter, r *http.Request) {

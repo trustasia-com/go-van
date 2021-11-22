@@ -15,7 +15,11 @@ import (
 
 // cors headers
 const (
-	HeaderOrigin                            = "Origin"
+	HeaderOrigin              = "Origin"
+	HeaderAccept              = "Accept"
+	HeaderContentType         = "Content-Type"
+	HeaderCustomRequestedWith = "X-Requested-With"
+
 	CORSHeaderVary                          = "Vary"
 	CORSHeaderAccessControlRequestMethod    = "Access-Control-Request-Method"
 	CORSHeaderAccessControlRequestMethods   = "Access-Control-Request-Methods"
@@ -73,15 +77,15 @@ func (opts CORSOptions) handlePreflight(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if opts.AllowedHeaders[0] == "*" {
-		headers.Set(CORSHeaderAccessControlRequestHeaders, "*")
+	if opts.AllowedOrigins[0] == "*" {
+		headers.Set(CORSHeaderAccessControlAllowOrigin, "*")
 	} else {
-		headers.Set(CORSHeaderAccessControlRequestHeaders, origin)
+		headers.Set(CORSHeaderAccessControlAllowOrigin, origin)
 	}
 	// Spec says: Since the list of methods can be unbounded, simply returning the method indicated
 	// by Access-Control-Request-Method (if supported) can be enough
-	headers.Set(CORSHeaderAccessControlRequestMethod, strings.ToUpper(reqMethod))
-	if len(reqHeaders) > -0 {
+	headers.Set(CORSHeaderAccessControlRequestMethods, strings.ToUpper(reqMethod))
+	if len(reqHeaders) > 0 {
 		// Spec says: Since the list of headers can be unbounded, simply returning supported headers
 		// from Access-Control-Request-Headers can be enough
 		headers.Set(CORSHeaderAccessControlRequestHeaders, strings.Join(reqHeaders, ", "))
@@ -118,7 +122,7 @@ func (opts CORSOptions) handleActualRequest(w http.ResponseWriter, r *http.Reque
 
 		return
 	}
-	if opts.AllowedHeaders[0] == "*" {
+	if opts.AllowedOrigins[0] == "*" {
 		headers.Set(CORSHeaderAccessControlAllowOrigin, "*")
 	} else {
 		headers.Set(CORSHeaderAccessControlAllowOrigin, origin)
@@ -134,7 +138,7 @@ func (opts CORSOptions) handleActualRequest(w http.ResponseWriter, r *http.Reque
 
 func (opts CORSOptions) isOriginAllowed(r *http.Request, origin string) bool {
 	// allow all
-	if opts.AllowedHeaders[0] == "*" {
+	if opts.AllowedOrigins[0] == "*" {
 		return true
 	}
 
@@ -226,9 +230,31 @@ func CORSAllowAll() CORSOptions {
 
 // CORSHandler return a middleware that cors
 func CORSHandler(opts CORSOptions) func(http.Handler) http.Handler {
+	// exposed headers
 	opts.ExposedHeaders = convert(opts.ExposedHeaders, http.CanonicalHeaderKey)
+	// allowed headers
 	if len(opts.AllowedHeaders) == 0 {
-		opts.AllowedHeaders = []string{"*"}
+		opts.AllowedHeaders = []string{
+			HeaderOrigin,
+			HeaderAccept,
+			HeaderContentType,
+			HeaderCustomRequestedWith,
+		}
+	} else {
+		// Origin is always appended as some browsers will always request for this header at preflight
+		opts.AllowedHeaders = convert(append(opts.AllowedHeaders, HeaderOrigin), http.CanonicalHeaderKey)
+	}
+	// allowed origins
+	if len(opts.AllowedOrigins) == 0 {
+		opts.AllowedOrigins = []string{"*"}
+	}
+	// allowed methods
+	if len(opts.AllowedMethods) == 0 {
+		opts.AllowedMethods = []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodHead,
+		}
 	}
 
 	return func(next http.Handler) http.Handler {
