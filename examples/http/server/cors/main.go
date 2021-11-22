@@ -8,7 +8,6 @@ import (
 	"github.com/trustasia-com/go-van/pkg/logx"
 	"github.com/trustasia-com/go-van/pkg/server"
 	"github.com/trustasia-com/go-van/pkg/server/httpx"
-	"github.com/trustasia-com/go-van/pkg/server/httpx/handler"
 )
 
 func main() {
@@ -22,7 +21,19 @@ func main() {
 		panic("panic error")
 	})
 
-	corsOpt := handler.CORSAllowAll()
+	corsOpt := httpx.CORSOptions{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{
+			http.MethodHead,
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodDelete,
+		},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: false,
+	}
 	corsOpt.AllowedHeaders = []string{"X-WeKey-Token"}
 	srv := httpx.NewServer(
 		server.WithAddress(":9000"),
