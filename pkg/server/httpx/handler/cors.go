@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	"github.com/trustasia-com/go-van/pkg/logx"
-
-	"github.com/justinas/alice"
 )
 
 //
@@ -227,7 +225,7 @@ func CORSAllowAll() CORSOptions {
 }
 
 // CORSHandler return a middleware that cors
-func CORSHandler(opts CORSOptions) alice.Constructor {
+func CORSHandler(opts CORSOptions) func(http.Handler) http.Handler {
 	opts.ExposedHeaders = convert(opts.ExposedHeaders, http.CanonicalHeaderKey)
 	if len(opts.AllowedHeaders) == 0 {
 		opts.AllowedHeaders = []string{"*"}

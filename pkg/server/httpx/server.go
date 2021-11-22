@@ -44,6 +44,10 @@ func NewServer(opts ...server.ServerOption) *Server {
 	if options.Flag&server.FlagTracing > 0 {
 		chain = chain.Append(handler.TraceSrvHandler)
 	}
+	h, ok := options.Context.Value(corsOptKey{}).(alice.Constructor)
+	if ok {
+		chain = chain.Append(h)
+	}
 	svr.Handler = chain.Then(svr.Handler)
 
 	return svr
