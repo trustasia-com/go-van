@@ -88,7 +88,11 @@ func (s *Server) Endpoint() (string, error) {
 // ServeHTTP wrapper http.Handler
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// TODO
-	// more
-	// eg. health check
+
+	// health check
+	if r.URL.Path == "/ping" {
+		w.Write([]byte("it's ok"))
+		return
+	}
 	s.options.Handler.ServeHTTP(w, r)
 }

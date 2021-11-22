@@ -42,6 +42,9 @@ type ServerOptions struct {
 	Handler http.Handler
 	// Options for gRPC server
 	Options []grpc.ServerOption
+	// other options for implementations of the interface
+	// can be stored in a context
+	Context context.Context
 
 	// server flag
 	Flag FlagOption
