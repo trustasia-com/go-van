@@ -147,10 +147,10 @@ func (opts CORSOptions) isOriginAllowed(r *http.Request, origin string) bool {
 		if o == origin {
 			return true
 		}
-		if idx := strings.IndexByte(origin, '*'); idx >= 0 {
+		if idx := strings.IndexByte(o, '*'); idx >= 0 {
 			prefix := o[:idx]
-			suffix := o[idx:]
-			if len(o) >= len(prefix)+len(suffix) && strings.HasPrefix(origin, prefix) &&
+			suffix := o[idx+1:]
+			if len(origin) >= len(prefix)+len(suffix) && strings.HasPrefix(origin, prefix) &&
 				strings.HasSuffix(origin, suffix) {
 				return true
 			}

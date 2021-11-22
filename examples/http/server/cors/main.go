@@ -22,7 +22,7 @@ func main() {
 	})
 
 	corsOpt := httpx.CORSOptions{
-		AllowedOrigins: []string{"*"},
+		AllowedOrigins: []string{"https://*.example.com"},
 		AllowedMethods: []string{
 			http.MethodHead,
 			http.MethodGet,
