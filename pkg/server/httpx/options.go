@@ -23,8 +23,11 @@ func WithTransport(trans *http.Transport) server.DialOption {
 
 type corsOptKey struct{}
 
+// CORSOptions cors options
+type CORSOptions = handler.CORSOptions
+
 // WithCORS http cross origin resource share
-func WithCORS(hOpts handler.CORSOptions) server.ServerOption {
+func WithCORS(hOpts CORSOptions) server.ServerOption {
 	return func(opts *server.ServerOptions) {
 		if opts.Context == nil {
 			opts.Context = context.Background()
