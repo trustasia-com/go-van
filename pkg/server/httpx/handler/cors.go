@@ -26,6 +26,7 @@ const (
 	CORSHeaderAccessControlRequestHeaders   = "Access-Control-Request-Headers"
 	CORSHeaderAccessControlAllowOrigin      = "Access-Control-Allow-Origin"
 	CORSHeaderAccessControlAllowCredentials = "Access-Control-Allow-Credentials"
+	CORSHeaderAccessControlAllowHeaders     = "Access-Control-Allow-Headers"
 	CORSHeaderAccessControlMaxAge           = "Access-Control-MaxAge"
 	CORSHeaderAccessControlExposeHeaders    = "Access-Control-Expose-Headers"
 )
@@ -83,7 +84,7 @@ func (opts CORSOptions) handlePreflight(w http.ResponseWriter, r *http.Request) 
 	if len(reqHeaders) > 0 {
 		// Spec says: Since the list of headers can be unbounded, simply returning supported headers
 		// from Access-Control-Request-Headers can be enough
-		headers.Set(CORSHeaderAccessControlRequestHeaders, strings.Join(reqHeaders, ", "))
+		headers.Set(CORSHeaderAccessControlAllowHeaders, strings.Join(reqHeaders, ", "))
 	}
 	if opts.AllowCredentials {
 		headers.Set(CORSHeaderAccessControlAllowCredentials, "true")
