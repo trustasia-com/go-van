@@ -47,10 +47,6 @@ func (opts CORSOptions) handlePreflight(w http.ResponseWriter, r *http.Request) 
 	headers := w.Header()
 
 	origin := r.Header.Get(HeaderOrigin)
-	if r.Method != http.MethodOptions {
-		logx.Warningf(" Preflight aborted: %s!=Options", r.Method)
-		return
-	}
 	// Always set Vary headers
 	// see https://github.com/rs/cors/issues/10,
 	//     https://github.com/rs/cors/commit/dbdca4d95feaa7511a46e6f1efb3b3aa505bc43f#commitcomment-12352001
@@ -59,7 +55,6 @@ func (opts CORSOptions) handlePreflight(w http.ResponseWriter, r *http.Request) 
 	headers.Add(CORSHeaderVary, CORSHeaderAccessControlRequestHeaders)
 
 	if origin == "" {
-		logx.Warningf(" Preflight aborted: empty origin")
 		return
 	}
 	if !opts.isOriginAllowed(r, origin) {
@@ -106,7 +101,6 @@ func (opts CORSOptions) handleActualRequest(w http.ResponseWriter, r *http.Reque
 	// Always set Vary, see https://github.com/rs/cors/issues/10
 	headers.Add(CORSHeaderVary, HeaderOrigin)
 	if origin == "" {
-		logx.Warning("  Actual request no headers added: missing origin")
 		return
 	}
 	if !opts.isOriginAllowed(r, origin) {
