@@ -3,6 +3,7 @@ package resolver
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/url"
 	"strings"
@@ -10,8 +11,6 @@ import (
 	"time"
 
 	"github.com/trustasia-com/go-van/pkg/registry"
-
-	"github.com/pkg/errors"
 )
 
 var dialer = &net.Dialer{

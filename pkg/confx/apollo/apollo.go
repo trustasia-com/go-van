@@ -4,6 +4,7 @@ package apollo
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -17,7 +18,6 @@ import (
 	"github.com/apolloconfig/agollo/v4/env/config"
 	"github.com/apolloconfig/agollo/v4/extension"
 	"github.com/apolloconfig/agollo/v4/storage"
-	"github.com/pkg/errors"
 )
 
 type apolloLoader struct {
@@ -49,7 +49,7 @@ func NewLoader(opts ...Option) (confx.Confx, error) {
 		return &options, nil
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "StartWithConfig fail")
+		return nil, fmt.Errorf("StartWithConfig fail %w", err)
 	}
 
 	return &apolloLoader{client: client}, nil
@@ -83,7 +83,7 @@ func (l *apolloLoader) LoadFiles(obj interface{}, namespaces ...string) error {
 	c := yaml.NewCodec()
 	err := c.Unmarshal(data, obj)
 	if err != nil {
-		return errors.Wrap(err, "unmarshal fail")
+		return fmt.Errorf("unmarshal fail %w", err)
 	}
 	return nil
 }

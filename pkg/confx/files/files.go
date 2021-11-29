@@ -4,6 +4,8 @@ package files
 import (
 	"bytes"
 	"context"
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -12,7 +14,6 @@ import (
 	"github.com/trustasia-com/go-van/pkg/logx"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/pkg/errors"
 )
 
 type filesLoader struct {
@@ -49,7 +50,7 @@ func (l *filesLoader) LoadFiles(obj interface{}, files ...string) error {
 	c := yaml.NewCodec()
 	err := c.Unmarshal(data, obj)
 	if err != nil {
-		return errors.Wrap(err, "unmarshal fail")
+		return fmt.Errorf("unmarshal fail: %w", err)
 	}
 	return nil
 }

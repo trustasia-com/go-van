@@ -3,6 +3,7 @@ package van
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,7 +12,6 @@ import (
 	"github.com/trustasia-com/go-van/pkg/registry"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
