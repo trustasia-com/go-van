@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
@@ -40,7 +41,7 @@ func InitProvider(ctx context.Context, opts ...Option) (shutdown func()) {
 		tracerShutdown, metricShutdown shutdownFunc
 	)
 	// tracer
-	if options.tracerName != "" {
+	if options.name != "" {
 		tracerShutdown, err = initTracer(ctx, options)
 		if err != nil {
 			logx.Fatal(err)
@@ -81,7 +82,7 @@ func initTracer(ctx context.Context, opts options) (shutdownFunc, error) {
 	res, err := resource.New(context.Background(),
 		resource.WithAttributes(
 			// service name
-			semconv.ServiceNameKey.String(opts.tracerName),
+			semconv.ServiceNameKey.String(opts.name),
 		),
 	)
 	if err != nil {
@@ -100,6 +101,8 @@ func initTracer(ctx context.Context, opts options) (shutdownFunc, error) {
 	otel.SetTracerProvider(tracerProvider)
 	return tracerProvider.Shutdown, nil
 }
+
+var globalMeter metric.Meter
 
 // initMetric metric provider
 func initMetric(ctx context.Context, opts options) (shutdownFunc, error) {
@@ -124,5 +127,6 @@ func initMetric(ctx context.Context, opts options) (shutdownFunc, error) {
 	if err != nil {
 		return nil, err
 	}
+	globalMeter = pusher.Meter(opts.name)
 	return pusher.Stop, nil
 }

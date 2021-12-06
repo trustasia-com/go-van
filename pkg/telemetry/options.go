@@ -12,8 +12,8 @@ type Option func(opts *options)
 type options struct {
 	// connect to backend store, maybe is a cluster
 	endpoint string
-	// tracer name
-	tracerName string
+	// name
+	name string
 	// export metrics
 	metrics bool
 	// otel tracer options
@@ -25,9 +25,9 @@ func WithEndpoint(edp string) Option {
 	return func(opts *options) { opts.endpoint = edp }
 }
 
-// WithTracerName open tracer with name
-func WithTracerName(name string) Option {
-	return func(opts *options) { opts.tracerName = name }
+// WithName open with name
+func WithName(name string) Option {
+	return func(opts *options) { opts.name = name }
 }
 
 // WithMetrics open metrics
