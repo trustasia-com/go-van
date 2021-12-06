@@ -31,8 +31,8 @@ func WithTracerName(name string) Option {
 }
 
 // WithMetrics open metrics
-func WithMetrics() Option {
-	return func(opts *options) { opts.metrics = true }
+func WithMetrics(metrics bool) Option {
+	return func(opts *options) { opts.metrics = metrics }
 }
 
 // WithOptions otlpgrpc options
