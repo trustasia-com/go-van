@@ -3,7 +3,10 @@ package etcd
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -13,7 +16,11 @@ import (
 var reg registry.Registry
 
 func init() {
-	reg = NewRegistry(registry.WithAddress("192.168.252.177:2379"))
+	// tlsConf := newTLSConfig()
+	reg = NewRegistry(
+		registry.WithAddress("192.168.252.177:2379"),
+		// registry.WithTLS(tlsConf),
+	)
 	w, err := reg.Watch(context.Background(), "server1")
 	if err != nil {
 		panic(err)
@@ -72,4 +79,24 @@ func TestRegistry(t *testing.T) {
 	}
 	// sleep 3 seconds wait for watcher stop
 	time.Sleep(time.Second * 3)
+}
+
+func newTLSConfig() *tls.Config {
+	// 客户端证书
+	cert, err := tls.LoadX509KeyPair("./tls.crt", "./tls.key")
+	if err != nil {
+		panic(err)
+	}
+	// cacert
+	data, err := os.ReadFile("./cacert")
+	if err != nil {
+		panic(err)
+	}
+	pool := x509.NewCertPool()
+	pool.AppendCertsFromPEM(data)
+
+	return &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		RootCAs:      pool,
+	}
 }
