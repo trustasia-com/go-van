@@ -41,5 +41,5 @@ func (resp Response) Scan(p interface{}) error {
 	default:
 		*p.(*[]byte) = resp.Data
 	}
-	return nil
+	return err
 }
