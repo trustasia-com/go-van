@@ -93,7 +93,7 @@ func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error
 		return
 	}
 	// check content length
-	if httpResp.ContentLength > 1<<10 { // 1m
+	if httpResp.ContentLength > 1<<20 { // 1m
 		err = fmt.Errorf("httpx: too large: %d over 1M", httpResp.ContentLength)
 		return
 	}
