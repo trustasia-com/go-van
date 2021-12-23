@@ -5,7 +5,6 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"net/url"
 )
 
 // NewRequest new request for client
@@ -33,12 +32,7 @@ type Request struct {
 
 // HTTP generate http request
 func (req *Request) HTTP(host string) (*http.Request, error) {
-	u, err := url.Parse(host)
-	if err != nil {
-		return nil, err
-	}
-	u.Path = req.path
-	httpReq, err := http.NewRequest(req.method, u.String(), req.body)
+	httpReq, err := http.NewRequest(req.method, host+req.path, req.body)
 	if err != nil {
 		return nil, err
 	}
