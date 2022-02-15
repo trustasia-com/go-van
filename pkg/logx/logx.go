@@ -131,6 +131,13 @@ func (log *Logging) Fatalf(format string, args ...interface{}) {
 	os.Exit(1)
 }
 
+// SetLevel change logging options level
+func (log *Logging) SetLevel(lv Level) {
+	if lv >= LevelDebug && lv <= LevelFatal {
+		log.options.level = lv
+	}
+}
+
 // V reports whether verbosity level log is at least the requested verbose level.
 func (log *Logging) V(l Level) bool {
 	return log.options.level <= l
@@ -184,6 +191,11 @@ func Fatal(args ...interface{}) {
 // Fatalf logs to ERROR log. with os.Exit(1).
 func Fatalf(format string, args ...interface{}) {
 	std.Fatalf(format, args...)
+}
+
+// SetLevel change logging options level
+func SetLevel(lv Level) {
+	std.SetLevel(lv)
 }
 
 // WithData custom data

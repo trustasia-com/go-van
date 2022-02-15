@@ -12,6 +12,10 @@ func init() {
 }
 
 func TestLogging(t *testing.T) {
+	SetLevel(LevelDebug)
+	Debug("test")
+	Debugf("test: %s", "hello")
+
 	Info("test")
 	Infof("test: %s", "hello")
 
