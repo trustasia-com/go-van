@@ -35,6 +35,10 @@ const (
 	Unauthenticated    Code = 16
 
 	_maxCode = 17
+
+	// special http code
+	HTTPMovedPermanently Code = 301
+	HTTPFound            Code = 302
 )
 
 var (
@@ -44,42 +48,46 @@ var (
 	// code2Desc embeded code description
 	code2Desc = map[string]map[Code]string{
 		LangZhCN: {
-			OK:                 "OK",
-			Canceled:           "操作被取消",
-			Unknown:            "未知错误",
-			InvalidArgument:    "请求参数无效",
-			DeadlineExceeded:   "操作超时",
-			NotFound:           "资源未找到",
-			AlreadyExist:       "资源已存在",
-			PermissionDenied:   "权限不足",
-			ResourceExhausted:  "资源耗尽",
-			FailedPrecondition: "前置条件不足",
-			Aborted:            "操作被终止",
-			OutOfRange:         "索引越界",
-			Unimplemented:      "方法未实现",
-			Internal:           "内部错误",
-			Unavailable:        "服务繁忙",
-			DataLoss:           "数据丢失",
-			Unauthenticated:    "未经认证",
+			OK:                   "OK",
+			Canceled:             "操作被取消",
+			Unknown:              "未知错误",
+			InvalidArgument:      "请求参数无效",
+			DeadlineExceeded:     "操作超时",
+			NotFound:             "资源未找到",
+			AlreadyExist:         "资源已存在",
+			PermissionDenied:     "权限不足",
+			ResourceExhausted:    "资源耗尽",
+			FailedPrecondition:   "前置条件不足",
+			Aborted:              "操作被终止",
+			OutOfRange:           "索引越界",
+			Unimplemented:        "方法未实现",
+			Internal:             "内部错误",
+			Unavailable:          "服务繁忙",
+			DataLoss:             "数据丢失",
+			Unauthenticated:      "未经认证",
+			HTTPMovedPermanently: "永久重定向",
+			HTTPFound:            "临时重定向",
 		},
 		LangEnUS: {
-			OK:                 "OK",
-			Canceled:           "Canceled",
-			Unknown:            "Unknown",
-			InvalidArgument:    "InvalidArgument",
-			DeadlineExceeded:   "DeadlineExceeded",
-			NotFound:           "NotFound",
-			AlreadyExist:       "AlreadyExist",
-			PermissionDenied:   "PermissionDenied",
-			ResourceExhausted:  "ResourceExhausted",
-			FailedPrecondition: "FailedPrecondition",
-			Aborted:            "Aborted",
-			OutOfRange:         "OutOfRange",
-			Unimplemented:      "Unimplemented",
-			Internal:           "Internal",
-			Unavailable:        "Unavailable",
-			DataLoss:           "DataLoss",
-			Unauthenticated:    "Unauthenticated",
+			OK:                   "OK",
+			Canceled:             "Canceled",
+			Unknown:              "Unknown",
+			InvalidArgument:      "InvalidArgument",
+			DeadlineExceeded:     "DeadlineExceeded",
+			NotFound:             "NotFound",
+			AlreadyExist:         "AlreadyExist",
+			PermissionDenied:     "PermissionDenied",
+			ResourceExhausted:    "ResourceExhausted",
+			FailedPrecondition:   "FailedPrecondition",
+			Aborted:              "Aborted",
+			OutOfRange:           "OutOfRange",
+			Unimplemented:        "Unimplemented",
+			Internal:             "Internal",
+			Unavailable:          "Unavailable",
+			DataLoss:             "DataLoss",
+			Unauthenticated:      "Unauthenticated",
+			HTTPMovedPermanently: "Movedpermanently",
+			HTTPFound:            "Found",
 		},
 	}
 )
@@ -117,6 +125,10 @@ func GRPCCode(httpCode int) Code {
 		return DeadlineExceeded
 	case http.StatusPreconditionFailed:
 		return FailedPrecondition
+	case http.StatusMovedPermanently:
+		return HTTPMovedPermanently
+	case http.StatusFound:
+		return HTTPFound
 	}
 	return Unknown
 }
@@ -124,7 +136,7 @@ func GRPCCode(httpCode int) Code {
 // StatusCode codes.Code to http status code
 func StatusCode(grpcCode Code) int {
 	switch grpcCode {
-	case OK:
+	case OK, HTTPMovedPermanently, HTTPFound:
 		return http.StatusOK
 	case InvalidArgument:
 		return http.StatusBadRequest
@@ -176,7 +188,7 @@ func (c Code) Tr(lang string, args ...interface{}) string {
 		lang = globalI18n.supportedLang[0]
 	}
 	// tansplate code
-	if c < _maxCode {
+	if c < _maxCode || c == HTTPMovedPermanently || c == HTTPFound {
 		codes, ok := code2Desc[lang]
 		if !ok {
 			return "codes: warning: unsupported lang " + lang
