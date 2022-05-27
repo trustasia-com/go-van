@@ -15,7 +15,7 @@ func main() {
 		server.WithEndpoint("https://baidu.com"),
 	)
 
-	req := httpx.NewRequest(http.MethodGet, "", nil)
+	req := httpx.NewRequest(http.MethodGet, "/", "", nil)
 	resp, err := cli.Do(context.Background(), req)
 	if err != nil {
 		panic(err)

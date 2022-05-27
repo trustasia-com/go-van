@@ -25,7 +25,7 @@ func main() {
 		server.WithEndpoint("http://gin-http"),
 	)
 
-	req := httpx.NewRequest(http.MethodGet, "/hello", nil)
+	req := httpx.NewRequest(http.MethodGet, "/hello", "", nil)
 	resp, err := cli.Do(context.Background(), req)
 	if err != nil {
 		panic(err)

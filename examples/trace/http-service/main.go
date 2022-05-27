@@ -19,7 +19,7 @@ func main() {
 	shutdown := telemetry.InitProvider(
 		context.Background(),
 		telemetry.WithEndpoint("192.168.252.177:4317"),
-		telemetry.WithTracerName("http-service-app"),
+		telemetry.WithName("http-service-app"),
 		telemetry.WithOptions(grpc.WithInsecure()),
 	)
 	defer shutdown()
