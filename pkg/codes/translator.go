@@ -1,7 +1,9 @@
 // Package codes provides ...
 package codes
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Translator translate code to desc
 type Translator interface {
@@ -23,7 +25,10 @@ func (t DefaultTranslator) Tr(lang string, code Code,
 	codes := t.Code2Desc[lang]
 	desc, ok := codes[code]
 	if !ok {
-		return "Code" + str
+		for _, arg := range args {
+			desc += fmt.Sprintf(": %v", arg)
+		}
+		return "Code" + str + desc
 	}
 	return fmt.Sprintf(str+desc, args...)
 }

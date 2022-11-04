@@ -60,3 +60,8 @@ func TestTrCustomNoLang(t *testing.T) {
 	str := testCode.Tr(LangEnUS)
 	t.Log(str)
 }
+
+func TestTrCustomNoLangWithArgs(t *testing.T) {
+	str := testCode.Tr(LangEnUS, "hello", "world")
+	t.Log(str)
+}
