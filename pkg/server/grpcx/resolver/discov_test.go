@@ -9,7 +9,6 @@ import (
 	"github.com/trustasia-com/go-van/pkg/registry/etcd"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -29,7 +28,6 @@ func TestDiscovResolver(t *testing.T) {
 	_, err := grpc.Dial("discov:///helloworld",
 		grpc.WithResolvers(resolv),
 		grpc.WithInsecure(),
-		grpc.WithBalancerName(roundrobin.Name),
 	)
 	if err != nil {
 		t.Fatal(err)

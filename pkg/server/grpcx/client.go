@@ -9,8 +9,9 @@ import (
 	"github.com/trustasia-com/go-van/pkg/server/grpcx/resolver"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/balancer/roundrobin"
 )
+
+const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
 
 // DialContext dial to grpc server
 func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
@@ -23,9 +24,10 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 	for _, o := range opts {
 		o(&options)
 	}
+	// default config
 	// grpc dial options
 	grpcOpts := []grpc.DialOption{
-		grpc.WithBalancerName(roundrobin.Name),
+		grpc.WithDefaultServiceConfig(grpcServiceConfig),
 	}
 	// discovery
 	if options.Registry != nil {
