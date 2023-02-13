@@ -70,10 +70,9 @@ func InitProvider(ctx context.Context, opts ...Option) (shutdown func()) {
 
 // initTracer trace provider
 func initTracer(ctx context.Context, opts options) (shutdownFunc, error) {
-	res, err := resource.Merge(
-		resource.Default(),
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			// the service name used to display traces in backends
 			semconv.ServiceNameKey.String(opts.name),
 		),
 	)
