@@ -13,8 +13,8 @@ import (
 // the middleware from: https://github.com/rs/cors
 //
 
-// Options is a configuration container to setup the CORS middleware.
-type Options struct {
+// CORSOptions is a configuration container to setup the CORS middleware.
+type CORSOptions struct {
 	// AllowedOrigins is a list of origins a cross-domain request can be executed from.
 	// If the special "*" value is present in the list, all origins will be allowed.
 	// An origin may contain a wildcard (*) to replace 0 or more characters
@@ -96,7 +96,7 @@ type Cors struct {
 }
 
 // New creates a new Cors handler with the provided options.
-func New(options Options) *Cors {
+func New(options CORSOptions) *Cors {
 	c := &Cors{
 		Debug:                  options.Debug,
 		exposedHeaders:         convert(options.ExposedHeaders, http.CanonicalHeaderKey),
@@ -176,13 +176,13 @@ func New(options Options) *Cors {
 
 // Default creates a new Cors handler with default options.
 func Default() *Cors {
-	return New(Options{})
+	return New(CORSOptions{})
 }
 
 // AllowAll create a new Cors handler with permissive configuration allowing all
 // origins with all standard methods with any header and credentials.
 func AllowAll() *Cors {
-	return New(Options{
+	return New(CORSOptions{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{
 			http.MethodHead,

@@ -28,11 +28,12 @@ type CORSOptions = handler.CORSOptions
 
 // WithCORS http cross origin resource share
 func WithCORS(hOpts CORSOptions) server.ServerOption {
+	cors := handler.New(hOpts)
+
 	return func(opts *server.ServerOptions) {
 		if opts.Context == nil {
 			opts.Context = context.Background()
 		}
-		h := handler.CORSHandler(hOpts)
-		opts.Context = context.WithValue(opts.Context, corsOptKey{}, h)
+		opts.Context = context.WithValue(opts.Context, corsOptKey{}, cors.Handler)
 	}
 }
