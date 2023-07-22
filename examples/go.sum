@@ -708,8 +708,8 @@ github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKs
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/tevid/gohamcrest v1.1.1/go.mod h1:3UvtWlqm8j5JbwYZh80D/PVBt0mJ1eJiYgZMibh0H/k=
-github.com/trustasia-com/go-van v0.1.11-0.20230213160615-24a68652146e h1:XLdwayCR1eVO4lWfpVoPE0VNFFmBeQZL56+GU1oGSrY=
-github.com/trustasia-com/go-van v0.1.11-0.20230213160615-24a68652146e/go.mod h1:VW+Yi2N4qXuNNYzhj7gagkzs2cCHesJkCIIdMHE2Dt0=
+github.com/trustasia-com/go-van v0.1.12 h1:ODCRBROlIgOJzCgSaym1wQyldzbQznZlYyqKU9U82Ow=
+github.com/trustasia-com/go-van v0.1.12/go.mod h1:VW+Yi2N4qXuNNYzhj7gagkzs2cCHesJkCIIdMHE2Dt0=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.9 h1:rmenucSohSTiyL09Y+l2OCk+FrMxGMzho2+tjr5ticU=
