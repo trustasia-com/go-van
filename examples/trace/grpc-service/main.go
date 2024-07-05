@@ -25,7 +25,7 @@ var httpClient = http.Client{Transport: otelhttp.NewTransport(http.DefaultTransp
 func main() {
 	shutdown := telemetry.InitProvider(
 		context.Background(),
-		telemetry.WithEndpoint("192.168.252.177:4317"),
+		telemetry.WithEndpoint("localhost:4317"),
 		telemetry.WithName("grpc-service-app"),
 		telemetry.WithOptions(grpc.WithInsecure()),
 	)

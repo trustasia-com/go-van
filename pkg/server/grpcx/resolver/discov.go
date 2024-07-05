@@ -47,7 +47,7 @@ func (d *discovBuilder) Build(target resolver.Target, cc resolver.ClientConn,
 
 	d.cc = cc
 	// watch addrs change
-	w, err := d.registry.Watch(context.TODO(), target.Endpoint)
+	w, err := d.registry.Watch(context.TODO(), target.Endpoint())
 	if err != nil {
 		return nil, err
 	}

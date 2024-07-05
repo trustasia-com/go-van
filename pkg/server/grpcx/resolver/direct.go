@@ -10,17 +10,17 @@ import (
 type directBuilder struct{}
 
 // ResolveNow could be called multiple times concurrently
-func (r *directBuilder) ResolveNow(options resolver.ResolveNowOptions) {}
+func (d *directBuilder) ResolveNow(options resolver.ResolveNowOptions) {}
 
 // Close close watcher
-func (r *directBuilder) Close() {}
+func (d *directBuilder) Close() {}
 
 // Build implements resolver.Resolver
 func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn,
 	opts resolver.BuildOptions) (resolver.Resolver, error) {
 
 	var addrs []resolver.Address
-	endpoints := strings.FieldsFunc(target.Endpoint, func(r rune) bool {
+	endpoints := strings.FieldsFunc(target.Endpoint(), func(r rune) bool {
 		return r == EndpointSepChar
 	})
 

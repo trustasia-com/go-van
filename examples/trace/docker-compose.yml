@@ -1,50 +1,21 @@
 version: "3"
 services:
-  # Collector
   otel-collector:
-    image: otel/opentelemetry-collector-dev:latest
-    command: ["--config=/etc/otel-collector-config.yml", "${OTELCOL_ARGS}"]
+    image: otel/opentelemetry-collector-contrib:0.104.0
+    command: ["--config=/etc/otel-collector.yml"]
     volumes:
-      - ${PWD}/otel-collector-config.yml:/etc/otel-collector-config.yml
+      - ./otel-collector.yml:/etc/otel-collector.yml
     ports:
-      - "1888:1888"   # pprof extension
-      - "8888:8888"   # Prometheus metrics exposed by the collector
-      - "8889:8889"   # Prometheus exporter metrics
-      - "13133:13133" # health_check extension
-      - "4317"        # OTLP gRPC receiver
-      - "55670:55679" # zpages extension
-    depends_on:
-      - jaeger-all-in-one
-  # Agent
-  otel-agent:
-    image: otel/opentelemetry-collector-dev:latest
-    command: ["--config=/etc/otel-agent-config.yml", "${OTELCOL_ARGS}"]
-    volumes:
-      - ${PWD}/otel-agent-config.yml:/etc/otel-agent-config.yml
-    ports:
-      - "8887:8888"   # Prometheus metrics exposed by the agent
-      - "14250"       # Jaeger grpc receiver
-      - "14268"       # Jaeger http thrift receiver
-      - "55678"       # OpenCensus receiver
-      - "4317:4317"   # OTLP gRPC receiver
-      - "9411"        # Zipkin receiver
-      - "1777:1777"   # pprof extension
-      - "55679:55679" # zpages extension
-      - "13133"       # health_check
-    depends_on:
-      - otel-collector
-  # Jaeger
-  jaeger-all-in-one:
-    image: jaegertracing/all-in-one:latest
-    ports:
-      - "16686:16686"
-      - "14268"
-      - "14250"
-  # Prometheus
+      - 4317:4317
+
   prometheus:
-    container_name: prometheus
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.53.0
     volumes:
-      - ${PWD}/prometheus.yaml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - 9090:9090
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    ports:
+      - 16686:16686

@@ -9,6 +9,7 @@ import (
 	"github.com/trustasia-com/go-van/pkg/server/grpcx/resolver"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
@@ -24,8 +25,7 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 	for _, o := range opts {
 		o(&options)
 	}
-	// default config
-	// grpc dial options
+	// default config, grpc dial options
 	grpcOpts := []grpc.DialOption{
 		grpc.WithDefaultServiceConfig(grpcServiceConfig),
 	}
@@ -37,13 +37,10 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 
 	// flag apply option
 	if options.Flag&server.FlagSecure == 0 {
-		grpcOpts = append(grpcOpts, grpc.WithInsecure())
+		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 	if options.Flag&server.FlagTracing > 0 {
-		grpcOpts = append(grpcOpts,
-			grpc.WithUnaryInterceptor(clientinterceptor.UnaryTraceInterceptor()),
-			grpc.WithStreamInterceptor(clientinterceptor.StreamTraceInterceptor()),
-		)
+		grpcOpts = append(grpcOpts, grpc.WithStatsHandler(clientinterceptor.OtelTraceHandler()))
 	}
 
 	// context custom options
@@ -52,7 +49,6 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 		if ok {
 			grpcOpts = append(grpcOpts, opts...)
 		}
-		return grpc.DialContext(options.Context, options.Endpoint, grpcOpts...)
 	}
-	return grpc.Dial(options.Endpoint, grpcOpts...)
+	return grpc.NewClient(options.Endpoint, grpcOpts...)
 }

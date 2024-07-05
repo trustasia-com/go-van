@@ -40,10 +40,7 @@ func NewServer(opts ...server.ServerOption) *Server {
 		)
 	}
 	if options.Flag&server.FlagTracing > 0 {
-		grpcOpts = append(grpcOpts,
-			grpc.ChainUnaryInterceptor(serverinterceptor.UnaryTraceInterceptor()),
-			grpc.ChainStreamInterceptor(serverinterceptor.StreamTraceInterceptor()),
-		)
+		grpcOpts = append(grpcOpts, grpc.StatsHandler(serverinterceptor.OtelTraceHandler()))
 	}
 
 	// other server option or middleware
@@ -91,7 +88,8 @@ func (s *Server) Stop() error {
 
 // Endpoint return a real address to registry endpoint.
 // examples:
-//   grpc://127.0.0.1:9000?isSecure=false
+//
+//	grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (string, error) {
 	addr, err := internal.Extract(s.options.Address)
 	if err != nil {

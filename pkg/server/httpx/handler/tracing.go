@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/semconv/v1.20.0/httpconv"
 	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
@@ -34,9 +34,8 @@ func TraceSrvHandler(next http.Handler) http.Handler {
 
 		spanName := r.RequestURI
 		opts := []oteltrace.SpanStartOption{
-			oteltrace.WithAttributes(semconv.NetAttributesFromHTTPRequest("tcp", r)...),
-			oteltrace.WithAttributes(semconv.EndUserAttributesFromHTTPRequest(r)...),
-			oteltrace.WithAttributes(semconv.HTTPServerAttributesFromHTTPRequest("", spanName, r)...),
+			oteltrace.WithAttributes(httpconv.ClientRequest(r)...),
+			oteltrace.WithAttributes(httpconv.ServerRequest("", r)...),
 			oteltrace.WithSpanKind(oteltrace.SpanKindServer),
 		}
 		if spanName == "" {
