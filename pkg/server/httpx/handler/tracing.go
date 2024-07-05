@@ -19,7 +19,7 @@ const tracerName = "go-van-tracer"
 // TraceSrvHandler returns a middleware that trace the request.
 func TraceSrvHandler(next http.Handler) http.Handler {
 	propagators := otel.GetTextMapPropagator()
-	tracer := otel.GetTracerProvider().Tracer(
+	tracer := otel.Tracer(
 		tracerName,
 		oteltrace.WithInstrumentationVersion(pkg.Version),
 	)
