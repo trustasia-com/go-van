@@ -16,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -24,7 +25,7 @@ var (
 	grpcClient pb.UserClient
 )
 
-func main() {
+func init() {
 	// grpc client
 	conn, err := grpcx.DialContext(
 		server.WithEndpoint("localhost:8000"),
@@ -34,19 +35,21 @@ func main() {
 		panic(err)
 	}
 	grpcClient = pb.NewUserClient(conn)
+}
+
+func main() {
+	shutdown := telemetry.InitProvider(
+		context.Background(),
+		telemetry.WithEndpoint("localhost:4317"),
+		telemetry.WithName("http-interface-app"),
+		telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	)
+	defer shutdown()
 	// http client
 	httpClient = httpx.NewClient(
 		server.WithEndpoint("http://localhost:9001"),
 		server.WithCliFlag(server.FlagTracing),
 	)
-
-	shutdown := telemetry.InitProvider(
-		context.Background(),
-		telemetry.WithEndpoint("localhost:4317"),
-		telemetry.WithName("http-interface-app"),
-		telemetry.WithOptions(grpc.WithInsecure()),
-	)
-	defer shutdown()
 
 	r := gin.Default()
 	r.GET("/http-to-http/:id", handleHTTP2HTTP)

@@ -49,17 +49,6 @@ func TraceSrvHandler(next http.Handler) http.Handler {
 
 		// serve the request to the next middleware
 		next.ServeHTTP(w, r)
-
-		// status from writer TODO
-		// status := 200
-		// attrs := semconv.HTTPAttributesFromHTTPStatusCode(status)
-		// spanStatus, spanMessage := semconv.SpanStatusFromHTTPStatusCode(status)
-		// span.SetAttributes(attrs...)
-		// span.SetStatus(spanStatus, spanMessage)
-		// if len(c.Errors) > 0 {
-		// 	span.SetAttributes(attribute.String("gin.errors", c.Errors.String()))
-		// }
-
 	})
 }
 

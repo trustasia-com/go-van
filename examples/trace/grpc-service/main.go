@@ -18,6 +18,7 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var httpClient = http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
@@ -27,7 +28,7 @@ func main() {
 		context.Background(),
 		telemetry.WithEndpoint("localhost:4317"),
 		telemetry.WithName("grpc-service-app"),
-		telemetry.WithOptions(grpc.WithInsecure()),
+		telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	)
 	defer shutdown()
 

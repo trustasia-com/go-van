@@ -9,6 +9,7 @@ import (
 	"github.com/trustasia-com/go-van/pkg/registry/etcd"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -25,9 +26,9 @@ func init() {
 }
 
 func TestDiscovResolver(t *testing.T) {
-	_, err := grpc.Dial("discov:///helloworld",
+	_, err := grpc.NewClient("discov:///helloworld",
 		grpc.WithResolvers(resolv),
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		t.Fatal(err)
