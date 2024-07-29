@@ -8,6 +8,7 @@ import (
 
 	"github.com/trustasia-com/go-van"
 	pb "github.com/trustasia-com/go-van/examples/trace/proto"
+	"github.com/trustasia-com/go-van/pkg/codes/status"
 	"github.com/trustasia-com/go-van/pkg/logx"
 	"github.com/trustasia-com/go-van/pkg/server"
 	"github.com/trustasia-com/go-van/pkg/server/grpcx"
@@ -78,7 +79,12 @@ func handleHTTP2HTTP(c *gin.Context) {
 
 	resp, err := httpClient.Do(ctx, req)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		s, ok := status.FromError(err)
+		if ok {
+			c.String(http.StatusBadRequest, s.Message())
+		} else {
+			c.String(http.StatusBadRequest, err.Error())
+		}
 		return
 	}
 	c.Data(http.StatusOK, "text/html", resp.Data)
@@ -94,7 +100,12 @@ func handleHTTP2GRPC(c *gin.Context) {
 	))
 	resp, err := grpcClient.GetUserInfo(ctx, &pb.UserInfoReq{Id: id})
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		s, ok := status.FromError(err)
+		if ok {
+			c.String(http.StatusBadRequest, s.Message())
+		} else {
+			c.String(http.StatusBadRequest, err.Error())
+		}
 		return
 	}
 	c.JSON(http.StatusOK, resp)
@@ -110,7 +121,12 @@ func handleHTTP2GRPC2HTTP(c *gin.Context) {
 	))
 	resp, err := grpcClient.GetUserInfoProxy(ctx, &pb.UserInfoReq{Id: id})
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		s, ok := status.FromError(err)
+		if ok {
+			c.String(http.StatusBadRequest, s.Message())
+		} else {
+			c.String(http.StatusBadRequest, err.Error())
+		}
 		return
 	}
 	c.JSON(http.StatusOK, resp)

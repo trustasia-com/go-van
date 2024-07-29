@@ -4,7 +4,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/trustasia-com/go-van"
@@ -73,7 +73,7 @@ func (s *userServer) GetUserInfoProxy(ctx context.Context, in *pb.UserInfoReq) (
 	}
 	defer resp.Body.Close()
 
-	data, _ := ioutil.ReadAll(resp.Body)
+	data, _ := io.ReadAll(resp.Body)
 	var m map[string]interface{}
 	err = json.Unmarshal(data, &m)
 	if err != nil {
