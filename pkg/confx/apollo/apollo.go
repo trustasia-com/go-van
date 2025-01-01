@@ -21,7 +21,7 @@ import (
 )
 
 type apolloLoader struct {
-	client *agollo.Client
+	client agollo.Client
 }
 
 // NewLoader a apolloLoader
