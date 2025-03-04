@@ -16,8 +16,8 @@ import (
 
 const tracerName = "go-van-tracer"
 
-// TraceSrvHandler returns a middleware that trace the request.
-func TraceSrvHandler(next http.Handler) http.Handler {
+// TracerSrvHandler returns a middleware that trace the request.
+func TracerSrvHandler(next http.Handler) http.Handler {
 	propagators := otel.GetTextMapPropagator()
 	tracer := otel.Tracer(
 		tracerName,
@@ -52,7 +52,7 @@ func TraceSrvHandler(next http.Handler) http.Handler {
 	})
 }
 
-// TraceCliHandler returns a middleware that trace the request.
-func TraceCliHandler(trans http.RoundTripper) http.RoundTripper {
+// TracerCliHandler returns a middleware that trace the request.
+func TracerCliHandler(trans http.RoundTripper) http.RoundTripper {
 	return otelhttp.NewTransport(trans)
 }

@@ -2,13 +2,16 @@
 package grpcx
 
 import (
+	"context"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/trustasia-com/go-van/pkg/internal"
 	"github.com/trustasia-com/go-van/pkg/logx"
 	"github.com/trustasia-com/go-van/pkg/server"
 	"github.com/trustasia-com/go-van/pkg/server/grpcx/serverinterceptor"
+	"github.com/trustasia-com/go-van/pkg/telemetry"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -39,10 +42,24 @@ func NewServer(opts ...server.ServerOption) *Server {
 			grpc.ChainStreamInterceptor(serverinterceptor.StreamServerInterceptor()),
 		)
 	}
-	if options.Flag&server.FlagTracing > 0 {
-		grpcOpts = append(grpcOpts, grpc.StatsHandler(serverinterceptor.OtelTraceHandler()))
-	}
+	// telemetry
+	if len(options.Telemetry) > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
 
+		var flag telemetry.FlagOption
+		svr.shutdown, flag = telemetry.InitProvider(ctx, options.Telemetry...)
+
+		if flag&telemetry.FlagMeter > 0 {
+			grpcOpts = append(grpcOpts,
+				grpc.ChainUnaryInterceptor(serverinterceptor.UnaryMeterInterceptor()),
+				grpc.ChainStreamInterceptor(serverinterceptor.StreamMeterInterceptor()),
+			)
+		}
+		if flag&telemetry.FlagTracer > 0 {
+			grpcOpts = append(grpcOpts, grpc.StatsHandler(serverinterceptor.OTelTracerHandler()))
+		}
+	}
 	// other server option or middleware
 	if len(options.Options) > 0 {
 		grpcOpts = append(grpcOpts, options.Options...)
@@ -60,7 +77,7 @@ func NewServer(opts ...server.ServerOption) *Server {
 // Server grpc server
 type Server struct {
 	options  server.ServerOptions
-	grpcOpts []grpc.ServerOption
+	shutdown func()
 
 	*grpc.Server
 	healthSvr *health.Server
@@ -80,9 +97,14 @@ func (s *Server) Start() error {
 
 // Stop server
 func (s *Server) Stop() error {
+	logx.Info("[gRPC] server stopping")
+
+	// telemetry
+	if s.shutdown != nil {
+		s.shutdown()
+	}
 	s.GracefulStop()
 	s.healthSvr.Shutdown()
-	logx.Info("[gRPC] server stopping")
 	return nil
 }
 

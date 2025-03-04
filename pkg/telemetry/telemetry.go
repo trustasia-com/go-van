@@ -28,8 +28,8 @@ import (
 type shutdownFunc func(context.Context) error
 
 // InitProvider init telemetry provider
-func InitProvider(ctx context.Context, opts ...Option) (shutdown func()) {
-	options := options{}
+func InitProvider(ctx context.Context, opts ...Option) (shutdown func(), flag FlagOption) {
+	options := options{flag: DefaultStdFlag}
 	// apply opts
 	for _, o := range opts {
 		o(&options)
@@ -54,16 +54,16 @@ func InitProvider(ctx context.Context, opts ...Option) (shutdown func()) {
 	if err != nil {
 		logx.Fatal(err)
 	}
-	// tracer
-	if options.name != "" {
-		tracerShutdown, err = initTracer(ctx, res, conn)
+	// meter
+	if options.flag&FlagMeter > 0 {
+		metricShutdown, err = initMeter(ctx, res, conn)
 		if err != nil {
 			logx.Fatal(err)
 		}
 	}
-	// metrics
-	if options.metrics {
-		metricShutdown, err = initMetric(ctx, res, conn)
+	// tracer
+	if options.flag&FlagTracer > 0 {
+		tracerShutdown, err = initTracer(ctx, res, conn)
 		if err != nil {
 			logx.Fatal(err)
 		}
@@ -71,7 +71,7 @@ func InitProvider(ctx context.Context, opts ...Option) (shutdown func()) {
 	// logger
 	//
 	shutdown = func() {
-		ctx, cancel := context.WithTimeout(ctx, time.Second*20)
+		ctx, cancel := context.WithTimeout(context.TODO(), time.Second*10)
 		defer cancel()
 
 		if tracerShutdown != nil {
@@ -85,7 +85,37 @@ func InitProvider(ctx context.Context, opts ...Option) (shutdown func()) {
 			}
 		}
 	}
-	return shutdown
+	return shutdown, options.flag
+}
+
+// initMetric metric provider
+//
+// eg.
+//
+//	appName := "example-api"
+//	meter := otel.Meter(appName)
+//	opt := api.WithAttributes(
+//		attribute.Key("A").String("B"),
+//		attribute.Key("C").String("D"),
+//	)
+//	counter, err := meter.Float64Counter("foo", api.WithDescription("a simple counter"))
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	counter.Add(ctx, 5, opt)
+func initMeter(ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) (shutdownFunc, error) {
+	metricExporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithGRPCConn(conn))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
+	}
+
+	meterProvider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExporter)),
+		sdkmetric.WithResource(res),
+	)
+	otel.SetMeterProvider(meterProvider)
+
+	return meterProvider.Shutdown, nil
 }
 
 // initTracer trace provider
@@ -111,20 +141,4 @@ func initTracer(ctx context.Context, res *resource.Resource, conn *grpc.ClientCo
 
 	// Shutdown will flush any remaining spans and shut down the exporter.
 	return tracerProvider.Shutdown, nil
-}
-
-// initMetric metric provider
-func initMetric(ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) (shutdownFunc, error) {
-	metricExporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithGRPCConn(conn))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
-	}
-
-	meterProvider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExporter)),
-		sdkmetric.WithResource(res),
-	)
-	otel.SetMeterProvider(meterProvider)
-
-	return meterProvider.Shutdown, nil
 }

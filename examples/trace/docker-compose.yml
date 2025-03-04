@@ -7,13 +7,14 @@ services:
       - ./otel-collector.yml:/etc/otel-collector.yml
     ports:
       - 4317:4317
+      - 9090:9090
 
   prometheus:
     image: prom/prometheus:v2.53.0
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - 9090:9090
+      - 9091:9090
 
   jaeger:
     image: jaegertracing/all-in-one:1.58

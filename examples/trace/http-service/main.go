@@ -23,15 +23,6 @@ import (
 var appName = "http-service-app"
 
 func main() {
-	shutdown := telemetry.InitProvider(
-		context.Background(),
-		telemetry.WithEndpoint("localhost:4317"),
-		telemetry.WithName(appName),
-		telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-		telemetry.WithMetrics(true),
-	)
-	defer shutdown()
-
 	r := gin.Default()
 	r.GET("/user/:id", handleUserInfo)
 
@@ -39,6 +30,11 @@ func main() {
 		server.WithAddress(":9001"),
 		server.WithHandler(r),
 		server.WithSrvFlag(server.FlagTracing),
+		server.WithTelemetry(
+			telemetry.WithEndpoint("localhost:4317"),
+			telemetry.WithName(appName),
+			telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
 	)
 	service := van.NewService(
 		van.WithName(appName),

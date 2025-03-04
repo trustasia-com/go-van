@@ -24,18 +24,15 @@ import (
 var httpClient = http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 func main() {
-	shutdown := telemetry.InitProvider(
-		context.Background(),
-		telemetry.WithEndpoint("localhost:4317"),
-		telemetry.WithName("grpc-service-app"),
-		telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	)
-	defer shutdown()
-
 	// grpc server
 	srv := grpcx.NewServer(
 		server.WithAddress(":8000"),
 		server.WithSrvFlag(server.FlagTracing),
+		server.WithTelemetry(
+			telemetry.WithEndpoint("localhost:4317"),
+			telemetry.WithName("grpc-service-app"),
+			telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
 	)
 	s := &userServer{}
 	pb.RegisterUserServer(srv, s)

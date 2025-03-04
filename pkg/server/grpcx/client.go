@@ -36,11 +36,11 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 	}
 
 	// flag apply option
-	if options.Flag&server.FlagSecure == 0 {
+	if options.Flag&server.FlagInsecure > 0 {
 		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 	if options.Flag&server.FlagTracing > 0 {
-		grpcOpts = append(grpcOpts, grpc.WithStatsHandler(clientinterceptor.OtelTraceHandler()))
+		grpcOpts = append(grpcOpts, grpc.WithStatsHandler(clientinterceptor.OTelTracerHandler()))
 	}
 
 	// context custom options

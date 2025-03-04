@@ -5,19 +5,33 @@ import (
 	"google.golang.org/grpc"
 )
 
+// FlagOption to flag with 0/1
+type FlagOption int
+
+// flag list
+const (
+	// opentelemetry metrics
+	FlagMeter = 1 << iota
+	// opentelemetry tracing
+	FlagTracer
+
+	DefaultStdFlag = FlagMeter | FlagTracer
+)
+
 // Option telemetry option
 type Option func(opts *options)
 
-// options registry Options
+// options telemetry Options
 type options struct {
 	// connect to backend store, maybe is a cluster
 	endpoint string
-	// name
+	// app name
 	name string
-	// export metrics
-	metrics bool
-	// otel tracer options
+	// otel collector options
 	options []grpc.DialOption
+
+	// opentelemetry switch
+	flag FlagOption
 }
 
 // WithEndpoint opentelemetry backend endpoint
@@ -30,9 +44,13 @@ func WithName(name string) Option {
 	return func(opts *options) { opts.name = name }
 }
 
-// WithMetrics open metrics
-func WithMetrics(metrics bool) Option {
-	return func(opts *options) { opts.metrics = metrics }
+// WithFlag opentelemetry switch
+func WithFlag(flags ...FlagOption) Option {
+	return func(opts *options) {
+		for _, f := range flags {
+			opts.flag |= f
+		}
+	}
 }
 
 // WithOptions otlpgrpc options

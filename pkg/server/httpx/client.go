@@ -48,7 +48,7 @@ func NewClient(opts ...server.DialOption) Client {
 
 	// apply client flag
 	if options.Flag&server.FlagTracing > 0 {
-		cli.transport = handler.TraceCliHandler(cli.transport)
+		cli.transport = handler.TracerCliHandler(cli.transport)
 	}
 	return cli
 }

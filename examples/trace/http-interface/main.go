@@ -2,7 +2,6 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -30,7 +29,7 @@ func init() {
 	// grpc client
 	conn, err := grpcx.DialContext(
 		server.WithEndpoint("localhost:8000"),
-		server.WithCliFlag(server.FlagTracing),
+		server.WithCliFlag(server.FlagTracing|server.FlagInsecure),
 	)
 	if err != nil {
 		panic(err)
@@ -39,13 +38,6 @@ func init() {
 }
 
 func main() {
-	shutdown := telemetry.InitProvider(
-		context.Background(),
-		telemetry.WithEndpoint("localhost:4317"),
-		telemetry.WithName("http-interface-app"),
-		telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	)
-	defer shutdown()
 	// http client
 	httpClient = httpx.NewClient(
 		server.WithEndpoint("http://localhost:9001"),
@@ -59,7 +51,11 @@ func main() {
 	srv := httpx.NewServer(
 		server.WithAddress(":9000"),
 		server.WithHandler(r),
-		server.WithSrvFlag(server.FlagTracing),
+		server.WithTelemetry(
+			telemetry.WithEndpoint("localhost:4317"),
+			telemetry.WithName("http-interface-app"),
+			telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
 	)
 	service := van.NewService(
 		van.WithName("http-interface"),

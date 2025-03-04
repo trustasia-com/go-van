@@ -12,6 +12,7 @@ import (
 	"github.com/trustasia-com/go-van/pkg/logx"
 	"github.com/trustasia-com/go-van/pkg/server"
 	"github.com/trustasia-com/go-van/pkg/server/httpx/handler"
+	"github.com/trustasia-com/go-van/pkg/telemetry"
 
 	"github.com/justinas/alice"
 )
@@ -41,8 +42,20 @@ func NewServer(opts ...server.ServerOption) *Server {
 	if options.Flag&server.FlagRecover > 0 {
 		chain = chain.Append(handler.RecoverHandler)
 	}
-	if options.Flag&server.FlagTracing > 0 {
-		chain = chain.Append(handler.TraceSrvHandler)
+	// telemetry
+	if len(options.Telemetry) > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+
+		var flag telemetry.FlagOption
+		svr.shutdown, flag = telemetry.InitProvider(ctx, options.Telemetry...)
+
+		if flag&telemetry.FlagMeter > 0 {
+			chain = chain.Append(handler.MeterSrvHandler)
+		}
+		if flag&telemetry.FlagTracer > 0 {
+			chain = chain.Append(handler.TracerSrvHandler)
+		}
 	}
 	// from context
 	if options.Context != nil {
@@ -51,14 +64,15 @@ func NewServer(opts ...server.ServerOption) *Server {
 			chain = chain.Append(h)
 		}
 	}
-	svr.Handler = chain.Then(svr.Handler)
+	svr.options.Handler = chain.Then(options.Handler)
 
 	return svr
 }
 
 // Server http server
 type Server struct {
-	options server.ServerOptions
+	options  server.ServerOptions
+	shutdown func()
 
 	*http.Server
 }
@@ -75,12 +89,15 @@ func (s *Server) Start() error {
 
 // Stop stop http server
 func (s *Server) Stop() error {
+	logx.Info("[HTTP] server stopping")
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
-
-	s.Shutdown(ctx)
-	logx.Info("[HTTP] server stopping")
-	return nil
+	// telemetry
+	if s.shutdown != nil {
+		s.shutdown()
+	}
+	return s.Shutdown(ctx)
 }
 
 // Endpoint return endpoint
@@ -98,8 +115,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// health check
 	if r.URL.Path == "/ping" {
-		w.Write([]byte("it's ok"))
+		w.Write([]byte("pong"))
 		return
 	}
-	s.options.Handler.ServeHTTP(w, r)
+	wrapper := &handler.WrappedWriter{}
+	wrapper.ResponseWriter = w
+	s.options.Handler.ServeHTTP(wrapper, r)
 }

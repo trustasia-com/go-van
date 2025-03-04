@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/trustasia-com/go-van/pkg/registry"
+	"github.com/trustasia-com/go-van/pkg/telemetry"
 
 	"google.golang.org/grpc"
 )
@@ -16,14 +17,12 @@ type FlagOption int
 
 // flag list
 const (
-	// recover from panic
+	// server: recover from panic
 	FlagRecover = 1 << iota
-	// tracing with opentelemetry
+	// client: tracing with telemetry
 	FlagTracing
-	// metric
-	FlagMetric
-	// client secure for tls
-	FlagSecure
+	// client: secure for tls
+	FlagInsecure
 
 	ServerStdFlag = FlagRecover
 	ClientStdFlag = 0
@@ -48,6 +47,9 @@ type ServerOptions struct {
 
 	// server flag
 	Flag FlagOption
+
+	// telemetry options
+	Telemetry []telemetry.Option
 }
 
 // WithNetwork server network
@@ -69,6 +71,13 @@ func WithHandler(h http.Handler) ServerOption {
 func WithOptions(sopts ...grpc.ServerOption) ServerOption {
 	return func(opts *ServerOptions) {
 		opts.Options = append(opts.Options, sopts...)
+	}
+}
+
+// WithTelemetry opentelemetry
+func WithTelemetry(topts ...telemetry.Option) ServerOption {
+	return func(opts *ServerOptions) {
+		opts.Telemetry = append(opts.Telemetry, topts...)
 	}
 }
 
