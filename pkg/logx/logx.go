@@ -41,21 +41,21 @@ type Logging struct {
 }
 
 // newEntry new entry
-func (log *Logging) newEntry() interface{} {
+func (log *Logging) newEntry() any {
 	return &Entry{
 		logging: log,
-		Data:    make(map[string]interface{}, 4),
+		Data:    make(map[string]any, 4),
 	}
 }
 
 // releaseEntry release entry
 func (log *Logging) releaseEntry(e *Entry) {
-	e.Data = map[string]interface{}{}
+	e.Data = map[string]any{}
 	log.entryPool.Put(e)
 }
 
 // newBuffer new buffer
-func (log *Logging) newBuffer() interface{} {
+func (log *Logging) newBuffer() any {
 	return new(bytes.Buffer)
 }
 
@@ -80,53 +80,53 @@ func (log *Logging) output(l Level, msg string) {
 }
 
 // Debug logs to DEBUG log.
-func (log *Logging) Debug(args ...interface{}) {
+func (log *Logging) Debug(args ...any) {
 	log.output(LevelDebug, fmt.Sprintln(args...))
 }
 
 // Debugf logs to DEBUG log.
-func (log *Logging) Debugf(format string, args ...interface{}) {
+func (log *Logging) Debugf(format string, args ...any) {
 	log.output(LevelDebug, fmt.Sprintf(format, args...))
 }
 
 // Info logs to INFO log.
-func (log *Logging) Info(args ...interface{}) {
+func (log *Logging) Info(args ...any) {
 	log.output(LevelInfo, fmt.Sprintln(args...))
 }
 
 // Infof logs to INFO log.
-func (log *Logging) Infof(format string, args ...interface{}) {
+func (log *Logging) Infof(format string, args ...any) {
 	log.output(LevelInfo, fmt.Sprintf(format, args...))
 }
 
 // Warning logs to WARNING log.
-func (log *Logging) Warning(args ...interface{}) {
+func (log *Logging) Warning(args ...any) {
 	log.output(LevelWarning, fmt.Sprintln(args...))
 }
 
 // Warningf logs to WARNING log.
-func (log *Logging) Warningf(format string, args ...interface{}) {
+func (log *Logging) Warningf(format string, args ...any) {
 	log.output(LevelWarning, fmt.Sprintf(format, args...))
 }
 
 // Error logs to ERROR log.
-func (log *Logging) Error(args ...interface{}) {
+func (log *Logging) Error(args ...any) {
 	log.output(LevelError, fmt.Sprintln(args...))
 }
 
 // Errorf logs to ERROR log.
-func (log *Logging) Errorf(format string, args ...interface{}) {
+func (log *Logging) Errorf(format string, args ...any) {
 	log.output(LevelError, fmt.Sprintf(format, args...))
 }
 
 // Fatal logs to ERROR log. with os.Exit(1).
-func (log *Logging) Fatal(args ...interface{}) {
+func (log *Logging) Fatal(args ...any) {
 	log.output(LevelFatal, fmt.Sprintln(args...))
 	os.Exit(1)
 }
 
 // Fatalf logs to ERROR log. with os.Exit(1).
-func (log *Logging) Fatalf(format string, args ...interface{}) {
+func (log *Logging) Fatalf(format string, args ...any) {
 	log.output(LevelFatal, fmt.Sprintf(format, args...))
 	os.Exit(1)
 }
@@ -144,52 +144,52 @@ func (log *Logging) V(l Level) bool {
 }
 
 // Debug logs to DEBUG log.
-func Debug(args ...interface{}) {
+func Debug(args ...any) {
 	std.Debug(args...)
 }
 
 // Debugf logs to DEBUG log.
-func Debugf(format string, args ...interface{}) {
+func Debugf(format string, args ...any) {
 	std.Debugf(format, args...)
 }
 
 // Info logs to INFO log.
-func Info(args ...interface{}) {
+func Info(args ...any) {
 	std.Info(args...)
 }
 
 // Infof logs to INFO log.
-func Infof(format string, args ...interface{}) {
+func Infof(format string, args ...any) {
 	std.Infof(format, args...)
 }
 
 // Warning logs to WARNING log.
-func Warning(args ...interface{}) {
+func Warning(args ...any) {
 	std.Warning(args...)
 }
 
 // Warningf logs to WARNING log.
-func Warningf(format string, args ...interface{}) {
+func Warningf(format string, args ...any) {
 	std.Warningf(format, args...)
 }
 
 // Error logs to ERROR log.
-func Error(args ...interface{}) {
+func Error(args ...any) {
 	std.Error(args...)
 }
 
 // Errorf logs to ERROR log.
-func Errorf(format string, args ...interface{}) {
+func Errorf(format string, args ...any) {
 	std.Errorf(format, args...)
 }
 
 // Fatal logs to ERROR log. with os.Exit(1).
-func Fatal(args ...interface{}) {
+func Fatal(args ...any) {
 	std.Fatal(args...)
 }
 
 // Fatalf logs to ERROR log. with os.Exit(1).
-func Fatalf(format string, args ...interface{}) {
+func Fatalf(format string, args ...any) {
 	std.Fatalf(format, args...)
 }
 
@@ -199,7 +199,7 @@ func SetLevel(lv Level) {
 }
 
 // WithData custom data
-func WithData(data map[string]interface{}) *Entry {
+func WithData(data map[string]any) *Entry {
 	entry, _ := std.entryPool.Get().(*Entry)
 	entry.Data = data
 	return entry

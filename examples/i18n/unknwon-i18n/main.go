@@ -13,7 +13,7 @@ type goI18nTranslator struct{}
 
 // Tr translate lang, should not manual call
 func (t goI18nTranslator) Tr(lang string, code codes.Code,
-	args ...interface{}) string {
+	args ...any) string {
 	return i18n.Tr(lang, fmt.Sprint(int(code)), args...)
 }
 

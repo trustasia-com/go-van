@@ -22,8 +22,8 @@ func (resp Response) HTTP() *http.Response {
 	return resp.Response
 }
 
-// Scan scan data to struct
-func (resp Response) Scan(p interface{}) error {
+// Scan scan data to struct, only support json and xml and []byte
+func (resp Response) Scan(p any) error {
 	if len(resp.Data) == 0 {
 		return fmt.Errorf("httpx: no content")
 	}

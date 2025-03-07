@@ -14,7 +14,7 @@ import (
 )
 
 // HandlerFunc recover handler func
-type HandlerFunc func(ctx context.Context, p interface{}) error
+type HandlerFunc func(ctx context.Context, p any) error
 
 // Option recovery option
 type Option func(*options)
@@ -34,8 +34,8 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 	for _, o := range opts {
 		o(&options)
 	}
-	return func(ctx context.Context, req interface{},
-		info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+	return func(ctx context.Context, req any,
+		info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ any, err error) {
 
 		panicked := true
 
@@ -61,7 +61,7 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 	for _, o := range opts {
 		o(&options)
 	}
-	return func(srv interface{}, stream grpc.ServerStream,
+	return func(srv any, stream grpc.ServerStream,
 		info *grpc.StreamServerInfo, handler grpc.StreamHandler) (err error) {
 
 		panicked := true
@@ -82,6 +82,6 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 	}
 }
 
-func defaultHandler(ctx context.Context, p interface{}) error {
+func defaultHandler(ctx context.Context, p any) error {
 	return status.Err(codes.Internal, fmt.Sprintf("[Panic]%v", p))
 }

@@ -33,7 +33,7 @@ func TestEntry(t *testing.T) {
 	e := NewEntry(NewLogging())
 	e.Info("test")
 
-	WithData(map[string]interface{}{
+	WithData(map[string]any{
 		"hello": "world",
 	}).Infof("hahaha: %s", "test")
 	WithContext(context.Background()).Info("test")

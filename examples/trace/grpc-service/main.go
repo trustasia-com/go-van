@@ -71,7 +71,7 @@ func (s *userServer) GetUserInfoProxy(ctx context.Context, in *pb.UserInfoReq) (
 	defer resp.Body.Close()
 
 	data, _ := io.ReadAll(resp.Body)
-	var m map[string]interface{}
+	var m map[string]any
 	err = json.Unmarshal(data, &m)
 	if err != nil {
 		return nil, err

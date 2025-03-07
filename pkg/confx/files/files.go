@@ -28,7 +28,7 @@ func NewLoader(dir string) confx.Confx {
 }
 
 // LoadFiles load config from backend
-func (l *filesLoader) LoadFiles(obj interface{}, files ...string) error {
+func (l *filesLoader) LoadFiles(obj any, files ...string) error {
 	buf := new(bytes.Buffer)
 	for _, name := range files {
 		suffix := filepath.Ext(name)

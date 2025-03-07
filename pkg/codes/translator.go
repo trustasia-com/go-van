@@ -7,7 +7,7 @@ import (
 
 // Translator translate code to desc
 type Translator interface {
-	Tr(lang string, code Code, args ...interface{}) string
+	Tr(lang string, code Code, args ...any) string
 	SupportedLang() []string
 }
 
@@ -18,7 +18,7 @@ type DefaultTranslator struct {
 
 // Tr translate lang, should not manual call
 func (t DefaultTranslator) Tr(lang string, code Code,
-	args ...interface{}) string {
+	args ...any) string {
 
 	str := code.String()
 

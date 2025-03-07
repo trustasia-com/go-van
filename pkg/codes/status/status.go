@@ -12,13 +12,13 @@ import (
 )
 
 // New returns a Status representing c and msg.
-func New(c codes.Code, args ...interface{}) *status.Status {
+func New(c codes.Code, args ...any) *status.Status {
 	scode := gcodes.Code(c)
 	return status.New(scode, c.Tr(codes.LangEnUS, args...))
 }
 
 // Err returns an error representing c and msg.  If c is OK, returns nil.
-func Err(c codes.Code, args ...interface{}) error {
+func Err(c codes.Code, args ...any) error {
 	return New(c, args...).Err()
 }
 

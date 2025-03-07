@@ -16,11 +16,11 @@ func NewCodec() codec.Codec {
 type xmlCodec struct{}
 
 // Marshal returns the wire format of v.
-func (xmlCodec) Marshal(v interface{}) ([]byte, error) {
+func (xmlCodec) Marshal(v any) ([]byte, error) {
 	return xml.Marshal(v)
 }
 
 // Unmarshal parses the wire format into v.
-func (xmlCodec) Unmarshal(data []byte, v interface{}) error {
+func (xmlCodec) Unmarshal(data []byte, v any) error {
 	return xml.Unmarshal(data, v)
 }

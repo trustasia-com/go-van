@@ -62,7 +62,7 @@ type CORSOptions struct {
 
 // Logger generic interface for logger
 type Logger interface {
-	Printf(string, ...interface{})
+	Printf(string, ...any)
 }
 
 // Cors http handler
@@ -364,7 +364,7 @@ func (c *Cors) handleActualRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 // convenience method. checks if a logger is set.
-func (c *Cors) logf(format string, a ...interface{}) {
+func (c *Cors) logf(format string, a ...any) {
 	if c.Debug {
 		logx.Infof(format, a...)
 	}

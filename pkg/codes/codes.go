@@ -172,7 +172,7 @@ type Code uint32
 func (c Code) StatusCode() int { return StatusCode(c) }
 
 // Tr translate code to description
-func (c Code) Tr(lang string, args ...interface{}) string {
+func (c Code) Tr(lang string, args ...any) string {
 	if globalI18n.translator == nil {
 		return "codes: warning: please specific translator"
 	}

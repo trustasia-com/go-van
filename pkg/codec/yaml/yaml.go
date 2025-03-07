@@ -16,11 +16,11 @@ func NewCodec() codec.Codec {
 type yamlCodec struct{}
 
 // Marshal returns the wire format of v.
-func (yamlCodec) Marshal(v interface{}) ([]byte, error) {
+func (yamlCodec) Marshal(v any) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
 // Unmarshal parses the wire format into v.
-func (yamlCodec) Unmarshal(data []byte, v interface{}) error {
+func (yamlCodec) Unmarshal(data []byte, v any) error {
 	return yaml.Unmarshal(data, v)
 }

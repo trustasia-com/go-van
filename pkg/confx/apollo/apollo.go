@@ -56,7 +56,7 @@ func NewLoader(opts ...Option) (confx.Confx, error) {
 }
 
 // LoadFiles load configs from backend
-func (l *apolloLoader) LoadFiles(obj interface{}, namespaces ...string) error {
+func (l *apolloLoader) LoadFiles(obj any, namespaces ...string) error {
 	if len(namespaces) == 0 {
 		return errors.New("please specific need load namespace")
 	}

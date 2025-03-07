@@ -16,11 +16,11 @@ func NewCodec() codec.Codec {
 type jsonCodec struct{}
 
 // Marshal returns the wire format of v.
-func (jsonCodec) Marshal(v interface{}) ([]byte, error) {
+func (jsonCodec) Marshal(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
 
 // Unmarshal parses the wire format into v.
-func (jsonCodec) Unmarshal(data []byte, v interface{}) error {
+func (jsonCodec) Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }

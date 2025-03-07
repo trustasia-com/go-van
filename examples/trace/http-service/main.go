@@ -61,10 +61,12 @@ func handleUserInfo(c *gin.Context) {
 
 	id := c.Param("id")
 	if id != "1" { // err
+		// logging with trace id
+		logx.WithContext(c.Request.Context()).Error("not found")
 		c.String(http.StatusBadRequest, "not found")
 		return
 	}
-	u := map[string]interface{}{
+	u := map[string]any{
 		"username": "bob",
 		"age":      10,
 	}
