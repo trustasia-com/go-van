@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.1](https://github.com/trustasia-com/go-van/compare/v0.4.0...v0.4.1) (2025-03-07)
+
+
+### Bug Fixes
+
+* replacing interface{} to any, logging print with trace_id ([b36b85e](https://github.com/trustasia-com/go-van/commit/b36b85ef60c1ab6c628bb98f9526e306dce2bd74))
+
 ## [0.4.0](https://github.com/trustasia-com/go-van/compare/v0.2.0...v0.4.0) (2025-03-04)
 
 ## [0.2.0](https://github.com/trustasia-com/go-van/compare/v0.1.14...v0.2.0) (2025-03-04)
