@@ -2,4 +2,4 @@
 package pkg
 
 // Version go-van version
-var Version = "v0.1.x"
+var Version = "v0.4.x"
