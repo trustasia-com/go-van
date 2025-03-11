@@ -31,7 +31,10 @@ func NewServer(opts ...server.ServerOption) *Server {
 	for _, o := range opts {
 		o(&options)
 	}
-	svr := &Server{options: options}
+	svr := &Server{
+		network: options.Network,
+		address: options.Address,
+	}
 	// prepare grpc option
 	grpcOpts := []grpc.ServerOption{}
 
@@ -76,7 +79,8 @@ func NewServer(opts ...server.ServerOption) *Server {
 
 // Server grpc server
 type Server struct {
-	options  server.ServerOptions
+	network  string
+	address  string
 	shutdown func()
 
 	*grpc.Server
@@ -85,7 +89,7 @@ type Server struct {
 
 // Start server
 func (s *Server) Start() error {
-	lis, err := net.Listen(s.options.Network, s.options.Address)
+	lis, err := net.Listen(s.network, s.address)
 	if err != nil {
 		return err
 	}
@@ -113,7 +117,7 @@ func (s *Server) Stop() error {
 //
 //	grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (string, error) {
-	addr, err := internal.Extract(s.options.Address)
+	addr, err := internal.Extract(s.address)
 	if err != nil {
 		return "", err
 	}

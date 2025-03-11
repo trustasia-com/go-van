@@ -37,3 +37,15 @@ func WithCORS(hOpts CORSOptions) server.ServerOption {
 		opts.Context = context.WithValue(opts.Context, corsOptKey{}, cors.Handler)
 	}
 }
+
+type headerOptKey struct{}
+
+// WithHeader http header
+func WithHeader(h map[string]string) server.DialOption {
+	return func(opts *server.DialOptions) {
+		if opts.Context == nil {
+			opts.Context = context.Background()
+		}
+		opts.Context = context.WithValue(opts.Context, headerOptKey{}, h)
+	}
+}

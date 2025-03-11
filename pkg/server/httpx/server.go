@@ -32,7 +32,9 @@ func NewServer(opts ...server.ServerOption) *Server {
 	}
 
 	svr := &Server{
-		options: options,
+		network: options.Network,
+		address: options.Address,
+		handler: options.Handler,
 	}
 	svr.Server = &http.Server{Handler: svr}
 
@@ -64,14 +66,16 @@ func NewServer(opts ...server.ServerOption) *Server {
 			chain = chain.Append(h)
 		}
 	}
-	svr.options.Handler = chain.Then(options.Handler)
+	svr.handler = chain.Then(options.Handler)
 
 	return svr
 }
 
 // Server http server
 type Server struct {
-	options  server.ServerOptions
+	network  string
+	address  string
+	handler  http.Handler
 	shutdown func()
 
 	*http.Server
@@ -79,7 +83,7 @@ type Server struct {
 
 // Start start http server
 func (s *Server) Start() error {
-	lis, err := net.Listen(s.options.Network, s.options.Address)
+	lis, err := net.Listen(s.network, s.address)
 	if err != nil {
 		return err
 	}
@@ -102,7 +106,7 @@ func (s *Server) Stop() error {
 
 // Endpoint return endpoint
 func (s *Server) Endpoint() (string, error) {
-	addr, err := internal.Extract(s.options.Address)
+	addr, err := internal.Extract(s.address)
 	if err != nil {
 		return "", err
 	}
@@ -120,5 +124,5 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	wrapper := &handler.WrappedWriter{}
 	wrapper.ResponseWriter = w
-	s.options.Handler.ServeHTTP(wrapper, r)
+	s.handler.ServeHTTP(wrapper, r)
 }

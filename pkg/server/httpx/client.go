@@ -3,11 +3,13 @@ package httpx
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 
+	"github.com/trustasia-com/go-van/pkg/logx"
 	"github.com/trustasia-com/go-van/pkg/server"
 	"github.com/trustasia-com/go-van/pkg/server/httpx/handler"
 	"github.com/trustasia-com/go-van/pkg/server/httpx/resolver"
@@ -28,35 +30,50 @@ func NewClient(opts ...server.DialOption) Client {
 		o(&options)
 	}
 
-	cli := &client{options: options}
+	cli := &client{
+		endpoint:  options.Endpoint,
+		userAgent: options.UserAgent,
+	}
 	cli.Client = &http.Client{Transport: cli}
 
 	// transport apply
-	transport := http.DefaultTransport
+	cli.transport = http.DefaultTransport
 	if options.Context != nil {
 		trans, ok := options.Context.Value(transportOptKey{}).(*http.Transport)
 		if ok {
-			transport = trans
+			cli.transport = trans
+		}
+		header, ok := options.Context.Value(headerOptKey{}).(map[string]string)
+		if ok {
+			cli.httpHeader = header
 		}
 	}
 	// NOTE discovery, experimental nature, not recommended
 	if options.Registry != nil {
 		builder := resolver.NewBuilder(options.Registry)
-		transport.(*http.Transport).DialContext, _ = builder.Build(options.Endpoint)
+		cli.transport.(*http.Transport).DialContext, _ = builder.Build(options.Endpoint)
 	}
-	cli.transport = transport
-
 	// apply client flag
 	if options.Flag&server.FlagTracing > 0 {
 		cli.transport = handler.TracerCliHandler(cli.transport)
+	}
+	if options.Flag&server.FlagInsecure > 0 {
+		trans, ok := cli.transport.(*http.Transport)
+		if ok {
+			trans.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		} else {
+			logx.Warningf("httpx: insecure transport not supported")
+		}
 	}
 	return cli
 }
 
 // client wrapper http client
 type client struct {
-	options   server.DialOptions
-	transport http.RoundTripper
+	endpoint   string
+	userAgent  string
+	httpHeader map[string]string
+	transport  http.RoundTripper
 
 	*http.Client
 	addresses []string
@@ -64,9 +81,13 @@ type client struct {
 
 // Do request to server
 func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error) {
-	httpReq, err := req.HTTP(c.options.Endpoint)
+	httpReq, err := req.HTTP(c.endpoint)
 	if err != nil {
 		return
+	}
+	// apply client header
+	for k, v := range c.httpHeader {
+		httpReq.Header.Add(k, v)
 	}
 	httpReq = httpReq.WithContext(ctx)
 	httpResp, err := c.Client.Do(httpReq)
@@ -102,8 +123,8 @@ func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error
 
 // RoundTrip implements http.RoundTripper as http.Transport
 func (c *client) RoundTrip(req *http.Request) (*http.Response, error) {
-	if req.UserAgent() == "" && c.options.UserAgent != "" {
-		req.Header.Set("User-Agent", c.options.UserAgent)
+	if req.UserAgent() == "" && c.userAgent != "" {
+		req.Header.Set("User-Agent", c.userAgent)
 	}
 	return c.transport.RoundTrip(req)
 }

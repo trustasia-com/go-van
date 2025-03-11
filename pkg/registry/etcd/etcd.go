@@ -48,11 +48,11 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 	if err != nil {
 		logx.Fatalf("etcd: new etcd client: %s", err)
 	}
-	return &etcdRegistry{options: options, client: client}
+	return &etcdRegistry{client: client}
 }
 
 type etcdRegistry struct {
-	options registry.Options
+	ttl time.Duration
 
 	client  *clientv3.Client
 	leaseID clientv3.LeaseID
@@ -67,7 +67,7 @@ func (r *etcdRegistry) Register(ctx context.Context, ins *registry.Instance) err
 		return err
 	}
 	// lease id
-	resp, err := r.client.Grant(ctx, int64(r.options.TTL.Seconds()))
+	resp, err := r.client.Grant(ctx, int64(r.ttl.Seconds()))
 	if err != nil {
 		return err
 	}
