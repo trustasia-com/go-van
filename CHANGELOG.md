@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.4](https://github.com/trustasia-com/go-van/compare/v0.4.3...v0.4.4) (2025-03-11)
+
+
+### Bug Fixes
+
+* **httpx:** http client request url ([35c4c00](https://github.com/trustasia-com/go-van/commit/35c4c001ee8da066e68e186ec6ae6bedccf3d46d))
+
 ### [0.4.3](https://github.com/trustasia-com/go-van/compare/v0.4.2...v0.4.3) (2025-03-11)
 
 
