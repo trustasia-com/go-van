@@ -12,10 +12,10 @@ import (
 
 func main() {
 	cli := httpx.NewClient(
-		server.WithEndpoint("https://baidu.com"),
+		server.WithEndpoint("https://api.deepzz.com/box-api/v1"),
 	)
 
-	req := httpx.NewRequest(http.MethodGet, "/", "", nil)
+	req := httpx.NewRequest(http.MethodGet, "/user/profile", "", nil)
 	resp, err := cli.Do(context.Background(), req)
 	if err != nil {
 		panic(err)

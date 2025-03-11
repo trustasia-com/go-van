@@ -42,7 +42,7 @@ func (req *Request) HTTP(host string) (httpReq *http.Request, err error) {
 	if err != nil {
 		return nil, err
 	}
-	u.JoinPath(req.path)
+	u = u.JoinPath(req.path)
 	u.RawQuery = req.query
 	if len(req.body) > 0 {
 		httpReq, err = http.NewRequest(req.method, u.String(), bytes.NewReader(req.body))
