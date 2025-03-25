@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.5](https://github.com/trustasia-com/go-van/compare/v0.4.4...v0.4.5) (2025-03-25)
+
+
+### Features
+
+* codes/status with language ([888900f](https://github.com/trustasia-com/go-van/commit/888900fd39f7835ae880fd5ab23e45b60e083bd8))
+
 ### [0.4.4](https://github.com/trustasia-com/go-van/compare/v0.4.3...v0.4.4) (2025-03-11)
 
 
