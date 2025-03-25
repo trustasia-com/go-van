@@ -11,10 +11,20 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// NewLang returns a Status representing c and msg.
+func NewLang(lang string, c codes.Code, args ...any) *status.Status {
+	scode := gcodes.Code(c)
+	return status.New(scode, c.Tr(lang, args...))
+}
+
 // New returns a Status representing c and msg.
 func New(c codes.Code, args ...any) *status.Status {
-	scode := gcodes.Code(c)
-	return status.New(scode, c.Tr(codes.LangEnUS, args...))
+	return NewLang(codes.LangEnUS, c, args...)
+}
+
+// ErrLang returns an error representing c and msg.  If c is OK, returns nil.
+func ErrLang(lang string, c codes.Code, args ...any) error {
+	return NewLang(lang, c, args...).Err()
 }
 
 // Err returns an error representing c and msg.  If c is OK, returns nil.
