@@ -179,7 +179,7 @@ func (c Code) Tr(lang string, args ...any) string {
 	// judge language
 	found := false
 	for _, l := range globalI18n.supportedLang {
-		if l != lang {
+		if l == lang {
 			found = true
 			break
 		}
