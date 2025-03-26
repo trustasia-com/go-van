@@ -14,6 +14,27 @@ import (
 	"github.com/trustasia-com/go-van/pkg/server/grpcx"
 )
 
+func init() {
+	trans := codes.DefaultTranslator{
+		Code2Desc: code2Desc,
+	}
+	codes.WithTranslator(trans)
+}
+
+// Code list
+const (
+	ErrAccountClosed codes.Code = 1000 // 账户被注销
+)
+
+var code2Desc = map[string]map[codes.Code]string{
+	codes.LangZhCN: {
+		ErrAccountClosed: "账户被注销",
+	},
+	codes.LangEnUS: {
+		ErrAccountClosed: "Account closed",
+	},
+}
+
 // serverGRPC is used to implement helloworld.GreeterServer.
 type serverGRPC struct {
 	pb.UnimplementedGreeterServer
@@ -22,7 +43,7 @@ type serverGRPC struct {
 // SayHello implements helloworld.GreeterServer
 func (s *serverGRPC) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "error" {
-		return nil, status.Err(codes.InvalidArgument, "name invalid")
+		return nil, status.ErrLang(in.Lang, ErrAccountClosed, "name invalid")
 	}
 	if in.Name == "panic" {
 		panic("panic error")
