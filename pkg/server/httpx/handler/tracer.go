@@ -48,6 +48,7 @@ func TracerSrvHandler(next http.Handler) http.Handler {
 		r = r.WithContext(ctx)
 
 		// serve the request to the next middleware
+		w.Header().Set("X-Trace-Id", span.SpanContext().TraceID().String())
 		next.ServeHTTP(w, r)
 	})
 }
