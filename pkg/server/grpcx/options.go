@@ -1,4 +1,4 @@
-// Package grpcx provides ...
+// Package grpcx provides gRPC utilities for the server package
 package grpcx
 
 import (
@@ -17,6 +17,12 @@ func WithDialOpt(options ...grpc.DialOption) server.DialOption {
 		if opts.Context == nil {
 			opts.Context = context.Background()
 		}
+
+		// Safely extract existing options from context
+		if existingOpts := opts.Context.Value(grpcOptsKey{}).([]grpc.DialOption); len(existingOpts) > 0 {
+			options = append(existingOpts, options...)
+		}
+
 		opts.Context = context.WithValue(opts.Context, grpcOptsKey{}, options)
 	}
 }
