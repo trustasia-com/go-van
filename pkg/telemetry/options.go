@@ -10,12 +10,14 @@ type FlagOption int
 
 // flag list
 const (
-	// opentelemetry metrics
-	FlagMeter = 1 << iota
 	// opentelemetry tracing
-	FlagTracer
+	FlagTracer = 1 << iota
+	// opentelemetry logger
+	FlagLogger
+	// opentelemetry metrics
+	FlagMeter
 
-	DefaultStdFlag = FlagMeter | FlagTracer
+	DefaultStdFlag = FlagTracer | FlagMeter
 )
 
 // Option telemetry option
