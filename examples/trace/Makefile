@@ -21,4 +21,12 @@ http2grpc2http:
 http2grpc2httperr:
 	@curl -v localhost:9000/http-to-grpc-to-http/2
 
+# go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/telemetrygen@latest
+# mock generate data
+traces:
+	@telemetrygen traces --otlp-insecure --duration 5s
+metrics:
+	@telemetrygen metrics --duration 5s --otlp-insecure
+logs:
+	@telemetrygen logs --duration 5s --otlp-insecure
 

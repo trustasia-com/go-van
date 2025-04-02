@@ -26,6 +26,7 @@ import (
 // examples:
 //   https://github.com/open-telemetry/opentelemetry-go-contrib
 //   https://github.com/open-telemetry/opentelemetry-go
+//   https://github.com/open-telemetry/opentelemetry-collector
 //
 
 // shutdownFunc func
