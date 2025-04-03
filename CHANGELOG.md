@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.8](https://github.com/trustasia-com/go-van/compare/v0.4.7...v0.4.8) (2025-04-03)
+
+
+### Bug Fixes
+
+* multiple call grpcx.WithDialOpt not working ([fab8c68](https://github.com/trustasia-com/go-van/commit/fab8c6896450b74545841d3e3fe13bc50942704a))
+
 ### [0.4.6](https://github.com/trustasia-com/go-van/compare/v0.4.5...v0.4.6) (2025-03-26)
 
 ### [0.4.5](https://github.com/trustasia-com/go-van/compare/v0.4.4...v0.4.5) (2025-03-25)
