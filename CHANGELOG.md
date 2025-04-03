@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.9](https://github.com/trustasia-com/go-van/compare/v0.4.8...v0.4.9) (2025-04-03)
+
+
+### Bug Fixes
+
+* **grpcx:** dial options interface conversion ([e11012f](https://github.com/trustasia-com/go-van/commit/e11012fdbfd2eecd481d704f8bdbb6bfd6eed9bc))
+
 ### [0.4.8](https://github.com/trustasia-com/go-van/compare/v0.4.7...v0.4.8) (2025-04-03)
 
 
