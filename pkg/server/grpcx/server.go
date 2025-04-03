@@ -25,7 +25,7 @@ func NewServer(opts ...server.ServerOption) *Server {
 		Network: "tcp",
 		Address: ":0",
 
-		Flag: server.ServerStdFlag,
+		Flag: server.FlagRecover,
 	}
 	// apply option
 	for _, o := range opts {

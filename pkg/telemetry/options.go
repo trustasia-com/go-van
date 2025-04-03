@@ -11,13 +11,11 @@ type FlagOption int
 // flag list
 const (
 	// opentelemetry tracing
-	FlagTracer = 1 << iota
+	FlagTracer FlagOption = 1 << iota
 	// opentelemetry logger
 	FlagLogger
 	// opentelemetry metrics
 	FlagMeter
-
-	DefaultStdFlag = FlagTracer | FlagMeter
 )
 
 // Option telemetry option
@@ -47,12 +45,8 @@ func WithName(name string) Option {
 }
 
 // WithFlag opentelemetry switch
-func WithFlag(flags ...FlagOption) Option {
-	return func(opts *options) {
-		for _, f := range flags {
-			opts.flag |= f
-		}
-	}
+func WithFlag(flag FlagOption) Option {
+	return func(opts *options) { opts.flag |= flag }
 }
 
 // WithOptions otlpgrpc options

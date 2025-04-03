@@ -34,7 +34,7 @@ type shutdownFunc func(context.Context) error
 
 // InitProvider init telemetry provider
 func InitProvider(ctx context.Context, opts ...Option) (shutdown func(), flag FlagOption) {
-	options := options{flag: DefaultStdFlag}
+	options := options{flag: FlagTracer} // default flag
 	// apply opts
 	for _, o := range opts {
 		o(&options)

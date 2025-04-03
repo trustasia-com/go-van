@@ -20,7 +20,7 @@ func DialContext(opts ...server.DialOption) (*grpc.ClientConn, error) {
 		Endpoint: ":0",
 		Timeout:  time.Second,
 
-		Flag: server.ClientStdFlag,
+		Flag: 0, // default flag
 	}
 	for _, o := range opts {
 		o(&options)

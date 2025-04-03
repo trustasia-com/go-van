@@ -24,6 +24,7 @@ type Client interface {
 func NewClient(opts ...server.DialOption) Client {
 	options := server.DialOptions{
 		Timeout: time.Second * 5,
+		Flag:    0, // default flag
 	}
 	// apply option
 	for _, o := range opts {

@@ -17,7 +17,7 @@ func main() {
 	// grpc client
 	conn, err := grpcx.DialContext(
 		server.WithEndpoint("localhost:8000"),
-		server.WithCliFlag(server.ClientStdFlag, server.FlagInsecure),
+		server.WithCliFlag(server.FlagInsecure),
 	)
 	if err != nil {
 		panic(err)

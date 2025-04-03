@@ -16,7 +16,7 @@ func NewLogging(opts ...Option) *Logging {
 	options := Options{
 		level:  LevelInfo,
 		writer: os.Stderr,
-		flag:   stdFlags,
+		flag:   0, // default flag
 	}
 	// apply opts
 	for _, o := range opts {

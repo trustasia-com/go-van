@@ -24,7 +24,7 @@ func NewServer(opts ...server.ServerOption) *Server {
 		Address: ":0",
 		Handler: http.DefaultServeMux,
 
-		Flag: server.ServerStdFlag,
+		Flag: server.FlagRecover,
 	}
 	// apply option
 	for _, o := range opts {

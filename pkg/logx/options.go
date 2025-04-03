@@ -5,11 +5,12 @@ import (
 	"io"
 )
 
+// FlagOption to flag with 0/1
+type FlagOption int
+
 // flag list
 const (
-	FlagFile = 1 << iota
-
-	stdFlags = 0
+	FlagFile FlagOption = 1 << iota
 )
 
 // Option logger option
@@ -21,7 +22,7 @@ type Options struct {
 	level   Level     // print severity
 	writer  io.Writer // writer
 
-	flag int // log flag
+	flag FlagOption // log flag
 }
 
 // WithService set service name
@@ -40,6 +41,6 @@ func WithWriter(w io.Writer) Option {
 }
 
 // WithFlag options flag
-func WithFlag(flag int) Option {
-	return func(opts *Options) { opts.flag = flag }
+func WithFlag(flag FlagOption) Option {
+	return func(opts *Options) { opts.flag |= flag }
 }

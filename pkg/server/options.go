@@ -18,14 +18,11 @@ type FlagOption int
 // flag list
 const (
 	// server: recover from panic
-	FlagRecover = 1 << iota
+	FlagRecover FlagOption = 1 << iota
 	// client: tracing with telemetry
 	FlagTracing
 	// client: secure for tls
 	FlagInsecure
-
-	ServerStdFlag = FlagRecover
-	ClientStdFlag = 0
 )
 
 // ServerOption server option
@@ -82,12 +79,8 @@ func WithTelemetry(topts ...telemetry.Option) ServerOption {
 }
 
 // WithSrvFlag server flag
-func WithSrvFlag(flags ...FlagOption) ServerOption {
-	return func(opts *ServerOptions) {
-		for _, f := range flags {
-			opts.Flag |= f
-		}
-	}
+func WithSrvFlag(flag FlagOption) ServerOption {
+	return func(opts *ServerOptions) { opts.Flag |= flag }
 }
 
 // DialOption client dial option
@@ -132,10 +125,6 @@ func WithRegistry(reg registry.Registry) DialOption {
 }
 
 // WithCliFlag client flag
-func WithCliFlag(flags ...FlagOption) DialOption {
-	return func(opts *DialOptions) {
-		for _, f := range flags {
-			opts.Flag |= f
-		}
-	}
+func WithCliFlag(flag FlagOption) DialOption {
+	return func(opts *DialOptions) { opts.Flag |= flag }
 }
