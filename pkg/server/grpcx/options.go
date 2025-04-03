@@ -19,7 +19,7 @@ func WithDialOpt(options ...grpc.DialOption) server.DialOption {
 		}
 
 		// Safely extract existing options from context
-		if existingOpts := opts.Context.Value(grpcOptsKey{}).([]grpc.DialOption); len(existingOpts) > 0 {
+		if existingOpts, _ := opts.Context.Value(grpcOptsKey{}).([]grpc.DialOption); len(existingOpts) > 0 {
 			options = append(existingOpts, options...)
 		}
 
