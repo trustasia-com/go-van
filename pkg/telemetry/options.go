@@ -10,8 +10,10 @@ type FlagOption int
 
 // flag list
 const (
+	// secure for grpc
+	FlagInsecure FlagOption = 1 << iota
 	// opentelemetry tracing
-	FlagTracer FlagOption = 1 << iota
+	FlagTracer
 	// opentelemetry logger
 	FlagLogger
 	// opentelemetry metrics

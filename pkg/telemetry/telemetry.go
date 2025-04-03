@@ -19,6 +19,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // docs:
@@ -28,6 +29,8 @@ import (
 //   https://github.com/open-telemetry/opentelemetry-go
 //   https://github.com/open-telemetry/opentelemetry-collector
 //
+
+const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
 
 // shutdownFunc func
 type shutdownFunc func(context.Context) error
@@ -58,8 +61,20 @@ func InitProvider(ctx context.Context, opts ...Option) (shutdown func(), flag Fl
 	if err != nil {
 		logx.Fatal(err)
 	}
+	// default config, grpc dial options
+	grpcOpts := []grpc.DialOption{
+		grpc.WithDefaultServiceConfig(grpcServiceConfig),
+	}
+	// flag apply option
+	if options.flag&FlagInsecure > 0 {
+		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+	// custom options
+	if len(options.options) > 0 {
+		grpcOpts = append(grpcOpts, options.options...)
+	}
 	// gRPC connection
-	conn, err := grpc.NewClient(options.endpoint, options.options...)
+	conn, err := grpc.NewClient(options.endpoint, grpcOpts...)
 	if err != nil {
 		logx.Fatal(err)
 	}
