@@ -15,8 +15,6 @@ import (
 	"github.com/trustasia-com/go-van/pkg/telemetry"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -54,7 +52,7 @@ func main() {
 		server.WithTelemetry(
 			telemetry.WithEndpoint("localhost:4317"),
 			telemetry.WithName("http-interface-app"),
-			telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+			telemetry.WithFlag(telemetry.FlagInsecure|telemetry.FlagTracer|telemetry.FlagMeter),
 		),
 	)
 	service := van.NewService(

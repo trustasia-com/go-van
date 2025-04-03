@@ -16,8 +16,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 var appName = "http-service-app"
@@ -29,11 +27,11 @@ func main() {
 	srv := httpx.NewServer(
 		server.WithAddress(":9001"),
 		server.WithHandler(r),
-		server.WithSrvFlag(server.FlagTracing),
 		server.WithTelemetry(
 			telemetry.WithEndpoint("localhost:4317"),
 			telemetry.WithName(appName),
-			telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+			telemetry.WithFlag(telemetry.FlagInsecure),
+			telemetry.WithFlag(telemetry.FlagTracer|telemetry.FlagMeter),
 		),
 	)
 	service := van.NewService(

@@ -17,8 +17,6 @@ import (
 	"github.com/trustasia-com/go-van/pkg/telemetry"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 var httpClient = http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
@@ -27,11 +25,10 @@ func main() {
 	// grpc server
 	srv := grpcx.NewServer(
 		server.WithAddress(":8000"),
-		server.WithSrvFlag(server.FlagTracing),
 		server.WithTelemetry(
 			telemetry.WithEndpoint("localhost:4317"),
 			telemetry.WithName("grpc-service-app"),
-			telemetry.WithOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+			telemetry.WithFlag(telemetry.FlagInsecure|telemetry.FlagMeter),
 		),
 	)
 	s := &userServer{}
