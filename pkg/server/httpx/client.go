@@ -54,10 +54,6 @@ func NewClient(opts ...server.DialOption) Client {
 		builder := resolver.NewBuilder(options.Registry)
 		cli.transport.(*http.Transport).DialContext, _ = builder.Build(options.Endpoint)
 	}
-	// apply client flag
-	if options.Flag&server.FlagTracing > 0 {
-		cli.transport = handler.TracerCliHandler(cli.transport)
-	}
 	if options.Flag&server.FlagInsecure > 0 {
 		trans, ok := cli.transport.(*http.Transport)
 		if ok {
@@ -65,6 +61,10 @@ func NewClient(opts ...server.DialOption) Client {
 		} else {
 			logx.Warningf("httpx: insecure transport not supported")
 		}
+	}
+	// apply client flag
+	if options.Flag&server.FlagTracing > 0 {
+		cli.transport = handler.TracerCliHandler(cli.transport)
 	}
 	return cli
 }
