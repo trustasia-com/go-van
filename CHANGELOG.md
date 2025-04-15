@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.11](https://github.com/trustasia-com/go-van/compare/v0.4.10...v0.4.11) (2025-04-15)
+
+
+### Bug Fixes
+
+* **httpx:** insecure & tracing flag ([0793c70](https://github.com/trustasia-com/go-van/commit/0793c703d025f50d61062eac05ba8ffab37ce92f))
+
 ### [0.4.10](https://github.com/trustasia-com/go-van/compare/v0.4.9...v0.4.10) (2025-04-03)
 
 ### [0.4.9](https://github.com/trustasia-com/go-van/compare/v0.4.8...v0.4.9) (2025-04-03)
