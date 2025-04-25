@@ -31,9 +31,9 @@ func NewLoader(dir string) confx.Confx {
 func (l *filesLoader) LoadFiles(obj any, files ...string) error {
 	buf := new(bytes.Buffer)
 	for _, name := range files {
-		suffix := filepath.Ext(name)
-		if !(suffix == ".yaml" || suffix == ".yml") {
-			return errors.New("unsupported file suffix: " + suffix)
+		ext := filepath.Ext(name)
+		if ext != ".yaml" && ext != ".yml" {
+			return errors.New("unsupported file suffix: " + ext)
 		}
 
 		path := filepath.Join(l.filesDir, name)
@@ -57,6 +57,10 @@ func (l *filesLoader) LoadFiles(obj any, files ...string) error {
 
 // WatchFiles watch file change
 func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, fileNames ...string) error {
+	if do == nil {
+		return errors.New("do watchFunc is nil")
+	}
+
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
@@ -66,8 +70,7 @@ func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, fileNa
 	// watch file
 	for _, fileName := range fileNames {
 		path := filepath.Join(l.filesDir, fileName)
-		err = watcher.Add(path)
-		if err != nil {
+		if err = watcher.Add(path); err != nil {
 			return err
 		}
 	}

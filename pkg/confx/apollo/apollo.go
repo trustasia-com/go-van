@@ -63,9 +63,9 @@ func (l *apolloLoader) LoadFiles(obj any, namespaces ...string) error {
 
 	buf := new(bytes.Buffer)
 	for _, name := range namespaces {
-		suffix := filepath.Ext(name)
-		if !(suffix == ".yaml" || suffix == ".yml") {
-			return errors.New("unsupported file suffix: " + suffix)
+		ext := filepath.Ext(name)
+		if ext != ".yaml" && ext != ".yml" {
+			return errors.New("unsupported file suffix: " + ext)
 		}
 
 		s := l.client.GetConfigAndInit(name)

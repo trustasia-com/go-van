@@ -4,7 +4,6 @@ package files
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -36,7 +35,7 @@ func TestLoadFiles(t *testing.T) {
 }
 
 func TestWatchFiles(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
 	err := loader.WatchFiles(ctx, watchFunc, "test.yml", "test2.yml")
@@ -48,12 +47,7 @@ func TestWatchFiles(t *testing.T) {
 func watchFunc(name string, data []byte) error {
 	fmt.Println(name)
 	fmt.Println(string(data))
-	_, file := filepath.Split(name)
-	switch file {
-	case "test.yml":
-		loader.LoadFiles(&conf, name)
-	default:
-	}
+	loader.LoadFiles(&conf, name)
 	fmt.Println(conf)
 	return nil
 }
