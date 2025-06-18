@@ -114,11 +114,6 @@ func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error
 	if httpResp.StatusCode == 201 {
 		return
 	}
-	// check content length
-	if httpResp.ContentLength > 1<<20 { // 1m
-		err = fmt.Errorf("httpx: too large: %d over 1M", httpResp.ContentLength)
-		return
-	}
 	return
 }
 
