@@ -54,6 +54,10 @@ func MeterSrvHandler(next http.Handler) http.Handler {
 		// serve the request to the next middleware
 		next.ServeHTTP(w, r)
 
+		if r.Method == http.MethodGet || r.URL.Path == "/ping" {
+			return
+		}
+
 		// increment the counter
 		status := -1
 		if writer, ok := w.(*WrappedWriter); ok {
