@@ -52,9 +52,9 @@ func NewServer(opts ...server.ServerOption) *Server {
 		var flag telemetry.FlagOption
 		svr.shutdown, flag = telemetry.InitProvider(ctx, options.Telemetry...)
 
-		if flag&telemetry.FlagMeter > 0 {
-			chain = chain.Append(handler.MeterSrvHandler)
-		}
+		// if flag&telemetry.FlagMeter > 0 {
+		// 	chain = chain.Append(handler.MeterSrvHandler)
+		// }
 		if flag&telemetry.FlagTracer > 0 {
 			chain = chain.Append(handler.TracerSrvHandler)
 		}
