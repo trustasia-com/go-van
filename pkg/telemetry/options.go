@@ -2,6 +2,7 @@
 package telemetry
 
 import (
+	"go.opentelemetry.io/otel/attribute"
 	"google.golang.org/grpc"
 )
 
@@ -31,6 +32,8 @@ type options struct {
 	name string
 	// otel collector options
 	options []grpc.DialOption
+	// custom resource attributes that will be applied to all telemetry data
+	attributes []attribute.KeyValue
 
 	// opentelemetry switch
 	flag FlagOption
@@ -55,5 +58,13 @@ func WithFlag(flag FlagOption) Option {
 func WithOptions(dialOpts ...grpc.DialOption) Option {
 	return func(opts *options) {
 		opts.options = append(opts.options, dialOpts...)
+	}
+}
+
+// WithAttributes add custom resource attributes
+// These attributes will be applied to all telemetry data (traces, metrics, logs)
+func WithAttributes(attrs ...attribute.KeyValue) Option {
+	return func(opts *options) {
+		opts.attributes = append(opts.attributes, attrs...)
 	}
 }

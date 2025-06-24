@@ -9,6 +9,7 @@ import (
 	"github.com/trustasia-com/go-van/pkg/logx"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -52,11 +53,18 @@ func InitProvider(ctx context.Context, opts ...Option) (shutdown func(), flag Fl
 	otel.SetTextMapPropagator(prop)
 
 	// resource
+	resourceAttrs := []attribute.KeyValue{
+		// The service name used to display traces in backends
+		semconv.ServiceNameKey.String(options.name),
+	}
+
+	// Add custom attributes
+	if len(options.attributes) > 0 {
+		resourceAttrs = append(resourceAttrs, options.attributes...)
+	}
+
 	res, err := resource.New(ctx,
-		resource.WithAttributes(
-			// The service name used to display traces in backends
-			semconv.ServiceNameKey.String(options.name),
-		),
+		resource.WithAttributes(resourceAttrs...),
 	)
 	if err != nil {
 		logx.Fatal(err)
