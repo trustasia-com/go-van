@@ -9,8 +9,8 @@ import (
 
 // list languages
 const (
-	LangZhCN = "zh-cn"
-	LangEnUS = "en-us"
+	LangZhCN = "zh-CN"
+	LangEnUS = "en-US"
 	// and more...
 
 	// system embeded codes
