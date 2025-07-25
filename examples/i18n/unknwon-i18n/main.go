@@ -29,8 +29,8 @@ var (
 )
 
 func init() {
-	i18n.SetMessage(codes.LangZhCN, "zh-cn.ini")
-	i18n.SetMessage(codes.LangEnUS, "en-us.ini")
+	i18n.SetMessage(codes.LangZhCN, "zh-CN.ini")
+	i18n.SetMessage(codes.LangEnUS, "en-US.ini")
 	trans := goI18nTranslator{}
 
 	codes.WithTranslator(trans)
