@@ -91,7 +91,6 @@ func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error
 	}
 	logx.Debugf("httpx: request %s %s", httpReq.Method, httpReq.URL.String())
 	logx.Debugf("httpx: request header %v", httpReq.Header)
-	logx.Debugf("httpx: request body %s", httpReq.Body)
 	httpReq = httpReq.WithContext(ctx)
 	httpResp, err := c.Client.Do(httpReq)
 	if err != nil {
