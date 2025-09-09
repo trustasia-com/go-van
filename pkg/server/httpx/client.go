@@ -77,7 +77,6 @@ type client struct {
 	transport  http.RoundTripper
 
 	*http.Client
-	addresses []string
 }
 
 // Do request to server
@@ -90,6 +89,9 @@ func (c *client) Do(ctx context.Context, req *Request) (resp Response, err error
 	for k, v := range c.httpHeader {
 		httpReq.Header.Add(k, v)
 	}
+	logx.Debugf("httpx: request %s %s", httpReq.Method, httpReq.URL.String())
+	logx.Debugf("httpx: request header %v", httpReq.Header)
+	logx.Debugf("httpx: request body %s", httpReq.Body)
 	httpReq = httpReq.WithContext(ctx)
 	httpResp, err := c.Client.Do(httpReq)
 	if err != nil {
