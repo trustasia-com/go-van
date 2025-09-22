@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.18](https://github.com/trustasia-com/go-van/compare/v0.4.17...v0.4.18) (2025-09-22)
+
+
+### Bug Fixes
+
+* logger print time ([da71b29](https://github.com/trustasia-com/go-van/commit/da71b29fd8d0d070ce9587dc68aeab381c722efb))
+
 ### [0.4.17](https://github.com/trustasia-com/go-van/compare/v0.4.16...v0.4.17) (2025-09-09)
 
 ### [0.4.16](https://github.com/trustasia-com/go-van/compare/v0.4.15...v0.4.16) (2025-09-09)
