@@ -166,6 +166,19 @@ func (e *Entry) Fatalf(format string, args ...any) {
 	os.Exit(1)
 }
 
+func (entry *Entry) Dup() *Entry {
+	data := make(map[string]any, len(entry.Data))
+	for k, v := range entry.Data {
+		data[k] = v
+	}
+	return &Entry{
+		logging: entry.logging,
+		Data:    data,
+		Time:    entry.Time,
+		context: entry.context,
+	}
+}
+
 // Output print log
 func (e *Entry) Output(calldepth int) {
 	buf := e.logging.bufferPool.Get().(*bytes.Buffer)
@@ -173,6 +186,8 @@ func (e *Entry) Output(calldepth int) {
 		e.logging.releaseEntry(e)
 		e.logging.releaseBuffer(buf)
 	}()
+
+	newEntry := e.Dup()
 
 	// serialize
 	data := make(map[string]any, len(e.Data)+5)
@@ -185,10 +200,10 @@ func (e *Entry) Output(calldepth int) {
 		}
 	}
 	data["level"] = e.Level.String()
-	if e.Time.IsZero() {
-		e.Time = time.Now()
+	if newEntry.Time.IsZero() {
+		newEntry.Time = time.Now()
 	}
-	data["time"] = e.Time.Format(time.RFC3339)
+	data["time"] = newEntry.Time.Format(time.RFC3339)
 	if msg := strings.TrimSpace(e.Message); msg != "" {
 		data["msg"] = msg
 	}
@@ -212,8 +227,8 @@ func (e *Entry) Output(calldepth int) {
 		data["service"] = e.logging.options.service
 	}
 	// opentelemetry tracing
-	if e.context != nil {
-		spanCtx := trace.SpanContextFromContext(e.context)
+	if newEntry.context != nil {
+		spanCtx := trace.SpanContextFromContext(newEntry.context)
 		if spanCtx.IsValid() {
 			data["trace_id"] = spanCtx.SpanID().String()
 		}
@@ -223,9 +238,9 @@ func (e *Entry) Output(calldepth int) {
 		fmt.Fprintf(os.Stderr, "Failed to obtain reader, %v\n", err)
 		return
 	}
-	e.logging.mu.Lock()
-	defer e.logging.mu.Unlock()
-	_, err := e.logging.options.writer.Write(buf.Bytes())
+	newEntry.logging.mu.Lock()
+	defer newEntry.logging.mu.Unlock()
+	_, err := newEntry.logging.options.writer.Write(buf.Bytes())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to write to log, %v\n", err)
 	}

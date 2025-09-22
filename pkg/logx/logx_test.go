@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func init() {
@@ -18,6 +19,8 @@ func TestLogging(t *testing.T) {
 
 	Info("test")
 	Infof("test: %s", "hello")
+
+	time.Sleep(1 * time.Second)
 
 	Warning("test")
 	Warningf("test: %s", "hello")
