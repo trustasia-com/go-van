@@ -11,7 +11,7 @@ import (
 )
 
 // NewRequest new request for client
-func NewRequest(method, path, query string, body []byte) *Request {
+func NewRequest(method, path, query string, body any) *Request {
 	req := &Request{
 		method: method,
 		path:   path,
