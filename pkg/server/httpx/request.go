@@ -4,8 +4,10 @@ package httpx
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // NewRequest new request for client
@@ -26,7 +28,7 @@ type Request struct {
 	method             string // http method
 	path               string // url path
 	query              string // query
-	body               []byte // request body
+	body               any    // body, []byte or url.Values
 	username, password string // basic auth
 
 	header  http.Header     // header
@@ -44,10 +46,15 @@ func (req *Request) HTTP(host string) (httpReq *http.Request, err error) {
 	}
 	u = u.JoinPath(req.path)
 	u.RawQuery = req.query
-	if len(req.body) > 0 {
-		httpReq, err = http.NewRequest(req.method, u.String(), bytes.NewReader(req.body))
-	} else {
+	switch v := req.body.(type) {
+	case []byte:
+		httpReq, err = http.NewRequest(req.method, u.String(), bytes.NewReader(v))
+	case url.Values:
+		httpReq, err = http.NewRequest(req.method, u.String(), strings.NewReader(v.Encode()))
+	case nil:
 		httpReq, err = http.NewRequest(req.method, u.String(), nil)
+	default:
+		return nil, fmt.Errorf("httpx: unsupported body type: %T, only []byte and url.Values", v)
 	}
 	if err != nil {
 		return nil, err
@@ -81,7 +88,7 @@ func (req *Request) GetQuery() string {
 }
 
 // GetBody return body
-func (req *Request) GetBody() []byte {
+func (req *Request) GetBody() any {
 	return req.body
 }
 

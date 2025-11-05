@@ -24,7 +24,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	var result []byte
+	var result []map[string]any
 	resp.Scan(&result)
-	fmt.Println(string(result))
+	fmt.Printf("%#v\n", result)
 }
