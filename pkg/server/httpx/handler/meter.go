@@ -31,6 +31,13 @@ func (w *WrappedWriter) WriteHeader(statusCode int) {
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
+// Flush cover writer Flush
+func (w *WrappedWriter) Flush() {
+	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
+}
+
 // MeterSrvHandler returns a middleware that metrics the request.
 func MeterSrvHandler(next http.Handler) http.Handler {
 	meter := otel.Meter(meterName)
