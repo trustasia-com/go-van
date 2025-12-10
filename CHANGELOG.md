@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.20](https://github.com/trustasia-com/go-van/compare/v0.4.19...v0.4.20) (2025-12-10)
+
+
+### Bug Fixes
+
+* handler.WrappedWriter is not http.Flusher: missing method Flush ([5a66421](https://github.com/trustasia-com/go-van/commit/5a66421a65940d029b0b16504508d84936d205b2))
+* httpx.NewRequest unsupported url.Values ([a111fa6](https://github.com/trustasia-com/go-van/commit/a111fa6f079eb93454f2f874e6911c74457c1db3))
+
 ### [0.4.19](https://github.com/trustasia-com/go-van/compare/v0.4.18...v0.4.19) (2025-10-16)
 
 ### [0.4.18](https://github.com/trustasia-com/go-van/compare/v0.4.17...v0.4.18) (2025-09-22)
