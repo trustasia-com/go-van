@@ -3,6 +3,7 @@ package handler
 
 import (
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -12,6 +13,12 @@ import (
 //
 // the middleware from: https://github.com/rs/cors
 //
+
+var (
+	headerVaryOrigin = []string{"Origin"}
+	headerOriginAll  = []string{"*"}
+	headerTrue       = []string{"true"}
+)
 
 // CORSOptions is a configuration container to setup the CORS middleware.
 type CORSOptions struct {
@@ -42,7 +49,8 @@ type CORSOptions struct {
 	// API specification
 	ExposedHeaders []string
 	// MaxAge indicates how long (in seconds) the results of a preflight request
-	// can be cached
+	// can be cached. Default value is 0, which stands for no Access-Control-Max-Age
+	// header to be sent back. Set MaxAge to a negative value to force a 0 max-age.
 	MaxAge int
 	// AllowCredentials indicates whether the request can include user credentials like
 	// cookies, HTTP authentication or client side SSL certificates.
@@ -77,13 +85,14 @@ type Cors struct {
 	allowOriginFunc func(origin string) bool
 	// Optional origin validator (with request) function
 	allowOriginRequestFunc func(r *http.Request, origin string) bool
-	// Normalized list of allowed headers
-	allowedHeaders []string
+	// Normalized set of allowed headers (lowercase)
+	allowedHeaders map[string]struct{}
 	// Normalized list of allowed methods
 	allowedMethods []string
-	// Normalized list of exposed headers
+	// Pre-computed normalized list of exposed headers
 	exposedHeaders []string
-	maxAge         int
+	// Pre-computed maxAge header value
+	maxAge []string
 	// Set to true when allowed origins contains a "*"
 	allowedOriginsAll bool
 	// Set to true when allowed headers contains a "*"
@@ -93,6 +102,7 @@ type Cors struct {
 	allowCredentials     bool
 	allowPrivateNetwork  bool
 	optionPassthrough    bool
+	preflightVary        []string
 }
 
 // New creates a new Cors handler with the provided options.
@@ -104,7 +114,6 @@ func New(options CORSOptions) *Cors {
 		allowOriginRequestFunc: options.AllowOriginRequestFunc,
 		allowCredentials:       options.AllowCredentials,
 		allowPrivateNetwork:    options.AllowPrivateNetwork,
-		maxAge:                 options.MaxAge,
 		optionPassthrough:      options.OptionsPassthrough,
 	}
 
@@ -130,9 +139,8 @@ func New(options CORSOptions) *Cors {
 				c.allowedOrigins = nil
 				c.allowedWOrigins = nil
 				break
-			} else if i := strings.IndexByte(origin, '*'); i >= 0 {
-				// Split the origin in two: start and end string without the *
-				w := wildcard{origin[0:i], origin[i+1:]}
+			} else if prefix, suffix, ok := strings.Cut(origin, "*"); ok {
+				w := wildcard{prefix, suffix}
 				c.allowedWOrigins = append(c.allowedWOrigins, w)
 			} else {
 				c.allowedOrigins = append(c.allowedOrigins, origin)
@@ -140,19 +148,21 @@ func New(options CORSOptions) *Cors {
 		}
 	}
 
+	if c.allowCredentials && c.allowedOriginsAll &&
+		c.allowOriginFunc == nil && c.allowOriginRequestFunc == nil {
+		panic("cors: AllowCredentials cannot be used with AllowedOrigins=[\"*\"] or empty AllowedOrigins; specify explicit origins or use AllowOriginFunc")
+	}
+
 	// Allowed Headers
+	// Note: the Fetch standard guarantees that CORS-unsafe request-header names are lowercase.
 	if len(options.AllowedHeaders) == 0 {
-		// Use sensible defaults
-		c.allowedHeaders = []string{"Origin", "Accept", "Content-Type", "X-Requested-With"}
+		c.allowedHeaders = newAllowedHeaderSet("accept", "content-type", "origin", "x-requested-with")
 	} else {
-		// Origin is always appended as some browsers will always request for this header at preflight
-		c.allowedHeaders = convert(append(options.AllowedHeaders, "Origin"), http.CanonicalHeaderKey)
-		for _, h := range options.AllowedHeaders {
-			if h == "*" {
-				c.allowedHeadersAll = true
-				c.allowedHeaders = nil
-				break
-			}
+		normalized := convert(append(options.AllowedHeaders, "Origin"), strings.ToLower)
+		if slices.Contains(options.AllowedHeaders, "*") {
+			c.allowedHeadersAll = true
+		} else {
+			c.allowedHeaders = newAllowedHeaderSet(normalized...)
 		}
 	}
 
@@ -171,6 +181,18 @@ func New(options CORSOptions) *Cors {
 		c.optionsSuccessStatus = options.OptionsSuccessStatus
 	}
 
+	if c.allowPrivateNetwork {
+		c.preflightVary = []string{"Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Access-Control-Request-Private-Network"}
+	} else {
+		c.preflightVary = []string{"Origin, Access-Control-Request-Method, Access-Control-Request-Headers"}
+	}
+
+	if options.MaxAge > 0 {
+		c.maxAge = []string{strconv.Itoa(options.MaxAge)}
+	} else if options.MaxAge < 0 {
+		c.maxAge = []string{"0"}
+	}
+
 	return c
 }
 
@@ -180,7 +202,7 @@ func Default() *Cors {
 }
 
 // AllowAll create a new Cors handler with permissive configuration allowing all
-// origins with all standard methods with any header and credentials.
+// origins with all standard methods with any header.
 func AllowAll() *Cors {
 	return New(CORSOptions{
 		AllowedOrigins: []string{"*"},
@@ -226,8 +248,9 @@ func (c *Cors) HandlerFunc(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
 		c.logf("HandlerFunc: Preflight request")
 		c.handlePreflight(w, r)
-
-		w.WriteHeader(c.optionsSuccessStatus)
+		if !c.optionPassthrough {
+			w.WriteHeader(c.optionsSuccessStatus)
+		}
 	} else {
 		c.logf("HandlerFunc: Actual request")
 		c.handleActualRequest(w, r)
@@ -267,11 +290,10 @@ func (c *Cors) handlePreflight(w http.ResponseWriter, r *http.Request) {
 	// Always set Vary headers
 	// see https://github.com/rs/cors/issues/10,
 	//     https://github.com/rs/cors/commit/dbdca4d95feaa7511a46e6f1efb3b3aa505bc43f#commitcomment-12352001
-	headers.Add("Vary", "Origin")
-	headers.Add("Vary", "Access-Control-Request-Method")
-	headers.Add("Vary", "Access-Control-Request-Headers")
-	if c.allowPrivateNetwork {
-		headers.Add("Vary", "Access-Control-Request-Private-Network")
+	if vary, found := headers["Vary"]; found {
+		headers["Vary"] = append(vary, c.preflightVary[0])
+	} else {
+		headers["Vary"] = c.preflightVary
 	}
 
 	if origin == "" {
@@ -288,38 +310,34 @@ func (c *Cors) handlePreflight(w http.ResponseWriter, r *http.Request) {
 		c.logf("  Preflight aborted: method '%s' not allowed", reqMethod)
 		return
 	}
-	// Amazon API Gateway is sometimes feeding multiple values for
-	// Access-Control-Request-Headers in a way where r.Header.Values() picks
-	// them all up, but r.Header.Get() does not.
-	// I suspect it is something like this: https://stackoverflow.com/a/4371395
-	reqHeaderList := strings.Join(r.Header.Values("Access-Control-Request-Headers"), ",")
-	reqHeaders := parseHeaderList(reqHeaderList)
-	if !c.areHeadersAllowed(reqHeaders) {
+	// Note: the Fetch standard guarantees at most one Access-Control-Request-Headers
+	// header in preflight requests, but some gateways split it into multiple headers.
+	reqHeaders, found := r.Header["Access-Control-Request-Headers"]
+	if found && !c.allowedHeadersAll && !c.areRequestHeadersAllowed(reqHeaders) {
 		c.logf("  Preflight aborted: headers '%v' not allowed", reqHeaders)
 		return
 	}
 	if c.allowedOriginsAll {
-		headers.Set("Access-Control-Allow-Origin", "*")
+		headers["Access-Control-Allow-Origin"] = headerOriginAll
 	} else {
-		headers.Set("Access-Control-Allow-Origin", origin)
+		headers["Access-Control-Allow-Origin"] = r.Header["Origin"]
 	}
 	// Spec says: Since the list of methods can be unbounded, simply returning the method indicated
 	// by Access-Control-Request-Method (if supported) can be enough
-	headers.Set("Access-Control-Allow-Methods", strings.ToUpper(reqMethod))
-	if len(reqHeaders) > 0 {
-
+	headers["Access-Control-Allow-Methods"] = r.Header["Access-Control-Request-Method"]
+	if found && len(reqHeaders[0]) > 0 {
 		// Spec says: Since the list of headers can be unbounded, simply returning supported headers
 		// from Access-Control-Request-Headers can be enough
-		headers.Set("Access-Control-Allow-Headers", strings.Join(reqHeaders, ", "))
+		headers["Access-Control-Allow-Headers"] = reqHeaders
 	}
 	if c.allowCredentials {
-		headers.Set("Access-Control-Allow-Credentials", "true")
+		headers["Access-Control-Allow-Credentials"] = headerTrue
 	}
 	if c.allowPrivateNetwork && r.Header.Get("Access-Control-Request-Private-Network") == "true" {
-		headers.Set("Access-Control-Allow-Private-Network", "true")
+		headers["Access-Control-Allow-Private-Network"] = headerTrue
 	}
-	if c.maxAge > 0 {
-		headers.Set("Access-Control-Max-Age", strconv.Itoa(c.maxAge))
+	if len(c.maxAge) > 0 {
+		headers["Access-Control-Max-Age"] = c.maxAge
 	}
 	c.logf("  Preflight response headers: %v", headers)
 }
@@ -330,7 +348,11 @@ func (c *Cors) handleActualRequest(w http.ResponseWriter, r *http.Request) {
 	origin := r.Header.Get("Origin")
 
 	// Always set Vary, see https://github.com/rs/cors/issues/10
-	headers.Add("Vary", "Origin")
+	if vary := headers["Vary"]; vary == nil {
+		headers["Vary"] = headerVaryOrigin
+	} else {
+		headers["Vary"] = append(vary, headerVaryOrigin[0])
+	}
 	if origin == "" {
 		c.logf("  Actual request no headers added: missing origin")
 		return
@@ -350,15 +372,15 @@ func (c *Cors) handleActualRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if c.allowedOriginsAll {
-		headers.Set("Access-Control-Allow-Origin", "*")
+		headers["Access-Control-Allow-Origin"] = headerOriginAll
 	} else {
-		headers.Set("Access-Control-Allow-Origin", origin)
+		headers["Access-Control-Allow-Origin"] = r.Header["Origin"]
 	}
 	if len(c.exposedHeaders) > 0 {
 		headers.Set("Access-Control-Expose-Headers", strings.Join(c.exposedHeaders, ", "))
 	}
 	if c.allowCredentials {
-		headers.Set("Access-Control-Allow-Credentials", "true")
+		headers["Access-Control-Allow-Credentials"] = headerTrue
 	}
 	c.logf("  Actual response added headers: %v", headers)
 }
@@ -370,9 +392,12 @@ func (c *Cors) logf(format string, a ...any) {
 	}
 }
 
-// OriginAllowed check the Origin of a request. No origin at all is also allowed.
+// OriginAllowed reports whether the request origin is allowed.
 func (c *Cors) OriginAllowed(r *http.Request) bool {
 	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return false
+	}
 	return c.isOriginAllowed(r, origin)
 }
 
@@ -389,17 +414,12 @@ func (c *Cors) isOriginAllowed(r *http.Request, origin string) bool {
 		return true
 	}
 	origin = strings.ToLower(origin)
-	for _, o := range c.allowedOrigins {
-		if o == origin {
-			return true
-		}
+	if slices.Contains(c.allowedOrigins, origin) {
+		return true
 	}
-	for _, w := range c.allowedWOrigins {
-		if w.match(origin) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(c.allowedWOrigins, func(w wildcard) bool {
+		return w.match(origin)
+	})
 }
 
 // isMethodAllowed checks if a given method can be used as part of a cross-domain request
@@ -414,37 +434,22 @@ func (c *Cors) isMethodAllowed(method string) bool {
 		// Always allow preflight requests
 		return true
 	}
-	for _, m := range c.allowedMethods {
-		if m == method {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(c.allowedMethods, method)
 }
 
-// areHeadersAllowed checks if a given list of headers are allowed to used within
-// a cross-domain request.
-func (c *Cors) areHeadersAllowed(requestedHeaders []string) bool {
-	if c.allowedHeadersAll || len(requestedHeaders) == 0 {
-		return true
-	}
-	for _, header := range requestedHeaders {
-		header = http.CanonicalHeaderKey(header)
-		found := false
-		for _, h := range c.allowedHeaders {
-			if h == header {
-				found = true
-				break
+func (c *Cors) areRequestHeadersAllowed(values []string) bool {
+	for _, value := range values {
+		for _, name := range parseRequestHeaderNames(value) {
+			if name == "" {
+				continue
 			}
-		}
-		if !found {
-			return false
+			if _, ok := c.allowedHeaders[name]; !ok {
+				return false
+			}
 		}
 	}
 	return true
 }
-
-const toLower = 'a' - 'A'
 
 type converter func(string) string
 
@@ -457,57 +462,34 @@ func (w wildcard) match(s string) bool {
 	return len(s) >= len(w.prefix)+len(w.suffix) && strings.HasPrefix(s, w.prefix) && strings.HasSuffix(s, w.suffix)
 }
 
+func newAllowedHeaderSet(headers ...string) map[string]struct{} {
+	set := make(map[string]struct{}, len(headers))
+	for _, header := range headers {
+		set[header] = struct{}{}
+	}
+	return set
+}
+
 // convert converts a list of string using the passed converter function
 func convert(s []string, c converter) []string {
-	out := []string{}
+	out := make([]string, 0, len(s))
 	for _, i := range s {
 		out = append(out, c(i))
 	}
 	return out
 }
 
-// parseHeaderList tokenize + normalize a string containing a list of headers
-func parseHeaderList(headerList string) []string {
-	l := len(headerList)
-	h := make([]byte, 0, l)
-	upper := true
-	// Estimate the number headers in order to allocate the right splice size
-	t := 0
-	for i := 0; i < l; i++ {
-		if headerList[i] == ',' {
-			t++
+func parseRequestHeaderNames(headerList string) []string {
+	if headerList == "" {
+		return nil
+	}
+	parts := strings.Split(headerList, ",")
+	names := make([]string, 0, len(parts))
+	for _, part := range parts {
+		name := strings.ToLower(strings.TrimSpace(part))
+		if name != "" {
+			names = append(names, name)
 		}
 	}
-	headers := make([]string, 0, t)
-	for i := 0; i < l; i++ {
-		b := headerList[i]
-		switch {
-		case b >= 'a' && b <= 'z':
-			if upper {
-				h = append(h, b-toLower)
-			} else {
-				h = append(h, b)
-			}
-		case b >= 'A' && b <= 'Z':
-			if !upper {
-				h = append(h, b+toLower)
-			} else {
-				h = append(h, b)
-			}
-		case b == '-' || b == '_' || b == '.' || (b >= '0' && b <= '9'):
-			h = append(h, b)
-		}
-
-		if b == ' ' || b == ',' || i == l-1 {
-			if len(h) > 0 {
-				// Flush the found header
-				headers = append(headers, string(h))
-				h = h[:0]
-				upper = true
-			}
-		} else {
-			upper = b == '-' || b == '_'
-		}
-	}
-	return headers
+	return names
 }
