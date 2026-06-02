@@ -1,6 +1,13 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [0.4.21](https://github.com/trustasia-com/go-van/compare/v0.4.20...v0.4.21) (2026-06-02)
+
+
+### Bug Fixes
+
+* **httpx:** harden CORS middleware credentials and preflight handling ([ce172b4](https://github.com/trustasia-com/go-van/commit/ce172b4d871c70f5791eaf216b0de774a7c16ffc))
 
 ### [0.4.20](https://github.com/trustasia-com/go-van/compare/v0.4.19...v0.4.20) (2025-12-10)
 
