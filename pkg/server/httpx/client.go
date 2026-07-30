@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/trustasia-com/go-van/pkg/logx"
 	"github.com/trustasia-com/go-van/pkg/server"
@@ -23,7 +22,7 @@ type Client interface {
 // NewClient new http client, concurrent security
 func NewClient(opts ...server.DialOption) Client {
 	options := server.DialOptions{
-		Timeout: time.Second * 5,
+		Timeout: 0, // 默认不设置整体请求超时，由调用方通过 ctx 或 WithTimeout 显式控制
 		Flag:    0, // default flag
 	}
 	// apply option
@@ -35,7 +34,10 @@ func NewClient(opts ...server.DialOption) Client {
 		endpoint:  options.Endpoint,
 		userAgent: options.UserAgent,
 	}
-	cli.Client = &http.Client{Transport: cli}
+	cli.Client = &http.Client{
+		Transport: cli,
+		Timeout:   options.Timeout,
+	}
 
 	// transport apply
 	cli.transport = http.DefaultTransport

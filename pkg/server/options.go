@@ -109,7 +109,7 @@ func WithEndpoint(addr string) DialOption {
 	return func(opts *DialOptions) { opts.Endpoint = addr }
 }
 
-// WithTimeout dial timeout
+// WithTimeout 客户端整体请求超时（0 表示不限制，通过 context 控制）
 func WithTimeout(timeout time.Duration) DialOption {
 	return func(opts *DialOptions) { opts.Timeout = timeout }
 }
