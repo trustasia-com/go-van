@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.4.22](https://github.com/trustasia-com/go-van/compare/v0.4.21...v0.4.22) (2026-07-30)
+
+
+### Bug Fixes
+
+* **httpx:** make WithTimeout actually apply to Client.Timeout ([0e1a170](https://github.com/trustasia-com/go-van/commit/0e1a170ec83acb40262a58fe04e2ac77b3cd48c2))
+
 ## [0.4.21](https://github.com/trustasia-com/go-van/compare/v0.4.20...v0.4.21) (2026-06-02)
 
 
