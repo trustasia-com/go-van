@@ -2,12 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
-## [0.5.0](https://github.com/trustasia-com/go-van/compare/v0.4.22...v0.5.0) (2026-08-24)
+## [0.6.0](https://github.com/trustasia-com/go-van/compare/v0.4.22...v0.6.0) (2026-08-24)
 
+### Breaking changes
 
-### Features
+- Replaced `telemetry.InitProvider` with `telemetry.Start`, which returns `(*telemetry.Runtime, error)`.
+- Changed `server.WithTelemetry` to accept an application-owned Runtime. HTTP/gRPC servers
+  automatically install the processing chains matching its Signals and never close the Runtime.
+- Telemetry signals no longer default to tracing. Callers must select at least one Signal explicitly.
+- Replaced mixed `WithFlag` options with `WithSignals` and `WithInsecure`; Signals and Transport
+  can no longer be configured through the same bitmask.
+- `TracerSrvHandler` now accepts an optional `SpanNameFormatter`.
 
-* **telemetry:** add application-owned runtime ([9e10f0e](https://github.com/trustasia-com/go-van/commit/9e10f0eb128971ce8cb27081e7dff5f7a2eeb919))
+### Fixed
+
+- HTTP server traces no longer copy the full request URL into attributes, and Span Names no longer
+  contain `RequestURI`, path parameters, or query values. The safe Span Name is `HTTP <METHOD>`.
+- Provider initialization errors are returned instead of terminating the process.
+- Secure OTLP targets now use TLS credentials by default; `WithInsecure` remains explicit.
+- Partially initialized providers and the shared OTLP connection are released on startup failure.
+- Runtime shutdown is bounded by the caller context, idempotent, runs in reverse initialization
+  order, and returns all cleanup errors.
+- The OpenTelemetry logger provider is installed when `SignalLogger` is selected.
+- HTTP request Metrics now cover GET requests and use only low-cardinality Method and Status
+  attributes; raw Path and Query values are never exported.
+
+### Migration
+
+```go
+runtime, err := telemetry.Start(ctx, options...)
+if err != nil {
+	return err
+}
+defer runtime.Shutdown(shutdownCtx)
+
+httpServer := httpx.NewServer(
+	server.WithHandler(handler),
+	server.WithTelemetry(runtime),
+)
+```
+
+If Telemetry is disabled, skip `telemetry.Start` and omit `server.WithTelemetry` or pass nil.
 
 ## [0.4.22](https://github.com/trustasia-com/go-van/compare/v0.4.21...v0.4.22) (2026-07-30)
 
