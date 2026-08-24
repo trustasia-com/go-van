@@ -44,21 +44,13 @@ func NewServer(opts ...server.ServerOption) *Server {
 	if options.Flag&server.FlagRecover > 0 {
 		chain = chain.Append(handler.RecoverHandler)
 	}
-	// telemetry
-	if len(options.Telemetry) > 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-		defer cancel()
-
-		var flag telemetry.FlagOption
-		svr.shutdown, flag = telemetry.InitProvider(ctx, options.Telemetry...)
-
-		// Cancel auto record http path for meter, beacause path params
-		// if flag&telemetry.FlagMeter > 0 {
-		// 	chain = chain.Append(handler.MeterSrvHandler)
-		// }
-		if flag&telemetry.FlagTracer > 0 {
-			chain = chain.Append(handler.TracerSrvHandler)
-		}
+	if options.Telemetry != nil && options.Telemetry.Enabled(telemetry.SignalMeter) {
+		chain = chain.Append(handler.MeterSrvHandler)
+	}
+	if options.Telemetry != nil && options.Telemetry.Enabled(telemetry.SignalTracer) {
+		chain = chain.Append(func(next http.Handler) http.Handler {
+			return handler.TracerSrvHandler(next, nil)
+		})
 	}
 	// from context
 	if options.Context != nil {
@@ -74,10 +66,9 @@ func NewServer(opts ...server.ServerOption) *Server {
 
 // Server http server
 type Server struct {
-	network  string
-	address  string
-	handler  http.Handler
-	shutdown func()
+	network string
+	address string
+	handler http.Handler
 
 	*http.Server
 }
@@ -98,10 +89,6 @@ func (s *Server) Stop() error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
-	// telemetry
-	if s.shutdown != nil {
-		s.shutdown()
-	}
 	return s.Shutdown(ctx)
 }
 

@@ -16,8 +16,19 @@ import (
 
 const tracerName = "go-van-tracer"
 
+// SpanNameFormatter 将受控路由信息转换为低基数 Span Name。
+type SpanNameFormatter func(*http.Request) string
+
+// DefaultSpanNameFormatter 不读取 URL，避免 Path 参数与 Query 进入 Telemetry。
+func DefaultSpanNameFormatter(request *http.Request) string {
+	if request == nil || request.Method == "" {
+		return "HTTP UNKNOWN"
+	}
+	return fmt.Sprintf("HTTP %s", request.Method)
+}
+
 // TracerSrvHandler returns a middleware that trace the request.
-func TracerSrvHandler(next http.Handler) http.Handler {
+func TracerSrvHandler(next http.Handler, formatter SpanNameFormatter) http.Handler {
 	propagators := otel.GetTextMapPropagator()
 	tracer := otel.Tracer(
 		tracerName,
@@ -32,14 +43,16 @@ func TracerSrvHandler(next http.Handler) http.Handler {
 		}()
 		ctx := propagators.Extract(savedCtx, propagation.HeaderCarrier(r.Header))
 
-		spanName := r.RequestURI
+		spanName := DefaultSpanNameFormatter(r)
+		if formatter != nil {
+			spanName = formatter(r)
+			if spanName == "" {
+				spanName = DefaultSpanNameFormatter(r)
+			}
+		}
 		opts := []oteltrace.SpanStartOption{
-			oteltrace.WithAttributes(httpconv.ClientRequest(r)...),
 			oteltrace.WithAttributes(httpconv.ServerRequest("", r)...),
 			oteltrace.WithSpanKind(oteltrace.SpanKindServer),
-		}
-		if spanName == "" {
-			spanName = fmt.Sprintf("HTTP %s route not found", r.Method)
 		}
 		ctx, span := tracer.Start(ctx, spanName, opts...)
 		defer span.End()

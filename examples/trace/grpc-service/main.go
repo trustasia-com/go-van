@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/trustasia-com/go-van"
 	pb "github.com/trustasia-com/go-van/examples/trace/proto"
@@ -22,14 +23,28 @@ import (
 var httpClient = http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 func main() {
+	telemetryRuntime, err := telemetry.Start(
+		context.Background(),
+		telemetry.WithEndpoint("localhost:4317"),
+		telemetry.WithName("grpc-service-app"),
+		telemetry.WithSignals(telemetry.SignalTracer, telemetry.SignalMeter),
+		telemetry.WithInsecure(),
+	)
+	if err != nil {
+		logx.Fatal(err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := telemetryRuntime.Shutdown(ctx); err != nil {
+			logx.Errorf("shutdown telemetry: %v", err)
+		}
+	}()
+
 	// grpc server
 	srv := grpcx.NewServer(
 		server.WithAddress(":8000"),
-		server.WithTelemetry(
-			telemetry.WithEndpoint("localhost:4317"),
-			telemetry.WithName("grpc-service-app"),
-			telemetry.WithFlag(telemetry.FlagInsecure|telemetry.FlagMeter),
-		),
+		server.WithTelemetry(telemetryRuntime),
 	)
 	s := &userServer{}
 	pb.RegisterUserServer(srv, s)
@@ -39,7 +54,7 @@ func main() {
 		van.WithServer(srv),
 	)
 	if err := service.Run(); err != nil {
-		logx.Fatal(err)
+		logx.Error(err)
 	}
 }
 

@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -23,19 +24,35 @@ var (
 	grpcClient pb.UserClient
 )
 
-func init() {
-	// grpc client
-	conn, err := grpcx.DialContext(
+func main() {
+	telemetryRuntime, err := telemetry.Start(
+		context.Background(),
+		telemetry.WithEndpoint("localhost:4317"),
+		telemetry.WithName("http-interface-app"),
+		telemetry.WithSignals(telemetry.SignalTracer, telemetry.SignalMeter),
+		telemetry.WithInsecure(),
+	)
+	if err != nil {
+		logx.Fatal(err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := telemetryRuntime.Shutdown(ctx); err != nil {
+			logx.Errorf("shutdown telemetry: %v", err)
+		}
+	}()
+	// Telemetry Provider 必须先于使用它的客户端创建。
+	grpcConnection, err := grpcx.DialContext(
 		server.WithEndpoint("localhost:8000"),
 		server.WithCliFlag(server.FlagTracing|server.FlagInsecure),
 	)
 	if err != nil {
-		panic(err)
+		logx.Fatal(err)
 	}
-	grpcClient = pb.NewUserClient(conn)
-}
+	defer grpcConnection.Close()
+	grpcClient = pb.NewUserClient(grpcConnection)
 
-func main() {
 	// http client
 	httpClient = httpx.NewClient(
 		server.WithEndpoint("http://localhost:9001"),
@@ -49,18 +66,14 @@ func main() {
 	srv := httpx.NewServer(
 		server.WithAddress(":9000"),
 		server.WithHandler(r),
-		server.WithTelemetry(
-			telemetry.WithEndpoint("localhost:4317"),
-			telemetry.WithName("http-interface-app"),
-			telemetry.WithFlag(telemetry.FlagInsecure|telemetry.FlagTracer|telemetry.FlagMeter),
-		),
+		server.WithTelemetry(telemetryRuntime),
 	)
 	service := van.NewService(
 		van.WithName("http-interface"),
 		van.WithServer(srv),
 	)
 	if err := service.Run(); err != nil {
-		logx.Fatal(err)
+		logx.Error(err)
 	}
 }
 

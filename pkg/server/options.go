@@ -25,6 +25,11 @@ const (
 	FlagInsecure
 )
 
+// TelemetryRuntime 是 Server 使用的只读 Telemetry 能力，不包含生命周期操作。
+type TelemetryRuntime interface {
+	Enabled(telemetry.Signal) bool
+}
+
 // ServerOption server option
 type ServerOption func(opts *ServerOptions)
 
@@ -44,9 +49,8 @@ type ServerOptions struct {
 
 	// server flag
 	Flag FlagOption
-
-	// telemetry options
-	Telemetry []telemetry.Option
+	// application-owned telemetry Runtime
+	Telemetry TelemetryRuntime
 }
 
 // WithNetwork server network
@@ -71,11 +75,9 @@ func WithOptions(sopts ...grpc.ServerOption) ServerOption {
 	}
 }
 
-// WithTelemetry opentelemetry
-func WithTelemetry(topts ...telemetry.Option) ServerOption {
-	return func(opts *ServerOptions) {
-		opts.Telemetry = append(opts.Telemetry, topts...)
-	}
+// WithTelemetry 让 Server 根据 Runtime Signal 自动安装处理链；Server 不关闭 Runtime。
+func WithTelemetry(runtime TelemetryRuntime) ServerOption {
+	return func(opts *ServerOptions) { opts.Telemetry = runtime }
 }
 
 // WithSrvFlag server flag

@@ -6,20 +6,20 @@ import (
 	"google.golang.org/grpc"
 )
 
-// FlagOption to flag with 0/1
-type FlagOption int
+// Signal 表示一个 OpenTelemetry Signal。
+type Signal uint8
 
-// flag list
+// Signal 列表。
 const (
-	// secure for grpc
-	FlagInsecure FlagOption = 1 << iota
-	// opentelemetry tracing
-	FlagTracer
-	// opentelemetry logger
-	FlagLogger
-	// opentelemetry metrics
-	FlagMeter
+	SignalTracer Signal = 1 << iota
+	SignalLogger
+	SignalMeter
 )
+
+// Enabled 判断指定 Signal 是否全部启用。
+func (signals Signal) Enabled(signal Signal) bool {
+	return signal != 0 && signals&signal == signal
+}
 
 // Option telemetry option
 type Option func(opts *options)
@@ -35,8 +35,10 @@ type options struct {
 	// custom resource attributes that will be applied to all telemetry data
 	attributes []attribute.KeyValue
 
-	// opentelemetry switch
-	flag FlagOption
+	// OpenTelemetry Signals
+	signals Signal
+	// OTLP gRPC 是否使用明文连接
+	insecure bool
 }
 
 // WithEndpoint opentelemetry backend endpoint
@@ -49,9 +51,18 @@ func WithName(name string) Option {
 	return func(opts *options) { opts.name = name }
 }
 
-// WithFlag opentelemetry switch
-func WithFlag(flag FlagOption) Option {
-	return func(opts *options) { opts.flag |= flag }
+// WithSignals 选择需要初始化的 OpenTelemetry Signals。
+func WithSignals(signals ...Signal) Option {
+	return func(opts *options) {
+		for _, signal := range signals {
+			opts.signals |= signal
+		}
+	}
+}
+
+// WithInsecure 使用明文 OTLP gRPC Transport。
+func WithInsecure() Option {
+	return func(opts *options) { opts.insecure = true }
 }
 
 // WithOptions otlpgrpc options

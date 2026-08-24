@@ -2,10 +2,8 @@
 package grpcx
 
 import (
-	"context"
 	"fmt"
 	"net"
-	"time"
 
 	"github.com/trustasia-com/go-van/pkg/internal"
 	"github.com/trustasia-com/go-van/pkg/logx"
@@ -45,24 +43,7 @@ func NewServer(opts ...server.ServerOption) *Server {
 			grpc.ChainStreamInterceptor(serverinterceptor.StreamServerInterceptor()),
 		)
 	}
-	// telemetry
-	if len(options.Telemetry) > 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-		defer cancel()
-
-		var flag telemetry.FlagOption
-		svr.shutdown, flag = telemetry.InitProvider(ctx, options.Telemetry...)
-
-		if flag&telemetry.FlagMeter > 0 {
-			grpcOpts = append(grpcOpts,
-				grpc.ChainUnaryInterceptor(serverinterceptor.UnaryMeterInterceptor()),
-				grpc.ChainStreamInterceptor(serverinterceptor.StreamMeterInterceptor()),
-			)
-		}
-		if flag&telemetry.FlagTracer > 0 {
-			grpcOpts = append(grpcOpts, grpc.StatsHandler(serverinterceptor.OTelTracerHandler()))
-		}
-	}
+	grpcOpts = append(grpcOpts, telemetryServerOptions(options.Telemetry)...)
 	// other server option or middleware
 	if len(options.Options) > 0 {
 		grpcOpts = append(grpcOpts, options.Options...)
@@ -77,11 +58,27 @@ func NewServer(opts ...server.ServerOption) *Server {
 	return svr
 }
 
+func telemetryServerOptions(runtime server.TelemetryRuntime) []grpc.ServerOption {
+	if runtime == nil {
+		return nil
+	}
+	options := make([]grpc.ServerOption, 0, 3)
+	if runtime.Enabled(telemetry.SignalMeter) {
+		options = append(options,
+			grpc.ChainUnaryInterceptor(serverinterceptor.UnaryMeterInterceptor()),
+			grpc.ChainStreamInterceptor(serverinterceptor.StreamMeterInterceptor()),
+		)
+	}
+	if runtime.Enabled(telemetry.SignalTracer) {
+		options = append(options, grpc.StatsHandler(serverinterceptor.OTelTracerHandler()))
+	}
+	return options
+}
+
 // Server grpc server
 type Server struct {
-	network  string
-	address  string
-	shutdown func()
+	network string
+	address string
 
 	*grpc.Server
 	healthSvr *health.Server
@@ -103,10 +100,6 @@ func (s *Server) Start() error {
 func (s *Server) Stop() error {
 	logx.Info("[gRPC] server stopping")
 
-	// telemetry
-	if s.shutdown != nil {
-		s.shutdown()
-	}
 	s.GracefulStop()
 	s.healthSvr.Shutdown()
 	return nil

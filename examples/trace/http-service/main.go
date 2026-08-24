@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/trustasia-com/go-van"
 	"github.com/trustasia-com/go-van/pkg/logx"
@@ -21,25 +22,38 @@ import (
 var appName = "http-service-app"
 
 func main() {
+	telemetryRuntime, err := telemetry.Start(
+		context.Background(),
+		telemetry.WithEndpoint("localhost:4317"),
+		telemetry.WithName(appName),
+		telemetry.WithSignals(telemetry.SignalTracer, telemetry.SignalMeter),
+		telemetry.WithInsecure(),
+	)
+	if err != nil {
+		logx.Fatal(err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := telemetryRuntime.Shutdown(ctx); err != nil {
+			logx.Errorf("shutdown telemetry: %v", err)
+		}
+	}()
+
 	r := gin.Default()
 	r.GET("/user/:id", handleUserInfo)
 
 	srv := httpx.NewServer(
 		server.WithAddress(":9001"),
 		server.WithHandler(r),
-		server.WithTelemetry(
-			telemetry.WithEndpoint("localhost:4317"),
-			telemetry.WithName(appName),
-			telemetry.WithFlag(telemetry.FlagInsecure),
-			telemetry.WithFlag(telemetry.FlagTracer|telemetry.FlagMeter),
-		),
+		server.WithTelemetry(telemetryRuntime),
 	)
 	service := van.NewService(
 		van.WithName(appName),
 		van.WithServer(srv),
 	)
 	if err := service.Run(); err != nil {
-		logx.Fatal(err)
+		logx.Error(err)
 	}
 }
 

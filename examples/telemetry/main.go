@@ -17,10 +17,11 @@ func main() {
 	ctx := context.Background()
 
 	// 初始化telemetry，添加自定义变量
-	shutdown, _ := telemetry.InitProvider(ctx,
+	telemetryRuntime, err := telemetry.Start(ctx,
 		telemetry.WithName("custom-service"),
 		telemetry.WithEndpoint("localhost:4317"),
-		telemetry.WithFlag(telemetry.FlagTracer|telemetry.FlagMeter|telemetry.FlagLogger|telemetry.FlagInsecure),
+		telemetry.WithSignals(telemetry.SignalTracer, telemetry.SignalMeter, telemetry.SignalLogger),
+		telemetry.WithInsecure(),
 		telemetry.WithAttributes(
 			attribute.String("version", "1.0.0"),
 			attribute.String("environment", "production"),
@@ -31,7 +32,16 @@ func main() {
 			semconv.K8SNamespaceNameKey.String("default"),
 		),
 	)
-	defer shutdown()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := telemetryRuntime.Shutdown(shutdownCtx); err != nil {
+			logx.Errorf("shutdown telemetry: %v", err)
+		}
+	}()
 
 	// 使用tracer - 自定义属性会自动包含在所有span中
 	tracer := otel.Tracer("custom-service")
