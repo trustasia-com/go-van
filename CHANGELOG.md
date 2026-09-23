@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.6.1](https://github.com/trustasia-com/go-van/compare/v0.6.0...v0.6.1) (2026-09-23)
+
+### Features
+
+- **confx:** Configuration loaders now expand `${VAR}` and `${VAR:-default_value}` from the
+  environment for local files and Apollo, including watched updates.
+  ([1fcf737](https://github.com/trustasia-com/go-van/commit/1fcf737e70c0e52fdbab16594052041639197944))
+
 ## [0.6.0](https://github.com/trustasia-com/go-van/compare/v0.4.22...v0.6.0) (2026-08-24)
 
 ### Breaking changes
