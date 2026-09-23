@@ -46,7 +46,7 @@ func (l *filesLoader) LoadFiles(obj any, files ...string) error {
 		buf.WriteByte('\n')
 	}
 
-	data := buf.Bytes()
+	data := confx.ExpandEnv(buf.Bytes())
 	c := yaml.NewCodec()
 	err := c.Unmarshal(data, obj)
 	if err != nil {
@@ -86,7 +86,7 @@ func (l *filesLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, fileNa
 				if err != nil {
 					return err
 				}
-				do(event.Name, data)
+				do(event.Name, confx.ExpandEnv(data))
 			}
 			// Remove Create Rename Chmod
 		case err, ok := <-watcher.Errors:

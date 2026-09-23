@@ -79,7 +79,7 @@ func (l *apolloLoader) LoadFiles(obj any, namespaces ...string) error {
 		}
 	}
 
-	data := buf.Bytes()
+	data := confx.ExpandEnv(buf.Bytes())
 	c := yaml.NewCodec()
 	err := c.Unmarshal(data, obj)
 	if err != nil {
@@ -114,7 +114,7 @@ func (l *apolloLoader) WatchFiles(ctx context.Context, do confx.WatchFunc, names
 			if !ok {
 				return nil
 			}
-			do(ev.Name, ev.Data)
+			do(ev.Name, confx.ExpandEnv(ev.Data))
 		case <-ctx.Done():
 			logx.Error("error:", ctx.Err())
 			return ctx.Err()
