@@ -2,6 +2,8 @@
 package handler
 
 import (
+	"bufio"
+	"net"
 	"net/http"
 	"time"
 
@@ -32,11 +34,24 @@ func (w *WrappedWriter) WriteHeader(statusCode int) {
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
-// Flush cover writer Flush
+// Unwrap 保留底层响应控制能力，供 http.ResponseController 设置连接期限。
+func (w *WrappedWriter) Unwrap() http.ResponseWriter {
+	return w.ResponseWriter
+}
+
+// Hijack 保留 HTTP/1 连接升级能力；不支持的传输返回标准错误。
+func (w *WrappedWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	return http.NewResponseController(w.ResponseWriter).Hijack()
+}
+
+// FlushError 透传刷新错误，避免流式响应把写入失败报告为成功。
+func (w *WrappedWriter) FlushError() error {
+	return http.NewResponseController(w.ResponseWriter).Flush()
+}
+
+// Flush 保留 http.Flusher 接口；需要诊断错误的调用方使用 FlushError。
 func (w *WrappedWriter) Flush() {
-	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
-		flusher.Flush()
-	}
+	_ = w.FlushError()
 }
 
 // Status 返回已写入的 HTTP Status；未显式写 Header 时为 200。
